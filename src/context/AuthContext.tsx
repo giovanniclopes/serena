@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "../lib/supabaseClient";
 import { getCurrentUser, signIn, signOut, signUp } from "../services/auth";
 
@@ -54,10 +55,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const result = await signIn(email, password);
       console.log("✅ Sign in successful:", result);
+      toast.success("Login realizado com sucesso!");
       // Não definir loading como false aqui - deixar o onAuthStateChange fazer isso
     } catch (error) {
       console.log("❌ Sign in error:", error);
       setLoading(false);
+      toast.error("Erro ao fazer login. Verifique suas credenciais.");
       throw error;
     }
   };
@@ -70,9 +73,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       await signUp(email, password, name);
+      toast.success(
+        "Conta criada com sucesso! Verifique seu email para confirmar."
+      );
       // Não definir loading como false aqui - deixar o onAuthStateChange fazer isso
     } catch (error) {
       setLoading(false);
+      toast.error("Erro ao criar conta. Tente novamente.");
       throw error;
     }
   };
@@ -81,6 +88,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       await signOut();
+      toast.success("Logout realizado com sucesso!");
+    } catch (error) {
+      toast.error("Erro ao fazer logout. Tente novamente.");
     } finally {
       setLoading(false);
     }

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   createCountdown,
   deleteCountdown,
@@ -26,9 +27,11 @@ export function useCreateCountdown() {
     mutationFn: createCountdown,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["countdowns"] });
+      toast.success("Contagem regressiva criada com sucesso!");
     },
     onError: (error) => {
       console.error("Erro ao criar contagem regressiva:", error);
+      toast.error("Erro ao criar contagem regressiva. Tente novamente.");
     },
   });
 }
@@ -40,9 +43,11 @@ export function useUpdateCountdown() {
     mutationFn: updateCountdown,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["countdowns"] });
+      toast.success("Contagem regressiva atualizada com sucesso!");
     },
     onError: (error) => {
       console.error("Erro ao atualizar contagem regressiva:", error);
+      toast.error("Erro ao atualizar contagem regressiva. Tente novamente.");
     },
   });
 }
@@ -54,9 +59,11 @@ export function useDeleteCountdown() {
     mutationFn: deleteCountdown,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["countdowns"] });
+      toast.success("Contagem regressiva excluída com sucesso!");
     },
     onError: (error) => {
       console.error("Erro ao excluir contagem regressiva:", error);
+      toast.error("Erro ao excluir contagem regressiva. Tente novamente.");
     },
   });
 }

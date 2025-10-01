@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   completeTask,
   createTask,
@@ -27,9 +28,11 @@ export function useCreateTask() {
     mutationFn: createTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Tarefa criada com sucesso!");
     },
     onError: (error) => {
       console.error("Erro ao criar tarefa:", error);
+      toast.error("Erro ao criar tarefa. Tente novamente.");
     },
   });
 }
@@ -41,9 +44,11 @@ export function useUpdateTask() {
     mutationFn: updateTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Tarefa atualizada com sucesso!");
     },
     onError: (error) => {
       console.error("Erro ao atualizar tarefa:", error);
+      toast.error("Erro ao atualizar tarefa. Tente novamente.");
     },
   });
 }
@@ -55,9 +60,11 @@ export function useDeleteTask() {
     mutationFn: deleteTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Tarefa excluída com sucesso!");
     },
     onError: (error) => {
       console.error("Erro ao excluir tarefa:", error);
+      toast.error("Erro ao excluir tarefa. Tente novamente.");
     },
   });
 }
@@ -69,9 +76,11 @@ export function useCompleteTask() {
     mutationFn: completeTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Tarefa concluída com sucesso!");
     },
     onError: (error) => {
       console.error("Erro ao completar tarefa:", error);
+      toast.error("Erro ao concluir tarefa. Tente novamente.");
     },
   });
 }

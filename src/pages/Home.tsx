@@ -6,13 +6,24 @@ import FloatingActionButton from "../components/FloatingActionButton";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
+import {
+  useCompleteTask,
+  useCreateTask,
+  useTasks,
+  useUpdateTask,
+} from "../features/tasks/useTasks";
 import type { Task } from "../types";
 import { getOverdueTasks, getTodayTasks, getUpcomingTasks } from "../utils";
 
 export default function Home() {
-  const { state, dispatch, loading, error } = useApp();
+  const { state, loading, error } = useApp();
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+
+  const { tasks } = useTasks();
+  const createTaskMutation = useCreateTask();
+  const updateTaskMutation = useUpdateTask();
+  const completeTaskMutation = useCompleteTask();
 
   if (loading) {
     return (
@@ -45,12 +56,12 @@ export default function Home() {
     );
   }
 
-  const todayTasks = getTodayTasks(state.tasks);
-  const overdueTasks = getOverdueTasks(state.tasks);
-  const upcomingTasks = getUpcomingTasks(state.tasks, 7);
+  const todayTasks = getTodayTasks(tasks);
+  const overdueTasks = getOverdueTasks(tasks);
+  const upcomingTasks = getUpcomingTasks(tasks, 7);
 
   const handleCompleteTask = (taskId: string) => {
-    dispatch({ type: "COMPLETE_TASK", payload: taskId });
+    completeTaskMutation.mutate(taskId);
   };
 
   const handleEditTask = (task: Task) => {
@@ -62,25 +73,19 @@ export default function Home() {
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
   ) => {
     if (editingTask) {
-      dispatch({
-        type: "UPDATE_TASK",
-        payload: {
-          ...editingTask,
-          ...taskData,
-          updatedAt: new Date(),
-        },
+      updateTaskMutation.mutate({
+        ...editingTask,
+        ...taskData,
+        updatedAt: new Date(),
       });
     } else {
-      dispatch({
-        type: "ADD_TASK",
-        payload: {
-          ...taskData,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+      createTaskMutation.mutate({
+        ...taskData,
+        workspaceId: state.activeWorkspaceId,
       });
     }
+    setIsTaskModalOpen(false);
+    setEditingTask(undefined);
   };
 
   const stats = [

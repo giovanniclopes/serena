@@ -1,6 +1,12 @@
 import { ChevronDown, Edit, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
+import {
+  useCreateWorkspace,
+  useDeleteWorkspace,
+  useUpdateWorkspace,
+  useWorkspaces,
+} from "../features/workspaces/useWorkspaces";
 import type { Workspace } from "../types";
 import WorkspaceModal from "./WorkspaceModal";
 
@@ -12,7 +18,12 @@ export default function WorkspaceSelector() {
     Workspace | undefined
   >(undefined);
 
-  const activeWorkspace = state.workspaces.find(
+  const { workspaces } = useWorkspaces();
+  const createWorkspaceMutation = useCreateWorkspace();
+  const updateWorkspaceMutation = useUpdateWorkspace();
+  const deleteWorkspaceMutation = useDeleteWorkspace();
+
+  const activeWorkspace = workspaces?.find(
     (w) => w.id === state.activeWorkspaceId
   );
 
@@ -37,25 +48,15 @@ export default function WorkspaceSelector() {
     workspaceData: Omit<Workspace, "id" | "createdAt" | "updatedAt">
   ) => {
     if (editingWorkspace) {
-      dispatch({
-        type: "UPDATE_WORKSPACE",
-        payload: {
-          ...editingWorkspace,
-          ...workspaceData,
-          updatedAt: new Date(),
-        },
+      updateWorkspaceMutation.mutate({
+        id: editingWorkspace.id,
+        updates: workspaceData,
       });
     } else {
-      dispatch({
-        type: "ADD_WORKSPACE",
-        payload: {
-          ...workspaceData,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      });
+      createWorkspaceMutation.mutate(workspaceData);
     }
+    setIsWorkspaceModalOpen(false);
+    setEditingWorkspace(undefined);
   };
 
   const handleDeleteWorkspace = (workspaceId: string) => {
@@ -64,7 +65,7 @@ export default function WorkspaceSelector() {
         "Tem certeza que deseja excluir este workspace? Todos os dados associados serão removidos."
       )
     ) {
-      dispatch({ type: "DELETE_WORKSPACE", payload: workspaceId });
+      deleteWorkspaceMutation.mutate(workspaceId);
     }
   };
 
@@ -91,7 +92,7 @@ export default function WorkspaceSelector() {
           }}
         >
           <div className="p-2">
-            {state.workspaces.map((workspace) => (
+            {workspaces?.map((workspace) => (
               <div
                 key={workspace.id}
                 className={`w-full px-3 py-2 rounded-lg transition-colors ${

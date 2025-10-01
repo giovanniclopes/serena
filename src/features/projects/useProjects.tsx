@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   createProject,
   deleteProject,
@@ -27,6 +28,11 @@ export function useCreateProject() {
     mutationFn: createProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success("Projeto criado com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao criar projeto:", error);
+      toast.error("Erro ao criar projeto. Tente novamente.");
     },
   });
 }
@@ -39,6 +45,11 @@ export function useUpdateProject() {
       updateProject(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success("Projeto atualizado com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar projeto:", error);
+      toast.error("Erro ao atualizar projeto. Tente novamente.");
     },
   });
 }
@@ -50,6 +61,11 @@ export function useDeleteProject() {
     mutationFn: deleteProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
+      toast.success("Projeto excluído com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao excluir projeto:", error);
+      toast.error("Erro ao excluir projeto. Tente novamente.");
     },
   });
 }

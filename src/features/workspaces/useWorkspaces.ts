@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   createWorkspace,
   deleteWorkspace,
@@ -27,6 +28,11 @@ export function useCreateWorkspace() {
     mutationFn: createWorkspace,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      toast.success("Workspace criado com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao criar workspace:", error);
+      toast.error("Erro ao criar workspace. Tente novamente.");
     },
   });
 }
@@ -44,6 +50,11 @@ export function useUpdateWorkspace() {
     }) => updateWorkspace(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      toast.success("Workspace atualizado com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar workspace:", error);
+      toast.error("Erro ao atualizar workspace. Tente novamente.");
     },
   });
 }
@@ -55,6 +66,11 @@ export function useDeleteWorkspace() {
     mutationFn: deleteWorkspace,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      toast.success("Workspace excluído com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao excluir workspace:", error);
+      toast.error("Erro ao excluir workspace. Tente novamente.");
     },
   });
 }
