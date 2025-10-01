@@ -5,17 +5,15 @@ import React, {
   useEffect,
   useReducer,
   useRef,
+  useState,
 } from "react";
 import { availableThemes, defaultTheme } from "../constants/themes";
-import {
-  sampleCountdowns,
-  sampleHabits,
-  sampleProjects,
-  sampleTags,
-  sampleTasks,
-  sampleWorkspaces,
-} from "../data/sampleData";
 import { useAppStorage } from "../hooks/useLocalStorage";
+import { getCountdowns } from "../services/apiCountdowns";
+import { getHabitEntries, getHabits } from "../services/apiHabits";
+import { getProjects } from "../services/apiProjects";
+import { getTasks } from "../services/apiTasks";
+import { getWorkspaces } from "../services/apiWorkspaces";
 import type {
   AppState,
   Countdown,
@@ -27,10 +25,13 @@ import type {
   Task,
   Workspace,
 } from "../types";
+import { useAuth } from "./AuthContext";
 
 interface AppContextType {
   state: AppState;
   dispatch: React.Dispatch<AppAction>;
+  loading: boolean;
+  error: string | null;
 }
 
 type AppAction =
@@ -59,81 +60,23 @@ type AppAction =
   | { type: "ADD_FILTER"; payload: Filter }
   | { type: "UPDATE_FILTER"; payload: Filter }
   | { type: "DELETE_FILTER"; payload: string }
-  | { type: "SET_THEME"; payload: string };
+  | { type: "SET_THEME"; payload: string }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "LOAD_DATA"; payload: Partial<AppState> };
 
-const getInitialState = (appData: any): AppState => {
-  if (!appData || !appData.workspaces || !appData.workspaces.length) {
-    return {
-      workspaces: sampleWorkspaces,
-      activeWorkspaceId: "default-workspace",
-      projects: sampleProjects,
-      tasks: sampleTasks,
-      habits: sampleHabits,
-      habitEntries: [],
-      countdowns: sampleCountdowns,
-      tags: sampleTags,
-      filters: [],
-      currentTheme: defaultTheme,
-      availableThemes,
-    };
-  }
-
-  const currentTheme =
-    availableThemes.find((t) => t.id === appData.currentThemeId) ||
-    defaultTheme;
-
+const getInitialState = (): AppState => {
   return {
-    workspaces: appData.workspaces.map((w: any) => ({
-      ...w,
-      createdAt: new Date(w.createdAt),
-      updatedAt: new Date(w.updatedAt),
-    })),
-    activeWorkspaceId: appData.activeWorkspaceId || "default-workspace",
-    projects: appData.projects.map((p: any) => ({
-      ...p,
-      createdAt: new Date(p.createdAt),
-      updatedAt: new Date(p.updatedAt),
-    })),
-    tasks: appData.tasks.map((t: any) => ({
-      ...t,
-      dueDate: t.dueDate ? new Date(t.dueDate) : undefined,
-      completedAt: t.completedAt ? new Date(t.completedAt) : undefined,
-      createdAt: new Date(t.createdAt),
-      updatedAt: new Date(t.updatedAt),
-      subtasks: t.subtasks.map((st: any) => ({
-        ...st,
-        dueDate: st.dueDate ? new Date(st.dueDate) : undefined,
-        completedAt: st.completedAt ? new Date(st.completedAt) : undefined,
-        createdAt: new Date(st.createdAt),
-        updatedAt: new Date(st.updatedAt),
-      })),
-    })),
-    habits: appData.habits.map((h: any) => ({
-      ...h,
-      createdAt: new Date(h.createdAt),
-      updatedAt: new Date(h.updatedAt),
-    })),
-    habitEntries: appData.habitEntries.map((he: any) => ({
-      ...he,
-      date: new Date(he.date),
-    })),
-    countdowns: appData.countdowns.map((c: any) => ({
-      ...c,
-      targetDate: new Date(c.targetDate),
-      createdAt: new Date(c.createdAt),
-      updatedAt: new Date(c.updatedAt),
-    })),
-    tags: appData.tags,
-    filters: appData.filters.map((f: any) => ({
-      ...f,
-      dateRange: f.dateRange
-        ? {
-            start: new Date(f.dateRange.start),
-            end: new Date(f.dateRange.end),
-          }
-        : undefined,
-    })),
-    currentTheme,
+    workspaces: [],
+    activeWorkspaceId: "",
+    projects: [],
+    tasks: [],
+    habits: [],
+    habitEntries: [],
+    countdowns: [],
+    tags: [],
+    filters: [],
+    currentTheme: defaultTheme,
     availableThemes,
   };
 };
@@ -303,6 +246,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return theme ? { ...state, currentTheme: theme } : state;
     }
 
+    case "LOAD_DATA":
+      return { ...state, ...action.payload };
+
     default:
       return state;
   }
@@ -312,10 +258,103 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const { appData, setAppData } = useAppStorage();
-  const [state, dispatch] = useReducer(appReducer, getInitialState(appData));
+  const { user, loading: authLoading } = useAuth();
+  const [state, dispatch] = useReducer(appReducer, getInitialState());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const isInitialMount = useRef(true);
 
-  // Persist state changes to localStorage (skip on initial mount)
+  // Carregar dados do Supabase apenas quando o usuário estiver autenticado
+  useEffect(() => {
+    if (authLoading) return; // Aguardar autenticação
+
+    if (!user) {
+      // Usuário não autenticado - limpar dados
+      dispatch({
+        type: "LOAD_DATA",
+        payload: {
+          workspaces: [],
+          activeWorkspaceId: "",
+          projects: [],
+          tasks: [],
+          habits: [],
+          habitEntries: [],
+          countdowns: [],
+          tags: [],
+          filters: [],
+          currentTheme: defaultTheme,
+        },
+      });
+      setLoading(false);
+      return;
+    }
+
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [workspaces, projects, tasks, habits, habitEntries, countdowns] =
+          await Promise.all([
+            getWorkspaces(),
+            getProjects(),
+            getTasks(),
+            getHabits(),
+            getHabitEntries(),
+            getCountdowns(),
+          ]);
+
+        // Se não há workspaces, criar um padrão
+        let finalWorkspaces = workspaces;
+        let activeWorkspaceId =
+          appData?.activeWorkspaceId || workspaces[0]?.id || "";
+
+        if (workspaces.length === 0) {
+          // Criar workspace padrão
+          const defaultWorkspace = {
+            id: "default-workspace",
+            name: "Pessoal",
+            description: "Seu espaço pessoal",
+            color: "#ec4899",
+            icon: "home",
+            isDefault: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+          finalWorkspaces = [defaultWorkspace];
+          activeWorkspaceId = defaultWorkspace.id;
+        }
+
+        dispatch({
+          type: "LOAD_DATA",
+          payload: {
+            workspaces: finalWorkspaces,
+            activeWorkspaceId,
+            projects,
+            tasks,
+            habits,
+            habitEntries,
+            countdowns,
+            tags: [], // TODO: Implementar API de tags
+            filters: [],
+            currentTheme: appData?.currentThemeId
+              ? availableThemes.find((t) => t.id === appData.currentThemeId) ||
+                defaultTheme
+              : defaultTheme,
+          },
+        });
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+        setError(err instanceof Error ? err.message : "Erro ao carregar dados");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user, authLoading]);
+
+  // Persistir mudanças no localStorage (pular no mount inicial)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -323,22 +362,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     const dataToStore = {
-      workspaces: state.workspaces,
       activeWorkspaceId: state.activeWorkspaceId,
-      projects: state.projects,
-      tasks: state.tasks,
-      habits: state.habits,
-      habitEntries: state.habitEntries,
-      countdowns: state.countdowns,
-      tags: state.tags,
-      filters: state.filters,
       currentThemeId: state.currentTheme.id,
     };
     setAppData(dataToStore);
-  }, [state, setAppData]);
+  }, [state.activeWorkspaceId, state.currentTheme.id, setAppData]);
 
   return (
-    <AppContext.Provider value={{ state, dispatch }}>
+    <AppContext.Provider value={{ state, dispatch, loading, error }}>
       {children}
     </AppContext.Provider>
   );
