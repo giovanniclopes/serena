@@ -1,0 +1,325 @@
+import {
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+  format,
+} from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Calendar, Clock, Plus } from "lucide-react";
+import { useState } from "react";
+import CountdownModal from "../components/CountdownModal";
+import { useApp } from "../context/AppContext";
+import type { Countdown } from "../types";
+
+export default function Countdowns() {
+  const { state, dispatch } = useApp();
+  const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
+  const [editingCountdown, setEditingCountdown] = useState<
+    Countdown | undefined
+  >(undefined);
+
+  const getTimeRemaining = (targetDate: Date) => {
+    const now = new Date();
+    const days = differenceInDays(targetDate, now);
+    const hours = differenceInHours(targetDate, now) % 24;
+    const minutes = differenceInMinutes(targetDate, now) % 60;
+
+    if (days > 0) {
+      return `${days} dia${days !== 1 ? "s" : ""}`;
+    } else if (hours > 0) {
+      return `${hours} hora${hours !== 1 ? "s" : ""}`;
+    } else if (minutes > 0) {
+      return `${minutes} minuto${minutes !== 1 ? "s" : ""}`;
+    } else {
+      return "Chegou!";
+    }
+  };
+
+  const getTimeRemainingDetailed = (targetDate: Date) => {
+    const now = new Date();
+    const days = differenceInDays(targetDate, now);
+    const hours = differenceInHours(targetDate, now) % 24;
+    const minutes = differenceInMinutes(targetDate, now) % 60;
+
+    return { days, hours, minutes };
+  };
+
+  const isOverdue = (targetDate: Date) => {
+    return targetDate < new Date();
+  };
+
+  const handleCreateCountdown = () => {
+    setEditingCountdown(undefined);
+    setIsCountdownModalOpen(true);
+  };
+
+  const handleEditCountdown = (countdown: Countdown) => {
+    setEditingCountdown(countdown);
+    setIsCountdownModalOpen(true);
+  };
+
+  const handleSaveCountdown = (
+    countdownData: Omit<Countdown, "id" | "createdAt" | "updatedAt">
+  ) => {
+    if (editingCountdown) {
+      dispatch({
+        type: "UPDATE_COUNTDOWN",
+        payload: {
+          ...editingCountdown,
+          ...countdownData,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      dispatch({
+        type: "ADD_COUNTDOWN",
+        payload: {
+          ...countdownData,
+          id: Math.random().toString(36).substr(2, 9),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+    }
+  };
+
+  const handleDeleteCountdown = (countdownId: string) => {
+    if (confirm("Tem certeza que deseja excluir esta contagem regressiva?")) {
+      dispatch({ type: "DELETE_COUNTDOWN", payload: countdownId });
+    }
+  };
+
+  const renderCountdownCard = (countdown: any) => {
+    const timeRemaining = getTimeRemaining(countdown.targetDate);
+    const timeDetailed = getTimeRemainingDetailed(countdown.targetDate);
+    const overdue = isOverdue(countdown.targetDate);
+
+    return (
+      <div
+        key={countdown.id}
+        className="p-4 rounded-lg border relative overflow-hidden"
+        style={{
+          backgroundColor: state.currentTheme.colors.surface,
+          borderColor: state.currentTheme.colors.border,
+        }}
+      >
+        <div
+          className="absolute top-0 left-0 w-full h-1"
+          style={{ backgroundColor: countdown.color }}
+        />
+
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center space-x-2">
+            <div
+              className="p-2 rounded-md"
+              style={{ backgroundColor: countdown.color + "20" }}
+            >
+              <Clock className="w-4 h-4" style={{ color: countdown.color }} />
+            </div>
+            <div>
+              <h3
+                className="text-sm font-semibold"
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                {countdown.title}
+              </h3>
+              {countdown.description && (
+                <p
+                  className="text-xs"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  {countdown.description}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-3">
+          <div
+            className="text-xl font-bold mb-2"
+            style={{
+              color: overdue
+                ? state.currentTheme.colors.error
+                : state.currentTheme.colors.primary,
+            }}
+          >
+            {overdue ? "Passou!" : timeRemaining}
+          </div>
+
+          {!overdue && (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="text-center">
+                <div
+                  className="text-lg font-bold"
+                  style={{ color: state.currentTheme.colors.text }}
+                >
+                  {timeDetailed.days}
+                </div>
+                <div
+                  className="text-xs"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  dias
+                </div>
+              </div>
+              <div className="text-center">
+                <div
+                  className="text-lg font-bold"
+                  style={{ color: state.currentTheme.colors.text }}
+                >
+                  {timeDetailed.hours}
+                </div>
+                <div
+                  className="text-xs"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  horas
+                </div>
+              </div>
+              <div className="text-center">
+                <div
+                  className="text-lg font-bold"
+                  style={{ color: state.currentTheme.colors.text }}
+                >
+                  {timeDetailed.minutes}
+                </div>
+                <div
+                  className="text-xs"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  min
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Calendar
+            className="w-3 h-3"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          />
+          <span
+            className="text-xs"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          >
+            {format(countdown.targetDate, "dd 'de' MMMM 'de' yyyy", {
+              locale: ptBR,
+            })}
+          </span>
+        </div>
+      </div>
+    );
+  };
+
+  const upcomingCountdowns = state.countdowns.filter(
+    (c) => !isOverdue(c.targetDate)
+  );
+  const pastCountdowns = state.countdowns.filter((c) =>
+    isOverdue(c.targetDate)
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1
+          className="text-2xl font-bold"
+          style={{ color: state.currentTheme.colors.text }}
+        >
+          Contagem Regressiva
+        </h1>
+        <button
+          onClick={handleCreateCountdown}
+          className="flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
+          style={{
+            backgroundColor: state.currentTheme.colors.primary,
+            color: "white",
+          }}
+        >
+          <Plus className="w-4 h-4" />
+          <span>Nova Contagem</span>
+        </button>
+      </div>
+
+      {state.countdowns.length > 0 ? (
+        <div className="space-y-4">
+          {upcomingCountdowns.length > 0 && (
+            <div>
+              <h2
+                className="text-lg font-semibold mb-3"
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                🔮 Próximos Eventos
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {upcomingCountdowns.map(renderCountdownCard)}
+              </div>
+            </div>
+          )}
+
+          {pastCountdowns.length > 0 && (
+            <div>
+              <h2
+                className="text-lg font-semibold mb-3"
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                📅 Eventos Passados
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {pastCountdowns.map(renderCountdownCard)}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div
+          className="text-center py-8 rounded-lg"
+          style={{ backgroundColor: state.currentTheme.colors.surface }}
+        >
+          <div
+            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
+            style={{
+              backgroundColor: state.currentTheme.colors.primary + "20",
+            }}
+          >
+            <Clock
+              className="w-6 h-6"
+              style={{ color: state.currentTheme.colors.primary }}
+            />
+          </div>
+          <h3
+            className="text-lg font-semibold mb-1"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            Nenhuma contagem regressiva
+          </h3>
+          <p
+            className="text-sm mb-3"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          >
+            Crie contagens regressivas para eventos importantes e acompanhe o
+            tempo restante
+          </p>
+          <button
+            onClick={handleCreateCountdown}
+            className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+            style={{
+              backgroundColor: state.currentTheme.colors.primary,
+              color: "white",
+            }}
+          >
+            Criar Primeira Contagem
+          </button>
+        </div>
+      )}
+
+      <CountdownModal
+        isOpen={isCountdownModalOpen}
+        onClose={() => setIsCountdownModalOpen(false)}
+        countdown={editingCountdown}
+        onSave={handleSaveCountdown}
+      />
+    </div>
+  );
+}

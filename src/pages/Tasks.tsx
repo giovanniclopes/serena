@@ -1,0 +1,242 @@
+import { Filter, Grid, List, Plus, Search } from "lucide-react";
+import { useState } from "react";
+import TaskCard from "../components/TaskCard";
+import TaskModal from "../components/TaskModal";
+import { useApp } from "../context/AppContext";
+import type { Task } from "../types";
+import { filterTasks, searchTasks } from "../utils";
+
+export default function Tasks() {
+  const { state, dispatch } = useApp();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+
+  const filteredTasks = filterTasks(searchTasks(state.tasks, searchQuery), {
+    id: "default",
+    name: "Filtro Padrão",
+    workspaceId: state.activeWorkspaceId,
+    isCompleted: showCompleted ? undefined : false,
+  });
+
+  const handleCompleteTask = (taskId: string) => {
+    dispatch({ type: "COMPLETE_TASK", payload: taskId });
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleCreateTask = () => {
+    setEditingTask(undefined);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleSaveTask = (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => {
+    if (editingTask) {
+      dispatch({
+        type: "UPDATE_TASK",
+        payload: {
+          ...editingTask,
+          ...taskData,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      dispatch({
+        type: "ADD_TASK",
+        payload: {
+          ...taskData,
+          id: Math.random().toString(36).substr(2, 9),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+    }
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
+      dispatch({ type: "DELETE_TASK", payload: taskId });
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h1
+          className="text-2xl font-bold"
+          style={{ color: state.currentTheme.colors.text }}
+        >
+          Tarefas
+        </h1>
+        <button
+          onClick={handleCreateTask}
+          className="flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
+          style={{
+            backgroundColor: state.currentTheme.colors.primary,
+            color: "white",
+          }}
+        >
+          <Plus className="w-4 h-4" />
+          <span>Nova Tarefa</span>
+        </button>
+      </div>
+
+      <div className="flex items-center space-x-3">
+        <div className="flex-1 relative">
+          <Search
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          />
+          <input
+            type="text"
+            placeholder="Buscar tarefas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-lg border transition-colors text-sm"
+            style={{
+              backgroundColor: state.currentTheme.colors.surface,
+              borderColor: state.currentTheme.colors.border,
+              color: state.currentTheme.colors.text,
+            }}
+          />
+        </div>
+
+        <button
+          className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+          style={{
+            backgroundColor: state.currentTheme.colors.primary + "20",
+            color: state.currentTheme.colors.primary,
+          }}
+        >
+          <Filter className="w-4 h-4" />
+        </button>
+
+        <div
+          className="flex rounded-lg"
+          style={{ backgroundColor: state.currentTheme.colors.surface }}
+        >
+          <button
+            onClick={() => setViewMode("list")}
+            className={`p-2 rounded-l-lg transition-colors ${
+              viewMode === "list" ? "bg-opacity-20" : ""
+            }`}
+            style={{
+              backgroundColor:
+                viewMode === "list"
+                  ? state.currentTheme.colors.primary + "20"
+                  : "transparent",
+              color:
+                viewMode === "list"
+                  ? state.currentTheme.colors.primary
+                  : state.currentTheme.colors.textSecondary,
+            }}
+          >
+            <List className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`p-2 rounded-r-lg transition-colors ${
+              viewMode === "grid" ? "bg-opacity-20" : ""
+            }`}
+            style={{
+              backgroundColor:
+                viewMode === "grid"
+                  ? state.currentTheme.colors.primary + "20"
+                  : "transparent",
+              color:
+                viewMode === "grid"
+                  ? state.currentTheme.colors.primary
+                  : state.currentTheme.colors.textSecondary,
+            }}
+          >
+            <Grid className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center space-x-4">
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={showCompleted}
+            onChange={(e) => setShowCompleted(e.target.checked)}
+            className="w-4 h-4 rounded"
+            style={{ accentColor: state.currentTheme.colors.primary }}
+          />
+          <span
+            className="text-sm"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            Mostrar concluídas
+          </span>
+        </label>
+      </div>
+
+      {filteredTasks.length > 0 ? (
+        <div
+          className={`space-y-2 ${
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
+              : ""
+          }`}
+        >
+          {filteredTasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onComplete={handleCompleteTask}
+              onEdit={handleEditTask}
+              showProject={true}
+              showDate={true}
+            />
+          ))}
+        </div>
+      ) : (
+        <div
+          className="text-center py-8 rounded-lg"
+          style={{ backgroundColor: state.currentTheme.colors.surface }}
+        >
+          <div
+            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
+            style={{
+              backgroundColor: state.currentTheme.colors.primary + "20",
+            }}
+          >
+            <List
+              className="w-6 h-6"
+              style={{ color: state.currentTheme.colors.primary }}
+            />
+          </div>
+          <h3
+            className="text-lg font-semibold mb-1"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            Nenhuma tarefa encontrada
+          </h3>
+          <p
+            className="text-sm"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          >
+            {searchQuery
+              ? "Tente ajustar sua busca ou filtros"
+              : "Que tal criar sua primeira tarefa?"}
+          </p>
+        </div>
+      )}
+
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        task={editingTask}
+        onSave={handleSaveTask}
+      />
+    </div>
+  );
+}
