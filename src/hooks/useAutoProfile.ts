@@ -20,14 +20,14 @@ export function useAutoProfile() {
         const { data: existingProfile } = await supabase
           .from("profiles")
           .select("id")
-          .eq("id", user.id)
+          .eq("id", (user as any).id)
           .single();
 
         // Se não tem perfil, criar um automaticamente
         if (!existingProfile) {
           await createProfile({
-            username: user.email?.split("@")[0] || "usuario",
-            firstName: user.user_metadata?.name || undefined,
+            username: (user as any).email?.split("@")[0] || "usuario",
+            firstName: (user as any).user_metadata?.name || undefined,
             status: "active",
           });
           console.log(

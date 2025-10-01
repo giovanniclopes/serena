@@ -3,6 +3,10 @@ import { useApp } from "../context/AppContext";
 import type { Countdown } from "../types";
 import DateTimeInput from "./DateTimeInput";
 import Modal from "./Modal";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 
 interface CountdownModalProps {
   isOpen: boolean;
@@ -70,59 +74,34 @@ export default function CountdownModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Título *
-          </label>
-          <input
+          <Label htmlFor="title">Título *</Label>
+          <Input
+            id="title"
             type="text"
             value={formData.title}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, title: e.target.value }))
             }
-            className="w-full px-3 py-2 rounded-lg border transition-colors"
-            style={{
-              backgroundColor: state.currentTheme.colors.background,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
             placeholder="Ex: Viagem para o Japão, Aniversário, Prova"
             required
           />
         </div>
 
         <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Descrição
-          </label>
-          <textarea
+          <Label htmlFor="description">Descrição</Label>
+          <Textarea
+            id="description"
             value={formData.description}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, description: e.target.value }))
             }
-            className="w-full px-3 py-2 rounded-lg border transition-colors resize-none"
-            style={{
-              backgroundColor: state.currentTheme.colors.background,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
             placeholder="Descrição do evento (opcional)"
             rows={3}
           />
         </div>
 
         <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Data e Hora *
-          </label>
+          <Label htmlFor="targetDate">Data e Hora *</Label>
           <DateTimeInput
             value={formData.targetDate}
             onChange={(value) =>
@@ -130,22 +109,12 @@ export default function CountdownModal({
             }
             placeholder="DD/MM/AAAA HH:MM"
             className="w-full"
-            style={{
-              backgroundColor: state.currentTheme.colors.background,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
             required
           />
         </div>
 
         <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Cor
-          </label>
+          <Label>Cor</Label>
           <div className="flex flex-wrap gap-2">
             {colors.map((color) => (
               <button
@@ -168,27 +137,10 @@ export default function CountdownModal({
         </div>
 
         <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg font-medium transition-colors"
-            style={{
-              backgroundColor: state.currentTheme.colors.surface,
-              color: state.currentTheme.colors.text,
-              borderColor: state.currentTheme.colors.border,
-            }}
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             Cancelar
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-white"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary,
-            }}
-          >
-            {countdown ? "Salvar" : "Criar"}
-          </button>
+          </Button>
+          <Button type="submit">{countdown ? "Salvar" : "Criar"}</Button>
         </div>
       </form>
     </Modal>

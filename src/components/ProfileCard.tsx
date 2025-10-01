@@ -4,6 +4,10 @@ import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
 import { useAutoProfile } from "../hooks/useAutoProfile";
 import ProfileModal from "./ProfileModal";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Card, CardContent } from "./ui/card";
 
 interface ProfileCardProps {
   showEditButton?: boolean;
@@ -77,131 +81,111 @@ export default function ProfileCard({
 
   return (
     <>
-      <div
-        className={`rounded-lg border p-4 ${compact ? "p-3" : "p-4"}`}
-        style={{
-          backgroundColor: state.currentTheme.colors.surface,
-          borderColor: state.currentTheme.colors.border,
-        }}
-      >
-        <div className="flex items-start space-x-4">
-          {/* Avatar */}
-          <div className="flex-shrink-0">
-            {profile.avatarUrl ? (
-              <img
-                src={profile.avatarUrl}
-                alt="Avatar"
-                className={`rounded-full object-cover border-2 ${
-                  compact ? "w-12 h-12" : "w-16 h-16"
-                }`}
-                style={{ borderColor: state.currentTheme.colors.primary }}
-              />
-            ) : (
-              <div
-                className={`rounded-full flex items-center justify-center border-2 ${
-                  compact ? "w-12 h-12" : "w-16 h-16"
-                }`}
-                style={{
-                  backgroundColor: state.currentTheme.colors.primary + "20",
-                  borderColor: state.currentTheme.colors.primary,
-                }}
-              >
+      <Card className={compact ? "p-3" : "p-4"}>
+        <CardContent className="p-0">
+          <div className="flex items-start space-x-4">
+            {/* Avatar */}
+            <Avatar className={compact ? "w-12 h-12" : "w-16 h-16"}>
+              <AvatarImage src={profile.avatarUrl} alt="Avatar" />
+              <AvatarFallback>
                 <User
                   className={compact ? "w-6 h-6" : "w-8 h-8"}
                   style={{ color: state.currentTheme.colors.primary }}
                 />
-              </div>
-            )}
-          </div>
+              </AvatarFallback>
+            </Avatar>
 
-          {/* Profile Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3
-                  className={`font-semibold ${
-                    compact ? "text-base" : "text-lg"
-                  }`}
-                  style={{ color: state.currentTheme.colors.text }}
-                >
-                  {fullName || profile.username || "Usuário"}
-                </h3>
-
-                {profile.username && fullName && (
-                  <p
-                    className="text-sm"
-                    style={{ color: state.currentTheme.colors.textSecondary }}
+            {/* Profile Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3
+                    className={`font-semibold ${
+                      compact ? "text-base" : "text-lg"
+                    }`}
+                    style={{ color: state.currentTheme.colors.text }}
                   >
-                    @{profile.username}
-                  </p>
-                )}
+                    {fullName || profile.username || "Usuário"}
+                  </h3>
 
-                {/* Status */}
-                <div className="flex items-center space-x-2 mt-1">
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: getStatusColor(profile.status) }}
-                  />
-                  <span
-                    className="text-sm font-medium"
-                    style={{ color: getStatusColor(profile.status) }}
-                  >
-                    {getStatusText(profile.status)}
-                  </span>
-                </div>
-              </div>
-
-              {showEditButton && (
-                <button
-                  onClick={() => setIsProfileModalOpen(true)}
-                  className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
-                  style={{
-                    backgroundColor: state.currentTheme.colors.primary + "20",
-                    color: state.currentTheme.colors.primary,
-                  }}
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Additional Info */}
-            {!compact && (
-              <div className="mt-3 space-y-2">
-                {profile.birthDate && (
-                  <div className="flex items-center space-x-2">
-                    <Calendar
-                      className="w-4 h-4"
-                      style={{ color: state.currentTheme.colors.textSecondary }}
-                    />
-                    <span
+                  {profile.username && fullName && (
+                    <p
                       className="text-sm"
                       style={{ color: state.currentTheme.colors.textSecondary }}
                     >
-                      Nascido em {profile.birthDate.toLocaleDateString("pt-BR")}
-                    </span>
-                  </div>
-                )}
+                      @{profile.username}
+                    </p>
+                  )}
 
-                <div className="text-xs space-y-1">
-                  <div
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  >
-                    <strong>Membro desde:</strong>{" "}
-                    {profile.createdAt.toLocaleDateString("pt-BR")}
-                  </div>
-                  <div
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  >
-                    <strong>Última atualização:</strong>{" "}
-                    {profile.updatedAt.toLocaleDateString("pt-BR")}
+                  {/* Status */}
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Badge
+                      variant="outline"
+                      style={{
+                        backgroundColor: getStatusColor(profile.status) + "20",
+                        color: getStatusColor(profile.status),
+                        borderColor: getStatusColor(profile.status),
+                      }}
+                    >
+                      {getStatusText(profile.status)}
+                    </Badge>
                   </div>
                 </div>
+
+                {showEditButton && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsProfileModalOpen(true)}
+                  >
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
-            )}
+
+              {/* Additional Info */}
+              {!compact && (
+                <div className="mt-3 space-y-2">
+                  {profile.birthDate && (
+                    <div className="flex items-center space-x-2">
+                      <Calendar
+                        className="w-4 h-4"
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                      />
+                      <span
+                        className="text-sm"
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                      >
+                        Nascido em{" "}
+                        {profile.birthDate.toLocaleDateString("pt-BR")}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="text-xs space-y-1">
+                    <div
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    >
+                      <strong>Membro desde:</strong>{" "}
+                      {profile.createdAt.toLocaleDateString("pt-BR")}
+                    </div>
+                    <div
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    >
+                      <strong>Última atualização:</strong>{" "}
+                      {profile.updatedAt.toLocaleDateString("pt-BR")}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <ProfileModal
         isOpen={isProfileModalOpen}

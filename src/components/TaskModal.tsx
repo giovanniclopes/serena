@@ -4,6 +4,17 @@ import { useProjects } from "../features/projects/useProjects";
 import type { Priority, Task } from "../types";
 import DateTimeInput from "./DateTimeInput";
 import Modal from "./Modal";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Textarea } from "./ui/textarea";
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -76,47 +87,27 @@ export default function TaskModal({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Título *
-          </label>
-          <input
+          <Label htmlFor="title">Título *</Label>
+          <Input
+            id="title"
             type="text"
             value={formData.title}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, title: e.target.value }))
             }
-            className="w-full px-3 py-2 rounded-lg border transition-colors"
-            style={{
-              backgroundColor: state.currentTheme.colors.background,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
             placeholder="Digite o título da tarefa"
             required
           />
         </div>
 
         <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Descrição
-          </label>
-          <textarea
+          <Label htmlFor="description">Descrição</Label>
+          <Textarea
+            id="description"
             value={formData.description}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, description: e.target.value }))
             }
-            className="w-full px-3 py-2 rounded-lg border transition-colors resize-none"
-            style={{
-              backgroundColor: state.currentTheme.colors.background,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
             placeholder="Descrição da tarefa (opcional)"
             rows={3}
           />
@@ -124,70 +115,56 @@ export default function TaskModal({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: state.currentTheme.colors.text }}
-            >
-              Projeto
-            </label>
-            <select
-              value={formData.projectId}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, projectId: e.target.value }))
+            <Label htmlFor="project">Projeto</Label>
+            <Select
+              value={formData.projectId || "none"}
+              onValueChange={(value) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  projectId: value === "none" ? "" : value,
+                }))
               }
-              className="w-full px-3 py-2 rounded-lg border transition-colors"
-              style={{
-                backgroundColor: state.currentTheme.colors.background,
-                borderColor: state.currentTheme.colors.border,
-                color: state.currentTheme.colors.text,
-              }}
             >
-              <option value="">Sem projeto</option>
-              {availableProjects.map((project) => (
-                <option key={project.id} value={project.id}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione um projeto" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">Sem projeto</SelectItem>
+                {availableProjects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: state.currentTheme.colors.text }}
-            >
-              Prioridade
-            </label>
-            <select
+            <Label htmlFor="priority">Prioridade</Label>
+            <Select
               value={formData.priority}
-              onChange={(e) =>
+              onValueChange={(value) =>
                 setFormData((prev) => ({
                   ...prev,
-                  priority: e.target.value as Priority,
+                  priority: value as Priority,
                 }))
               }
-              className="w-full px-3 py-2 rounded-lg border transition-colors"
-              style={{
-                backgroundColor: state.currentTheme.colors.background,
-                borderColor: state.currentTheme.colors.border,
-                color: state.currentTheme.colors.text,
-              }}
             >
-              <option value="P1">P1 - Urgente</option>
-              <option value="P2">P2 - Alta</option>
-              <option value="P3">P3 - Média</option>
-              <option value="P4">P4 - Baixa</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione a prioridade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="P1">P1 - Urgente</SelectItem>
+                <SelectItem value="P2">P2 - Alta</SelectItem>
+                <SelectItem value="P3">P3 - Média</SelectItem>
+                <SelectItem value="P4">P4 - Baixa</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
         <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Data de Vencimento
-          </label>
+          <Label htmlFor="dueDate">Data de Vencimento</Label>
           <DateTimeInput
             value={formData.dueDate}
             onChange={(value) =>
@@ -195,22 +172,12 @@ export default function TaskModal({
             }
             placeholder="DD/MM/AAAA HH:MM"
             className="w-full"
-            style={{
-              backgroundColor: state.currentTheme.colors.background,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
           />
         </div>
 
         {availableTags.length > 0 && (
           <div>
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: state.currentTheme.colors.text }}
-            >
-              Tags
-            </label>
+            <Label>Tags</Label>
             <div className="flex flex-wrap gap-2">
               {availableTags.map((tag) => (
                 <button
@@ -235,27 +202,10 @@ export default function TaskModal({
         )}
 
         <div className="flex justify-end space-x-3 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg font-medium transition-colors"
-            style={{
-              backgroundColor: state.currentTheme.colors.surface,
-              color: state.currentTheme.colors.text,
-              borderColor: state.currentTheme.colors.border,
-            }}
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             Cancelar
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-white"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary,
-            }}
-          >
-            {task ? "Salvar" : "Criar"}
-          </button>
+          </Button>
+          <Button type="submit">{task ? "Salvar" : "Criar"}</Button>
         </div>
       </form>
     </Modal>
