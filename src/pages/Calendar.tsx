@@ -13,12 +13,14 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
 import TaskCard from "../components/TaskCard";
 import { useApp } from "../context/AppContext";
-import { getTasksForDate } from "../utils";
+import { useTasks } from "../features/tasks/useTasks";
+import { getPriorityColor, getTasksForDate } from "../utils";
 
 type ViewMode = "month" | "week" | "day";
 
 export default function Calendar() {
   const { state, dispatch } = useApp();
+  const { tasks, isLoading } = useTasks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -41,11 +43,19 @@ export default function Calendar() {
 
   const getTasksForSelectedDate = () => {
     if (!selectedDate) return [];
-    return getTasksForDate(state.tasks, selectedDate);
+    const filteredTasks = tasks.filter(
+      (task) =>
+        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+    );
+    return getTasksForDate(filteredTasks, selectedDate);
   };
 
   const getDayTasks = (date: Date) => {
-    return getTasksForDate(state.tasks, date);
+    const filteredTasks = tasks.filter(
+      (task) =>
+        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+    );
+    return getTasksForDate(filteredTasks, date);
   };
 
   const renderMonthView = () => (
@@ -126,25 +136,46 @@ export default function Calendar() {
                   {dayTasks.slice(0, 2).map((task) => (
                     <div
                       key={task.id}
-                      className="text-xs p-1 rounded truncate"
+                      className="text-xs p-1 rounded truncate flex items-center space-x-1"
                       style={{
                         backgroundColor: task.projectId
                           ? state.currentTheme.colors.primary + "20"
-                          : state.currentTheme.colors.secondary,
+                          : getPriorityColor(task.priority) + "20",
                         color: task.projectId
                           ? state.currentTheme.colors.primary
-                          : state.currentTheme.colors.text,
+                          : getPriorityColor(task.priority),
+                        borderLeft: `3px solid ${
+                          task.projectId
+                            ? state.currentTheme.colors.primary
+                            : getPriorityColor(task.priority)
+                        }`,
                       }}
                     >
-                      {task.title}
+                      <div
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{
+                          backgroundColor: task.isCompleted
+                            ? "#10b981"
+                            : task.projectId
+                            ? state.currentTheme.colors.primary
+                            : getPriorityColor(task.priority),
+                        }}
+                      />
+                      <span
+                        className={
+                          task.isCompleted ? "line-through opacity-70" : ""
+                        }
+                      >
+                        {task.title}
+                      </span>
                     </div>
                   ))}
                   {dayTasks.length > 2 && (
                     <div
-                      className="text-xs"
+                      className="text-xs font-medium"
                       style={{ color: state.currentTheme.colors.textSecondary }}
                     >
-                      +{dayTasks.length - 2}
+                      +{dayTasks.length - 2} tarefas
                     </div>
                   )}
                 </div>
@@ -155,6 +186,19 @@ export default function Calendar() {
       </div>
     </div>
   );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div
+          className="text-lg"
+          style={{ color: state.currentTheme.colors.textSecondary }}
+        >
+          Carregando calendário...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
