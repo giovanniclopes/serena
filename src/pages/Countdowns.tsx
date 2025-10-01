@@ -8,6 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, Clock, Plus } from "lucide-react";
 import { useState } from "react";
 import CountdownModal from "../components/CountdownModal";
+import FloatingActionButton from "../components/FloatingActionButton";
 import { useApp } from "../context/AppContext";
 import {
   useCountdowns,
@@ -335,6 +336,13 @@ export default function Countdowns() {
         onClose={() => setIsCountdownModalOpen(false)}
         countdown={editingCountdown}
         onSave={handleSaveCountdown}
+      />
+
+      <FloatingActionButton
+        onClick={() => {
+          setEditingCountdown(undefined);
+          setIsCountdownModalOpen(true);
+        }}
       />
     </div>
   );

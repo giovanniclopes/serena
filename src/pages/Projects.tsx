@@ -1,5 +1,6 @@
 import { Folder, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import FloatingActionButton from "../components/FloatingActionButton";
 import ProjectModal from "../components/ProjectModal";
 import {
   useCreateProject,
@@ -129,6 +130,13 @@ export default function Projects() {
           project={editingProject || undefined}
         />
       )}
+
+      <FloatingActionButton
+        onClick={() => {
+          setEditingProject(null);
+          setIsProjectModalOpen(true);
+        }}
+      />
     </div>
   );
 }

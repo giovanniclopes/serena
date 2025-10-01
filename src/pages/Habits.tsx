@@ -7,6 +7,7 @@ import {
 } from "date-fns";
 import { Plus, Target } from "lucide-react";
 import { useState } from "react";
+import FloatingActionButton from "../components/FloatingActionButton";
 import HabitModal from "../components/HabitModal";
 import { useApp } from "../context/AppContext";
 import {
@@ -311,6 +312,13 @@ export default function Habits() {
         onClose={() => setIsHabitModalOpen(false)}
         habit={editingHabit}
         onSave={handleSaveHabit}
+      />
+
+      <FloatingActionButton
+        onClick={() => {
+          setEditingHabit(undefined);
+          setIsHabitModalOpen(true);
+        }}
       />
     </div>
   );

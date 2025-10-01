@@ -1,5 +1,6 @@
 import { Filter, Grid, List, Plus, Search } from "lucide-react";
 import { useState } from "react";
+import FloatingActionButton from "../components/FloatingActionButton";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
@@ -266,6 +267,13 @@ export default function Tasks() {
         onClose={() => setIsTaskModalOpen(false)}
         task={editingTask}
         onSave={handleSaveTask}
+      />
+
+      <FloatingActionButton
+        onClick={() => {
+          setEditingTask(undefined);
+          setIsTaskModalOpen(true);
+        }}
       />
     </div>
   );
