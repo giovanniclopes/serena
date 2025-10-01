@@ -1,8 +1,11 @@
 "use client";
 
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import {
+  createBrazilDateTime,
+  formatBrazilDate,
+  formatBrazilTime,
+} from "@/lib/dayjs";
+import { Calendar as CalendarIcon } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -36,38 +39,130 @@ export function DateTimePicker({
     value
   );
   const [timeValue, setTimeValue] = React.useState(
-    value ? format(value, "HH:mm") : ""
+    value ? formatBrazilTime(value) : ""
   );
+  const [isTimeFocused, setIsTimeFocused] = React.useState(false);
 
   React.useEffect(() => {
     setSelectedDate(value);
-    setTimeValue(value ? format(value, "HH:mm") : "");
+    // Usar timezone de São Paulo para exibir o horário correto
+    setTimeValue(value ? formatBrazilTime(value) : "");
   }, [value]);
 
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     if (date && timeValue) {
       const [hours, minutes] = timeValue.split(":").map(Number);
-      const newDateTime = new Date(date);
-      newDateTime.setHours(hours, minutes);
+      // Criar data usando helper do Brasil
+      const newDateTime = createBrazilDateTime(date, hours, minutes);
       onChange?.(newDateTime);
     } else if (date) {
       onChange?.(date);
     }
   };
 
+  const validateTime = (time: string): boolean => {
+    const timeRegex = /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/;
+    return timeRegex.test(time);
+  };
+
   const handleTimeChange = (time: string) => {
+    // Permitir digitação livre, mas validar no blur
     setTimeValue(time);
-    if (selectedDate && time) {
+
+    // Se o formato está correto, atualizar a data
+    if (time && validateTime(time) && selectedDate) {
       const [hours, minutes] = time.split(":").map(Number);
-      const newDateTime = new Date(selectedDate);
-      newDateTime.setHours(hours, minutes);
+      // Criar data usando helper do Brasil
+      const newDateTime = createBrazilDateTime(selectedDate, hours, minutes);
       onChange?.(newDateTime);
     }
   };
 
+  const handleTimeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const input = e.target as HTMLInputElement;
+    const value = input.value;
+    const cursorPosition = input.selectionStart || 0;
+
+    // Permitir teclas de navegação e controle
+    if (
+      [
+        "Backspace",
+        "Delete",
+        "Tab",
+        "Enter",
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End",
+      ].includes(e.key)
+    ) {
+      return;
+    }
+
+    // Permitir apenas números e dois pontos
+    if (!/\d|:/.test(e.key)) {
+      e.preventDefault();
+      return;
+    }
+
+    // Se o usuário digitar dois pontos, permitir apenas se não existir
+    if (e.key === ":" && value.includes(":")) {
+      e.preventDefault();
+      return;
+    }
+
+    // Auto-formatar: adicionar ":" após 2 dígitos se não existir
+    if (/\d/.test(e.key) && value.length === 1 && !value.includes(":")) {
+      setTimeout(() => {
+        const newValue = input.value;
+        if (newValue.length === 2 && !newValue.includes(":")) {
+          const formattedValue = newValue + ":";
+          input.value = formattedValue;
+          handleTimeChange(formattedValue);
+          // Posicionar cursor após os dois pontos
+          input.setSelectionRange(3, 3);
+        }
+      }, 0);
+    }
+  };
+
+  const handleTimeBlur = () => {
+    setIsTimeFocused(false);
+
+    // Tentar formatar o valor se estiver incompleto
+    if (timeValue && !validateTime(timeValue)) {
+      // Se tem apenas números, tentar formatar
+      if (/^\d{1,4}$/.test(timeValue)) {
+        const digits = timeValue.padStart(4, "0");
+        const hours = digits.substring(0, 2);
+        const minutes = digits.substring(2, 4);
+
+        // Validar se é um horário válido
+        const h = parseInt(hours);
+        const m = parseInt(minutes);
+
+        if (h >= 0 && h <= 23 && m >= 0 && m <= 59) {
+          const formattedTime = `${hours}:${minutes}`;
+          setTimeValue(formattedTime);
+
+          // Atualizar a data se temos uma data selecionada
+          if (selectedDate) {
+            // Criar data usando helper do Brasil
+            const newDateTime = createBrazilDateTime(selectedDate, h, m);
+            onChange?.(newDateTime);
+          }
+          return;
+        }
+      }
+
+      // Se não conseguiu formatar, limpar o campo
+      setTimeValue("");
+    }
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="grid grid-cols-2 gap-2">
       <Popover>
         <PopoverTrigger asChild>
           <Button
@@ -82,7 +177,7 @@ export function DateTimePicker({
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {selectedDate ? (
-              format(selectedDate, "dd/MM/yyyy", { locale: ptBR })
+              formatBrazilDate(selectedDate)
             ) : (
               <span>Selecione uma data</span>
             )}
@@ -94,22 +189,23 @@ export function DateTimePicker({
             selected={selectedDate}
             onSelect={handleDateSelect}
             initialFocus
-            locale={ptBR}
           />
         </PopoverContent>
       </Popover>
 
-      <div className="relative">
-        <Input
-          type="time"
-          value={timeValue}
-          onChange={(e) => handleTimeChange(e.target.value)}
-          placeholder="HH:MM"
-          className="w-full"
-          disabled={disabled}
-        />
-        <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-      </div>
+      <Input
+        type="text"
+        value={timeValue}
+        onChange={(e) => handleTimeChange(e.target.value)}
+        onKeyDown={handleTimeKeyDown}
+        onFocus={() => setIsTimeFocused(true)}
+        onBlur={handleTimeBlur}
+        placeholder="--:--"
+        className="w-full"
+        disabled={disabled}
+        maxLength={5}
+        title="Formato: HH:MM (24 horas)"
+      />
     </div>
   );
 }
