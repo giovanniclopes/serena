@@ -12,15 +12,41 @@ export async function getProjects(): Promise<Project[]> {
     throw new Error("Não foi possível carregar os projetos.");
   }
 
-  return data || [];
+  return (data || []).map((project) => ({
+    id: project.id,
+    name: project.name,
+    description: project.description,
+    color: project.color,
+    icon: project.icon,
+    workspaceId: project.workspace_id,
+    createdAt: new Date(project.created_at),
+    updatedAt: new Date(project.updated_at),
+  }));
 }
 
 export async function createProject(
   project: Omit<Project, "id" | "createdAt" | "updatedAt">
 ): Promise<Project> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Usuário não autenticado");
+  }
+
   const { data, error } = await supabase
     .from("projects")
-    .insert([project])
+    .insert([
+      {
+        name: project.name,
+        description: project.description,
+        color: project.color,
+        icon: project.icon,
+        workspace_id: project.workspaceId,
+        user_id: user.id,
+      },
+    ])
     .select()
     .single();
 
@@ -29,16 +55,35 @@ export async function createProject(
     throw new Error("Não foi possível criar o projeto.");
   }
 
-  return data;
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    color: data.color,
+    icon: data.icon,
+    workspaceId: data.workspace_id,
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
+  };
 }
 
 export async function updateProject(
   id: string,
   updates: Partial<Project>
 ): Promise<Project> {
+  const updateData: any = { updated_at: new Date().toISOString() };
+
+  if (updates.name !== undefined) updateData.name = updates.name;
+  if (updates.description !== undefined)
+    updateData.description = updates.description;
+  if (updates.color !== undefined) updateData.color = updates.color;
+  if (updates.icon !== undefined) updateData.icon = updates.icon;
+  if (updates.workspaceId !== undefined)
+    updateData.workspace_id = updates.workspaceId;
+
   const { data, error } = await supabase
     .from("projects")
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update(updateData)
     .eq("id", id)
     .select()
     .single();
@@ -48,7 +93,16 @@ export async function updateProject(
     throw new Error("Não foi possível atualizar o projeto.");
   }
 
-  return data;
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    color: data.color,
+    icon: data.icon,
+    workspaceId: data.workspace_id,
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
+  };
 }
 
 export async function deleteProject(id: string): Promise<void> {

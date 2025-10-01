@@ -22,7 +22,7 @@ export async function getHabits(): Promise<Habit[]> {
       color: habit.color,
       icon: habit.icon,
       reminders: habit.reminders || [],
-      workspaceId: habit.workspaceId,
+      workspaceId: habit.workspace_id,
       createdAt: new Date(habit.created_at),
       updatedAt: new Date(habit.updated_at),
     })) || []
@@ -32,6 +32,14 @@ export async function getHabits(): Promise<Habit[]> {
 export async function createHabit(
   habit: Omit<Habit, "id" | "createdAt" | "updatedAt">
 ): Promise<Habit> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Usuário não autenticado");
+  }
+
   const { data, error } = await supabase
     .from("habits")
     .insert({
@@ -42,7 +50,8 @@ export async function createHabit(
       color: habit.color,
       icon: habit.icon,
       reminders: habit.reminders,
-      workspaceId: habit.workspaceId,
+      workspace_id: habit.workspaceId,
+      user_id: user.id,
     })
     .select()
     .single();
@@ -61,7 +70,7 @@ export async function createHabit(
     color: data.color,
     icon: data.icon,
     reminders: data.reminders || [],
-    workspaceId: data.workspaceId,
+    workspaceId: data.workspace_id,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -99,7 +108,7 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
     color: data.color,
     icon: data.icon,
     reminders: data.reminders || [],
-    workspaceId: data.workspaceId,
+    workspaceId: data.workspace_id,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };

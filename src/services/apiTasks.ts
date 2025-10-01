@@ -60,6 +60,14 @@ export async function getTasks(): Promise<Task[]> {
 export async function createTask(
   task: Omit<Task, "id" | "createdAt" | "updatedAt">
 ): Promise<Task> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Usuário não autenticado");
+  }
+
   const { data, error } = await supabase
     .from("tasks")
     .insert({
@@ -74,6 +82,7 @@ export async function createTask(
       is_completed: task.isCompleted,
       completed_at: task.completedAt?.toISOString(),
       workspace_id: task.workspaceId,
+      user_id: user.id,
     })
     .select()
     .single();

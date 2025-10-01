@@ -1,6 +1,14 @@
 import { supabase } from "../lib/supabaseClient";
 import type { Countdown } from "../types";
 
+function parseDate(dateString: string): Date {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    throw new Error(`Data inválida: ${dateString}`);
+  }
+  return date;
+}
+
 export async function getCountdowns(): Promise<Countdown[]> {
   const { data, error } = await supabase
     .from("countdowns")
@@ -15,14 +23,14 @@ export async function getCountdowns(): Promise<Countdown[]> {
   return (
     data?.map((countdown) => ({
       id: countdown.id,
-      title: countdown.eventName,
+      title: countdown.event_name,
       description: countdown.description,
-      targetDate: new Date(countdown.eventDate),
+      targetDate: parseDate(countdown.event_date),
       color: countdown.color,
       icon: countdown.icon,
-      workspaceId: countdown.workspaceId,
-      createdAt: new Date(countdown.created_at),
-      updatedAt: new Date(countdown.updated_at),
+      workspaceId: countdown.workspace_id,
+      createdAt: parseDate(countdown.created_at),
+      updatedAt: parseDate(countdown.updated_at),
     })) || []
   );
 }
@@ -30,15 +38,24 @@ export async function getCountdowns(): Promise<Countdown[]> {
 export async function createCountdown(
   countdown: Omit<Countdown, "id" | "createdAt" | "updatedAt">
 ): Promise<Countdown> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Usuário não autenticado");
+  }
+
   const { data, error } = await supabase
     .from("countdowns")
     .insert({
-      eventName: countdown.title,
+      event_name: countdown.title,
       description: countdown.description,
-      eventDate: countdown.targetDate.toISOString(),
+      event_date: countdown.targetDate.toISOString(),
       color: countdown.color,
       icon: countdown.icon,
-      workspaceId: countdown.workspaceId,
+      workspace_id: countdown.workspaceId,
+      user_id: user.id,
     })
     .select()
     .single();
@@ -50,14 +67,14 @@ export async function createCountdown(
 
   return {
     id: data.id,
-    title: data.eventName,
+    title: data.event_name,
     description: data.description,
-    targetDate: new Date(data.eventDate),
+    targetDate: parseDate(data.event_date),
     color: data.color,
     icon: data.icon,
-    workspaceId: data.workspaceId,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+    workspaceId: data.workspace_id,
+    createdAt: parseDate(data.created_at),
+    updatedAt: parseDate(data.updated_at),
   };
 }
 
@@ -67,12 +84,12 @@ export async function updateCountdown(
   const { data, error } = await supabase
     .from("countdowns")
     .update({
-      eventName: countdown.title,
+      event_name: countdown.title,
       description: countdown.description,
-      eventDate: countdown.targetDate.toISOString(),
+      event_date: countdown.targetDate.toISOString(),
       color: countdown.color,
       icon: countdown.icon,
-      workspaceId: countdown.workspaceId,
+      workspace_id: countdown.workspaceId,
       updated_at: new Date().toISOString(),
     })
     .eq("id", countdown.id)
@@ -86,14 +103,14 @@ export async function updateCountdown(
 
   return {
     id: data.id,
-    title: data.eventName,
+    title: data.event_name,
     description: data.description,
-    targetDate: new Date(data.eventDate),
+    targetDate: parseDate(data.event_date),
     color: data.color,
     icon: data.icon,
-    workspaceId: data.workspaceId,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+    workspaceId: data.workspace_id,
+    createdAt: parseDate(data.created_at),
+    updatedAt: parseDate(data.updated_at),
   };
 }
 

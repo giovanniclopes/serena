@@ -71,7 +71,7 @@ export default function WorkspaceModal({
           </label>
           <input
             type="text"
-            value={formData.name}
+            value={formData.name || ""}
             onChange={(e) =>
               setFormData((prev) => ({ ...prev, name: e.target.value }))
             }

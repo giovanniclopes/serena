@@ -100,12 +100,6 @@ export default function WorkspaceSelector() {
                     ? "bg-opacity-20"
                     : "hover:bg-opacity-10"
                 }`}
-                style={{
-                  backgroundColor:
-                    workspace.id === state.activeWorkspaceId
-                      ? state.currentTheme.colors.primary + "10"
-                      : state.currentTheme.colors.primary + "10",
-                }}
               >
                 <div className="flex items-center justify-between">
                   <button
