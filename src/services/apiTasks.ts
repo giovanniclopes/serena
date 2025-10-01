@@ -1,6 +1,11 @@
 import { supabase } from "../lib/supabaseClient";
 import type { Task } from "../types";
 
+const formatDateForSupabase = (date: Date | undefined): string | undefined => {
+  if (!date) return undefined;
+  return date.toISOString();
+};
+
 export async function getTasks(): Promise<Task[]> {
   const { data, error } = await supabase
     .from("tasks")
@@ -25,6 +30,7 @@ export async function getTasks(): Promise<Task[]> {
       projectId: task.project_id,
       parentTaskId: task.parent_task_id,
       subtasks:
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         task.subtasks?.map((subtask: any) => ({
           id: subtask.id,
           title: subtask.title,
@@ -75,12 +81,12 @@ export async function createTask(
       description: task.description,
       project_id: task.projectId,
       parent_task_id: task.parentTaskId,
-      due_date: task.dueDate?.toISOString(),
+      due_date: formatDateForSupabase(task.dueDate),
       priority: task.priority,
       reminders: task.reminders,
       tags: task.tags,
       is_completed: task.isCompleted,
-      completed_at: task.completedAt?.toISOString(),
+      completed_at: formatDateForSupabase(task.completedAt),
       workspace_id: task.workspaceId,
       user_id: user.id,
     })
@@ -119,14 +125,14 @@ export async function updateTask(task: Task): Promise<Task> {
       description: task.description,
       project_id: task.projectId,
       parent_task_id: task.parentTaskId,
-      due_date: task.dueDate?.toISOString(),
+      due_date: formatDateForSupabase(task.dueDate),
       priority: task.priority,
       reminders: task.reminders,
       tags: task.tags,
       is_completed: task.isCompleted,
-      completed_at: task.completedAt?.toISOString(),
+      completed_at: formatDateForSupabase(task.completedAt),
       workspace_id: task.workspaceId,
-      updated_at: new Date().toISOString(),
+      updated_at: formatDateForSupabase(new Date()),
     })
     .eq("id", task.id)
     .select()
@@ -170,8 +176,8 @@ export async function completeTask(taskId: string): Promise<Task> {
     .from("tasks")
     .update({
       is_completed: true,
-      completed_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      completed_at: formatDateForSupabase(new Date()),
+      updated_at: formatDateForSupabase(new Date()),
     })
     .eq("id", taskId)
     .select()
