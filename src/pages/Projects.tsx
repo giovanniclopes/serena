@@ -2,6 +2,7 @@ import { Folder, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProjectModal from "../components/ProjectModal";
+import { useApp } from "../context/AppContext";
 import {
   useCreateProject,
   useDeleteProject,
@@ -10,7 +11,6 @@ import {
 } from "../features/projects/useProjects";
 import { useWorkspaces } from "../features/workspaces/useWorkspaces";
 import type { Project } from "../types";
-import { useApp } from "../context/AppContext";
 
 export default function Projects() {
   const { state } = useApp();
@@ -95,6 +95,64 @@ export default function Projects() {
           <span>Novo Projeto</span>
         </button>
       </div>
+
+      {filteredProjects.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredProjects.map((project: Project) => (
+            <div
+              key={project.id}
+              className="p-4 bg-ice-white border border-light-gray rounded-md shadow-sm"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Folder size={20} className="text-medium-gray" />
+                <h2 className="font-bold text-dark-gray">{project.name}</h2>
+              </div>
+              <p className="text-medium-gray text-sm mb-4">
+                {project.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div
+          className="text-center py-8 rounded-lg"
+          style={{ backgroundColor: state.currentTheme.colors.surface }}
+        >
+          <div
+            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
+            style={{
+              backgroundColor: state.currentTheme.colors.primary + "20",
+            }}
+          >
+            <Folder
+              className="w-6 h-6"
+              style={{ color: state.currentTheme.colors.primary }}
+            />
+          </div>
+          <h3
+            className="text-lg font-semibold mb-1"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            Nenhum projeto criado
+          </h3>
+          <p
+            className="text-sm mb-3"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          >
+            Crie projetos para organizar suas tarefas
+          </p>
+          <button
+            onClick={handleOpenCreateModal}
+            className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+            style={{
+              backgroundColor: state.currentTheme.colors.primary,
+              color: "white",
+            }}
+          >
+            Criar Primeiro Projeto
+          </button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredProjects.map((project: Project) => (

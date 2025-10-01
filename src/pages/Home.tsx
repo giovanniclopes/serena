@@ -118,154 +118,190 @@ export default function Home() {
   ];
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1
-          className="text-2xl font-bold mb-1"
-          style={{ color: state.currentTheme.colors.text }}
-        >
-          Olá
-          {profile?.firstName && profile?.lastName
-            ? `, ${profile.firstName} ${profile.lastName}`
-            : ""}
-          ! 👋
-        </h1>
-        <p
-          className="text-base"
-          style={{ color: state.currentTheme.colors.textSecondary }}
-        >
-          {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="p-3 rounded-lg"
-            style={{ backgroundColor: state.currentTheme.colors.surface }}
-          >
-            <div className="flex items-center space-x-2">
-              <div
-                className="p-1.5 rounded-md"
-                style={{ backgroundColor: stat.color + "20" }}
-              >
-                <stat.icon className="w-4 h-4" style={{ color: stat.color }} />
-              </div>
-              <div>
-                <p
-                  className="text-lg font-bold"
-                  style={{ color: state.currentTheme.colors.text }}
-                >
-                  {stat.value}
-                </p>
-                <p
-                  className="text-xs"
-                  style={{ color: state.currentTheme.colors.textSecondary }}
-                >
-                  {stat.label}
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {overdueTasks.length > 0 && (
-        <div>
-          <h2
-            className="text-lg font-semibold mb-3"
-            style={{ color: state.currentTheme.colors.error }}
-          >
-            ⚠️ Tarefas Atrasadas
-          </h2>
-          <div className="space-y-2">
-            {overdueTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onComplete={handleCompleteTask}
-                onEdit={handleEditTask}
-                showProject={true}
-                showDate={true}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div>
-        <h2
-          className="text-lg font-semibold mb-3"
-          style={{ color: state.currentTheme.colors.text }}
-        >
-          📅 Tarefas de Hoje
-        </h2>
-        {todayTasks.length > 0 ? (
-          <div className="space-y-2">
-            {todayTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onComplete={handleCompleteTask}
-                onEdit={handleEditTask}
-                showProject={true}
-                showDate={false}
-              />
-            ))}
-          </div>
-        ) : (
-          <div
-            className="text-center py-6 rounded-lg"
-            style={{ backgroundColor: state.currentTheme.colors.surface }}
-          >
-            <p
-              className="text-base"
-              style={{ color: state.currentTheme.colors.textSecondary }}
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b border-gray-100 px-4 py-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1
+              className="text-xl font-bold"
+              style={{ color: state.currentTheme.colors.text }}
             >
-              🎉 Nenhuma tarefa para hoje!
-            </p>
+              Olá
+              {profile?.firstName && profile?.lastName
+                ? `, ${profile.firstName} ${profile.lastName}`
+                : ""}
+              ! 👋
+            </h1>
             <p
               className="text-sm mt-1"
               style={{ color: state.currentTheme.colors.textSecondary }}
             >
-              Que tal aproveitar para relaxar ou planejar o futuro?
+              {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
             </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div
+              className="px-3 py-1.5 rounded-full text-sm font-medium"
+              style={{
+                backgroundColor: state.currentTheme.colors.primary + "10",
+                color: state.currentTheme.colors.primary,
+              }}
+            >
+              Pessoal
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="px-4 py-6 space-y-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          {stats.map((stat, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+            >
+              <div className="flex items-center space-x-3">
+                <div
+                  className="p-2 rounded-lg"
+                  style={{ backgroundColor: stat.color + "15" }}
+                >
+                  <stat.icon
+                    className="w-5 h-5"
+                    style={{ color: stat.color }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <p
+                    className="text-2xl font-bold"
+                    style={{ color: state.currentTheme.colors.text }}
+                  >
+                    {stat.value}
+                  </p>
+                  <p
+                    className="text-xs font-medium"
+                    style={{ color: state.currentTheme.colors.textSecondary }}
+                  >
+                    {stat.label}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Overdue Tasks */}
+        {overdueTasks.length > 0 && (
+          <div>
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-1 h-6 bg-red-500 rounded-full"></div>
+              <h2
+                className="text-lg font-semibold"
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                Tarefas Atrasadas
+              </h2>
+            </div>
+            <div className="space-y-2">
+              {overdueTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onComplete={handleCompleteTask}
+                  onEdit={handleEditTask}
+                  showProject={true}
+                  showDate={true}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Today's Tasks */}
+        <div>
+          <div className="flex items-center space-x-2 mb-3">
+            <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+            <h2
+              className="text-lg font-semibold"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Tarefas de Hoje
+            </h2>
+          </div>
+          {todayTasks.length > 0 ? (
+            <div className="space-y-2">
+              {todayTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onComplete={handleCompleteTask}
+                  onEdit={handleEditTask}
+                  showProject={true}
+                  showDate={false}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-gray-100">
+              <div className="text-4xl mb-3">🎉</div>
+              <p
+                className="text-base font-medium mb-1"
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                Nenhuma tarefa para hoje!
+              </p>
+              <p
+                className="text-sm"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Que tal aproveitar para relaxar ou planejar o futuro?
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Upcoming Tasks */}
+        {upcomingTasks.length > 0 && (
+          <div>
+            <div className="flex items-center space-x-2 mb-3">
+              <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+              <h2
+                className="text-lg font-semibold"
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                Próximos 7 dias
+              </h2>
+            </div>
+            <div className="space-y-2">
+              {upcomingTasks.slice(0, 5).map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onComplete={handleCompleteTask}
+                  onEdit={handleEditTask}
+                  showProject={true}
+                  showDate={true}
+                />
+              ))}
+              {upcomingTasks.length > 5 && (
+                <p
+                  className="text-center text-sm py-1"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  E mais {upcomingTasks.length - 5} tarefas...
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {upcomingTasks.length > 0 && (
-        <div>
-          <h2
-            className="text-lg font-semibold mb-3"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            🔮 Próximos 7 dias
-          </h2>
-          <div className="space-y-2">
-            {upcomingTasks.slice(0, 5).map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onComplete={handleCompleteTask}
-                onEdit={handleEditTask}
-                showProject={true}
-                showDate={true}
-              />
-            ))}
-            {upcomingTasks.length > 5 && (
-              <p
-                className="text-center text-sm py-1"
-                style={{ color: state.currentTheme.colors.textSecondary }}
-              >
-                E mais {upcomingTasks.length - 5} tarefas...
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Floating Action Button */}
+      <FloatingActionButton onClick={() => setIsTaskModalOpen(true)} />
 
+      {/* Task Modal */}
       <TaskModal
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}

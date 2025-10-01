@@ -13,18 +13,20 @@ export default function FloatingActionButton({
     <button
       onClick={onClick}
       className={`
-        fixed bottom-20 right-6 z-50
-        w-14 h-14 rounded-full
-        bg-pink-500 hover:bg-pink-600
-        shadow-lg hover:shadow-xl
+        fixed bottom-24 right-4 z-50
+        w-16 h-16 rounded-full
+        bg-gradient-to-r from-pink-500 to-purple-600
+        hover:from-pink-600 hover:to-purple-700
+        shadow-2xl hover:shadow-3xl
         flex items-center justify-center
-        transition-all duration-200
+        transition-all duration-300
         active:scale-95
+        border-2 border-white
         ${className}
       `}
       aria-label="Adicionar item"
     >
-      <Plus className="w-6 h-6 text-white" />
+      <Plus className="w-7 h-7 text-white" />
     </button>
   );
 }
