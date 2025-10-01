@@ -103,7 +103,7 @@ export default function WorkspaceSelector() {
                 style={{
                   backgroundColor:
                     workspace.id === state.activeWorkspaceId
-                      ? state.currentTheme.colors.primary + "20"
+                      ? state.currentTheme.colors.primary + "10"
                       : state.currentTheme.colors.primary + "10",
                 }}
               >
@@ -164,11 +164,7 @@ export default function WorkspaceSelector() {
 
             <button
               onClick={handleCreateWorkspace}
-              className="w-full text-left px-3 py-2 rounded-lg hover:bg-opacity-10 transition-colors mt-2"
-              style={{
-                backgroundColor: state.currentTheme.colors.primary + "10",
-                color: state.currentTheme.colors.primary,
-              }}
+              className="w-full text-left px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors mt-2"
             >
               <div className="flex items-center space-x-3">
                 <Plus className="w-4 h-4" />
