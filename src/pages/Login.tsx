@@ -1,27 +1,28 @@
 import { Eye, EyeOff, Lock, Mail, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, loading } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("📝 Login form submitted for:", email);
     setError("");
-    setLoading(true);
 
     try {
       await signIn(email, password);
+      console.log("🎉 Login completed successfully");
+      navigate("/");
     } catch (err) {
+      console.log("💥 Login error:", err);
       setError(err instanceof Error ? err.message : "Erro ao fazer login");
-    } finally {
-      setLoading(false);
     }
   };
 

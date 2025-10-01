@@ -1,6 +1,6 @@
 import { Eye, EyeOff, Lock, Mail, Sparkles, User } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
@@ -9,10 +9,10 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, loading } = useAuth();
+  const navigate = useNavigate();
 
   // Função para calcular a força da senha
   const getPasswordStrength = (password: string) => {
@@ -58,14 +58,11 @@ export default function Register() {
       return;
     }
 
-    setLoading(true);
-
     try {
       await signUp(email, password, name);
+      navigate("/");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar conta");
-    } finally {
-      setLoading(false);
     }
   };
 

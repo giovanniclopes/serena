@@ -8,6 +8,8 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
 
+  console.log("🛡️ ProtectedRoute - User:", user?.email, "Loading:", loading);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

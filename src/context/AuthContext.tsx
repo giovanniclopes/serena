@@ -16,6 +16,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<unknown | null>(null);
   const [loading, setLoading] = useState(true);
 
+  console.log(
+    "🔧 AuthProvider - Current user:",
+    user?.email,
+    "Loading:",
+    loading
+  );
+
   useEffect(() => {
     // Verificar se há um usuário logado
     getCurrentUser().then((user) => {
@@ -26,7 +33,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Escutar mudanças no estado de autenticação
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log(
+        "🔐 Auth state changed:",
+        event,
+        session?.user?.email,
+        "User:",
+        session?.user
+      );
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -35,11 +49,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleSignIn = async (email: string, password: string) => {
+    console.log("🚀 Starting sign in for:", email);
     setLoading(true);
     try {
-      await signIn(email, password);
-    } finally {
+      const result = await signIn(email, password);
+      console.log("✅ Sign in successful:", result);
+      // Não definir loading como false aqui - deixar o onAuthStateChange fazer isso
+    } catch (error) {
+      console.log("❌ Sign in error:", error);
       setLoading(false);
+      throw error;
     }
   };
 
@@ -51,8 +70,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       await signUp(email, password, name);
-    } finally {
+      // Não definir loading como false aqui - deixar o onAuthStateChange fazer isso
+    } catch (error) {
       setLoading(false);
+      throw error;
     }
   };
 
