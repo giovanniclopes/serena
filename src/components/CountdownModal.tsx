@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Countdown } from "../types";
+import DateTimeInput from "./DateTimeInput";
 import Modal from "./Modal";
 
 interface CountdownModalProps {
@@ -122,13 +123,13 @@ export default function CountdownModal({
           >
             Data e Hora *
           </label>
-          <input
-            type="datetime-local"
+          <DateTimeInput
             value={formData.targetDate}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, targetDate: e.target.value }))
+            onChange={(value) =>
+              setFormData((prev) => ({ ...prev, targetDate: value }))
             }
-            className="w-full px-3 py-2 rounded-lg border transition-colors"
+            placeholder="DD/MM/AAAA HH:MM"
+            className="w-full"
             style={{
               backgroundColor: state.currentTheme.colors.background,
               borderColor: state.currentTheme.colors.border,

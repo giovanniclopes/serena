@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { useProjects } from "../features/projects/useProjects";
 import type { Priority, Task } from "../types";
+import DateTimeInput from "./DateTimeInput";
 import Modal from "./Modal";
 
 interface TaskModalProps {
@@ -187,13 +188,13 @@ export default function TaskModal({
           >
             Data de Vencimento
           </label>
-          <input
-            type="datetime-local"
+          <DateTimeInput
             value={formData.dueDate}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, dueDate: e.target.value }))
+            onChange={(value) =>
+              setFormData((prev) => ({ ...prev, dueDate: value }))
             }
-            className="w-full px-3 py-2 rounded-lg border transition-colors"
+            placeholder="DD/MM/AAAA HH:MM"
+            className="w-full"
             style={{
               backgroundColor: state.currentTheme.colors.background,
               borderColor: state.currentTheme.colors.border,

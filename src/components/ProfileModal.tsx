@@ -1,4 +1,4 @@
-import { Calendar, Camera, Trash2, User, X } from "lucide-react";
+import { Camera, Trash2, User, X } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import {
@@ -13,6 +13,7 @@ import type {
   UserProfile,
   UserStatus,
 } from "../types";
+import DateInput from "./DateInput";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -282,24 +283,19 @@ export default function ProfileModal({
               >
                 Data de nascimento
               </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  name="birthDate"
-                  value={formData.birthDate}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 pr-10"
-                  style={{
-                    backgroundColor: state.currentTheme.colors.background,
-                    borderColor: state.currentTheme.colors.border,
-                    color: state.currentTheme.colors.text,
-                  }}
-                />
-                <Calendar
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-                  style={{ color: state.currentTheme.colors.textSecondary }}
-                />
-              </div>
+              <DateInput
+                value={formData.birthDate}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, birthDate: value }))
+                }
+                placeholder="DD/MM/AAAA"
+                className="w-full"
+                style={{
+                  backgroundColor: state.currentTheme.colors.background,
+                  borderColor: state.currentTheme.colors.border,
+                  color: state.currentTheme.colors.text,
+                }}
+              />
             </div>
 
             {/* Status */}
