@@ -1,5 +1,7 @@
 export type Priority = "P1" | "P2" | "P3" | "P4";
 
+export type UserStatus = "active" | "inactive" | "suspended";
+
 export type RecurrenceType =
   | "daily"
   | "weekly"
@@ -164,4 +166,34 @@ export interface CalendarEvent {
   priority?: Priority;
   color: string;
   projectId?: string;
+}
+
+export interface UserProfile {
+  id: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  birthDate?: Date;
+  status: UserStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateUserProfileData {
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  birthDate?: Date;
+  status?: UserStatus;
+}
+
+export interface UpdateUserProfileData {
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  birthDate?: Date;
+  status?: UserStatus;
 }

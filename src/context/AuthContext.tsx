@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "../lib/supabaseClient";
+import { createProfile } from "../services/apiProfile";
 import { getCurrentUser, signIn, signOut, signUp } from "../services/auth";
 
 interface AuthContextType {
@@ -25,8 +26,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
+
+      // Criar perfil automaticamente se o usuário não tiver um
+      if (event === "SIGNED_IN" && session?.user) {
+        try {
+          // Verificar se o usuário já tem um perfil
+          const { data: existingProfile } = await supabase
+            .from("profiles")
+            .select("id")
+            .eq("id", session.user.id)
+            .single();
+
+          // Se não tem perfil, criar um automaticamente
+          if (!existingProfile) {
+            await createProfile({
+              username: session.user.email?.split("@")[0] || "usuario",
+              firstName: session.user.user_metadata?.name || undefined,
+              status: "active",
+            });
+            console.log(
+              "✅ Perfil criado automaticamente para usuário existente"
+            );
+          }
+        } catch (profileError) {
+          console.log("⚠️ Erro ao verificar/criar perfil:", profileError);
+          // Não falha o login se não conseguir criar o perfil
+        }
+      }
+
       setLoading(false);
     });
 
@@ -54,7 +83,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   ) => {
     setLoading(true);
     try {
-      await signUp(email, password, name);
+      const result = await signUp(email, password, name);
+
+      // Criar perfil automaticamente após cadastro bem-sucedido
+      if (result?.user) {
+        try {
+          await createProfile({
+            username: name || email.split("@")[0],
+            firstName: name || undefined,
+            status: "active",
+          });
+          console.log("✅ Perfil criado automaticamente");
+        } catch (profileError) {
+          console.log("⚠️ Erro ao criar perfil automaticamente:", profileError);
+          // Não falha o cadastro se não conseguir criar o perfil
+        }
+      }
+
       toast.success(
         "Conta criada com sucesso! Verifique seu email para confirmar."
       );

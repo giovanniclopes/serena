@@ -14,6 +14,7 @@ import Countdowns from "./pages/Countdowns";
 import Habits from "./pages/Habits";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 import Projects from "./pages/Projects";
 import Register from "./pages/Register";
 import Tasks from "./pages/Tasks";
@@ -45,6 +46,7 @@ function App() {
               <Route path="projects" element={<Projects />} />
               <Route path="habits" element={<Habits />} />
               <Route path="countdowns" element={<Countdowns />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

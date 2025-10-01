@@ -12,7 +12,13 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE public.profiles (
   id uuid NOT NULL PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username text,
-  avatar_url text
+  first_name text,
+  last_name text,
+  avatar_url text,
+  birth_date date,
+  status text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'suspended')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 COMMENT ON TABLE public.profiles IS 'Armazena dados públicos do perfil do utilizador.';

@@ -1,4 +1,12 @@
-import { Calendar, Clock, Folder, Home, List, Target } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Folder,
+  Home,
+  List,
+  Target,
+  User,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 
@@ -12,6 +20,7 @@ export default function Navigation() {
     { path: "/projects", icon: Folder, label: "Projetos" },
     { path: "/habits", icon: Target, label: "Hábitos" },
     { path: "/countdowns", icon: Clock, label: "Contagem" },
+    { path: "/profile", icon: User, label: "Perfil" },
   ];
 
   return (

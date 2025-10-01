@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, CheckCircle, Clock, Target } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
+import ProfileCard from "../components/ProfileCard";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
@@ -117,6 +118,9 @@ export default function Home() {
 
   return (
     <div className="space-y-4">
+      {/* Profile Section */}
+      <ProfileCard showEditButton={true} compact={true} />
+
       <div>
         <h1
           className="text-2xl font-bold mb-1"
