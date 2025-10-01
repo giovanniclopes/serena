@@ -17,31 +17,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<unknown | null>(null);
   const [loading, setLoading] = useState(true);
 
-  console.log(
-    "🔧 AuthProvider - Current user:",
-    user?.email,
-    "Loading:",
-    loading
-  );
-
   useEffect(() => {
-    // Verificar se há um usuário logado
     getCurrentUser().then((user) => {
       setUser(user);
       setLoading(false);
     });
 
-    // Escutar mudanças no estado de autenticação
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log(
-        "🔐 Auth state changed:",
-        event,
-        session?.user?.email,
-        "User:",
-        session?.user
-      );
+    } = supabase.auth.onAuthStateChange(async (_, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -50,15 +34,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleSignIn = async (email: string, password: string) => {
-    console.log("🚀 Starting sign in for:", email);
+    console.log("🚀 Iniciando login para:", email);
     setLoading(true);
     try {
       const result = await signIn(email, password);
-      console.log("✅ Sign in successful:", result);
-      toast.success("Login realizado com sucesso!");
-      // Não definir loading como false aqui - deixar o onAuthStateChange fazer isso
+      console.log("✅ Login realizado com sucesso:", result);
     } catch (error) {
-      console.log("❌ Sign in error:", error);
+      console.log("❌ Erro ao fazer login:", error);
       setLoading(false);
       toast.error("Erro ao fazer login. Verifique suas credenciais.");
       throw error;
@@ -76,8 +58,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       toast.success(
         "Conta criada com sucesso! Verifique seu email para confirmar."
       );
-      // Não definir loading como false aqui - deixar o onAuthStateChange fazer isso
     } catch (error) {
+      console.log("❌ Erro ao criar conta:", error);
       setLoading(false);
       toast.error("Erro ao criar conta. Tente novamente.");
       throw error;
@@ -90,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await signOut();
       toast.success("Logout realizado com sucesso!");
     } catch (error) {
+      console.log("❌ Erro ao fazer logout:", error);
       toast.error("Erro ao fazer logout. Tente novamente.");
     } finally {
       setLoading(false);
@@ -111,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error("UseAuth deve ser usado dentro de um AuthProvider");
   }
   return context;
 }
