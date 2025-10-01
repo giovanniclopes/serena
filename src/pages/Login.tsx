@@ -13,15 +13,14 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("📝 Login form submitted for:", email);
     setError("");
 
     try {
       await signIn(email, password);
-      console.log("🎉 Login completed successfully");
+      console.log("🎉 Login realizado com sucesso");
       navigate("/");
     } catch (err) {
-      console.log("💥 Login error:", err);
+      console.log("💥 Erro ao fazer login:", err);
       setError(err instanceof Error ? err.message : "Erro ao fazer login");
     }
   };
@@ -29,7 +28,6 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-gradient-to-r from-pink-500 to-purple-600 rounded-2xl shadow-lg">
@@ -44,7 +42,6 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -54,7 +51,6 @@ export default function Login() {
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Email Field */}
             <div>
               <label
                 htmlFor="email"
@@ -80,7 +76,6 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Password Field */}
             <div>
               <label
                 htmlFor="password"
@@ -117,14 +112,12 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Error Message */}
             {error && (
               <div className="rounded-xl bg-red-50 border border-red-200 p-4">
                 <div className="text-sm text-red-700">{error}</div>
               </div>
             )}
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -141,7 +134,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Sign Up Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{" "}

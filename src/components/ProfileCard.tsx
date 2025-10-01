@@ -2,6 +2,7 @@ import { Calendar, Edit, User } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
+import { useAutoProfile } from "../hooks/useAutoProfile";
 import ProfileModal from "./ProfileModal";
 
 interface ProfileCardProps {
@@ -15,16 +16,17 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   const { state } = useApp();
   const { profile, isLoading } = useProfile();
+  const { isChecking } = useAutoProfile();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  if (isLoading) {
+  if (isLoading || isChecking) {
     return (
       <div className="flex items-center justify-center p-4">
         <div
           className="text-sm"
           style={{ color: state.currentTheme.colors.textSecondary }}
         >
-          Carregando perfil...
+          {isChecking ? "Configurando perfil..." : "Carregando perfil..."}
         </div>
       </div>
     );

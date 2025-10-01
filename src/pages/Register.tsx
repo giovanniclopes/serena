@@ -14,7 +14,6 @@ export default function Register() {
   const { signUp, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Função para calcular a força da senha
   const getPasswordStrength = (password: string) => {
     let score = 0;
     const checks = {
@@ -69,7 +68,6 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        {/* Logo/Brand */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl shadow-lg">
@@ -84,7 +82,6 @@ export default function Register() {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -94,7 +91,6 @@ export default function Register() {
           </div>
 
           <form className="space-y-5" onSubmit={handleSubmit}>
-            {/* Name Field */}
             <div>
               <label
                 htmlFor="name"
@@ -120,7 +116,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Email Field */}
             <div>
               <label
                 htmlFor="email"
@@ -146,7 +141,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Password Field */}
             <div>
               <label
                 htmlFor="password"
@@ -183,7 +177,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Password Strength Indicator */}
             {password && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
@@ -273,7 +266,6 @@ export default function Register() {
               </div>
             )}
 
-            {/* Confirm Password Field */}
             <div>
               <label
                 htmlFor="confirmPassword"
@@ -310,7 +302,6 @@ export default function Register() {
               </div>
             </div>
 
-            {/* Password Match Indicator */}
             {confirmPassword && (
               <div className="flex items-center gap-2 text-sm">
                 <div
@@ -332,14 +323,12 @@ export default function Register() {
               </div>
             )}
 
-            {/* Error Message */}
             {error && (
               <div className="rounded-xl bg-red-50 border border-red-200 p-4">
                 <div className="text-sm text-red-700">{error}</div>
               </div>
             )}
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -356,7 +345,6 @@ export default function Register() {
             </button>
           </form>
 
-          {/* Sign In Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Já tem uma conta?{" "}
