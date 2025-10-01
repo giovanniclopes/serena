@@ -25,3 +25,15 @@ dist-ssr
 
 # Variáveis de Ambiente
 .env
+
+# Outros
+docs
+
+# Supabase
+supabase/
+supabase/functions/node_modules/
+supabase/functions/dist/
+supabase/functions/src/
+supabase/functions/test/
+supabase/functions/utils/
+supabase/functions/utils/

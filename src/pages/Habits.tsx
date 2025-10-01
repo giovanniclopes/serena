@@ -9,46 +9,60 @@ import { Plus, Target } from "lucide-react";
 import { useState } from "react";
 import HabitModal from "../components/HabitModal";
 import { useApp } from "../context/AppContext";
+import {
+  useCreateHabit,
+  useCreateHabitEntry,
+  useDeleteHabit,
+  useHabitEntries,
+  useHabits,
+  useUpdateHabit,
+  useUpdateHabitEntry,
+} from "../features/habits/useHabits";
 import type { Habit } from "../types";
 import { getHabitProgress, getHabitStreak } from "../utils";
 
 export default function Habits() {
-  const { state, dispatch } = useApp();
+  const { state } = useApp();
   const [selectedHabit, setSelectedHabit] = useState<string | null>(null);
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(
     undefined
   );
 
+  const { habits, isLoading: habitsLoading, error: habitsError } = useHabits();
+  const {
+    entries,
+    isLoading: entriesLoading,
+    error: entriesError,
+  } = useHabitEntries();
+  const createHabitMutation = useCreateHabit();
+  const updateHabitMutation = useUpdateHabit();
+  const deleteHabitMutation = useDeleteHabit();
+  const createHabitEntryMutation = useCreateHabitEntry();
+  const updateHabitEntryMutation = useUpdateHabitEntry();
+
   const weekStart = startOfWeek(new Date());
   const weekEnd = endOfWeek(new Date());
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   const handleHabitEntry = (habitId: string, date: Date, value: number) => {
-    const existingEntry = state.habitEntries.find(
+    const existingEntry = entries.find(
       (entry) => entry.habitId === habitId && isSameDay(entry.date, date)
     );
 
     if (existingEntry) {
-      dispatch({
-        type: "UPDATE_HABIT_ENTRY",
-        payload: { ...existingEntry, value },
-      });
+      updateHabitEntryMutation.mutate({ ...existingEntry, value });
     } else {
-      dispatch({
-        type: "ADD_HABIT_ENTRY",
-        payload: {
-          id: Math.random().toString(36).substr(2, 9),
-          habitId,
-          date,
-          value,
-        },
+      createHabitEntryMutation.mutate({
+        habitId,
+        date,
+        value,
       });
     }
   };
 
   const getHabitEntryForDate = (habitId: string, date: Date) => {
-    return state.habitEntries.find(
+    return entries.find(
       (entry) => entry.habitId === habitId && isSameDay(entry.date, date)
     );
   };
@@ -67,40 +81,30 @@ export default function Habits() {
     habitData: Omit<Habit, "id" | "createdAt" | "updatedAt">
   ) => {
     if (editingHabit) {
-      dispatch({
-        type: "UPDATE_HABIT",
-        payload: {
-          ...editingHabit,
-          ...habitData,
-          updatedAt: new Date(),
-        },
+      updateHabitMutation.mutate({
+        ...editingHabit,
+        ...habitData,
+        updatedAt: new Date(),
       });
     } else {
-      dispatch({
-        type: "ADD_HABIT",
-        payload: {
-          ...habitData,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+      createHabitMutation.mutate({
+        ...habitData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
     }
+    setIsHabitModalOpen(false);
   };
 
   const handleDeleteHabit = (habitId: string) => {
     if (confirm("Tem certeza que deseja excluir este hábito?")) {
-      dispatch({ type: "DELETE_HABIT", payload: habitId });
+      deleteHabitMutation.mutate(habitId);
     }
   };
 
   const renderHabitCard = (habit: any) => {
-    const streak = getHabitStreak(habit, state.habitEntries);
-    const todayProgress = getHabitProgress(
-      habit,
-      state.habitEntries,
-      new Date()
-    );
+    const streak = getHabitStreak(habit, entries);
+    const todayProgress = getHabitProgress(habit, entries, new Date());
 
     return (
       <div
@@ -180,7 +184,7 @@ export default function Habits() {
         <div className="grid grid-cols-7 gap-1">
           {weekDays.map((day) => {
             const entry = getHabitEntryForDate(habit.id, day);
-            const progress = getHabitProgress(habit, state.habitEntries, day);
+            const progress = getHabitProgress(habit, entries, day);
             const isToday = isSameDay(day, new Date());
 
             return (
@@ -216,6 +220,38 @@ export default function Habits() {
     );
   };
 
+  if (habitsLoading || entriesLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div
+          className="text-center"
+          style={{ color: state.currentTheme.colors.textSecondary }}
+        >
+          Carregando hábitos...
+        </div>
+      </div>
+    );
+  }
+
+  if (habitsError || entriesError) {
+    return (
+      <div className="text-center py-8">
+        <div
+          className="text-red-500 mb-2"
+          style={{ color: state.currentTheme.colors.error }}
+        >
+          Erro ao carregar hábitos
+        </div>
+        <div
+          className="text-sm"
+          style={{ color: state.currentTheme.colors.textSecondary }}
+        >
+          Tente recarregar a página
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -238,9 +274,9 @@ export default function Habits() {
         </button>
       </div>
 
-      {state.habits.length > 0 ? (
+      {habits.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {state.habits.map(renderHabitCard)}
+          {habits.map(renderHabitCard)}
         </div>
       ) : (
         <div

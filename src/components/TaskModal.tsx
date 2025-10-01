@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
+import { useProjects } from "../features/projects/useProjects";
 import type { Priority, Task } from "../types";
 import Modal from "./Modal";
 
@@ -17,6 +18,7 @@ export default function TaskModal({
   onSave,
 }: TaskModalProps) {
   const { state } = useApp();
+  const { projects } = useProjects();
   const [formData, setFormData] = useState({
     title: task?.title || "",
     description: task?.description || "",
@@ -58,7 +60,7 @@ export default function TaskModal({
     }));
   };
 
-  const availableProjects = state.projects.filter(
+  const availableProjects = projects.filter(
     (p) => p.workspaceId === state.activeWorkspaceId
   );
   const availableTags = state.tags.filter(

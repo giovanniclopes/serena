@@ -3,18 +3,31 @@ import { useState } from "react";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
+import {
+  useCompleteTask,
+  useCreateTask,
+  useDeleteTask,
+  useTasks,
+  useUpdateTask,
+} from "../features/tasks/useTasks";
 import type { Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
 
 export default function Tasks() {
-  const { state, dispatch } = useApp();
+  const { state } = useApp();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
 
-  const filteredTasks = filterTasks(searchTasks(state.tasks, searchQuery), {
+  const { tasks, isLoading, error } = useTasks();
+  const createTaskMutation = useCreateTask();
+  const updateTaskMutation = useUpdateTask();
+  const deleteTaskMutation = useDeleteTask();
+  const completeTaskMutation = useCompleteTask();
+
+  const filteredTasks = filterTasks(searchTasks(tasks, searchQuery), {
     id: "default",
     name: "Filtro Padrão",
     workspaceId: state.activeWorkspaceId,
@@ -22,7 +35,7 @@ export default function Tasks() {
   });
 
   const handleCompleteTask = (taskId: string) => {
-    dispatch({ type: "COMPLETE_TASK", payload: taskId });
+    completeTaskMutation.mutate(taskId);
   };
 
   const handleEditTask = (task: Task) => {
@@ -39,32 +52,58 @@ export default function Tasks() {
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
   ) => {
     if (editingTask) {
-      dispatch({
-        type: "UPDATE_TASK",
-        payload: {
-          ...editingTask,
-          ...taskData,
-          updatedAt: new Date(),
-        },
+      updateTaskMutation.mutate({
+        ...editingTask,
+        ...taskData,
+        updatedAt: new Date(),
       });
     } else {
-      dispatch({
-        type: "ADD_TASK",
-        payload: {
-          ...taskData,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+      createTaskMutation.mutate({
+        ...taskData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
     }
+    setIsTaskModalOpen(false);
   };
 
   const handleDeleteTask = (taskId: string) => {
     if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
-      dispatch({ type: "DELETE_TASK", payload: taskId });
+      deleteTaskMutation.mutate(taskId);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div
+          className="text-center"
+          style={{ color: state.currentTheme.colors.textSecondary }}
+        >
+          Carregando tarefas...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div
+          className="text-red-500 mb-2"
+          style={{ color: state.currentTheme.colors.error }}
+        >
+          Erro ao carregar tarefas
+        </div>
+        <div
+          className="text-sm"
+          style={{ color: state.currentTheme.colors.textSecondary }}
+        >
+          Tente recarregar a página
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

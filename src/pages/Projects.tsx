@@ -1,22 +1,43 @@
+// src/pages/Projects.tsx
+
 import { Folder, Plus } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProjectModal from "../components/ProjectModal";
-import { useApp } from "../context/AppContext";
+import {
+  useCreateProject,
+  useDeleteProject,
+  useProjects,
+  useUpdateProject,
+} from "../features/projects/useProjects";
+import { useWorkspaces } from "../features/workspaces/useWorkspaces";
 import type { Project } from "../types";
 
 export default function Projects() {
-  const { state, dispatch } = useApp();
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<Project | undefined>(
-    undefined
-  );
+  const { workspaces } = useWorkspaces();
+  const { projects, isLoading: isLoadingProjects } = useProjects();
+  const createProjectMutation = useCreateProject();
+  const updateProjectMutation = useUpdateProject();
+  const deleteProjectMutation = useDeleteProject();
 
-  const handleCreateProject = () => {
-    setEditingProject(undefined);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>("");
+
+  // Definir workspace padrão quando os workspaces carregarem
+  useEffect(() => {
+    if (workspaces && workspaces.length > 0 && !activeWorkspaceId) {
+      const defaultWorkspace =
+        workspaces.find((w) => w.isDefault) || workspaces[0];
+      setActiveWorkspaceId(defaultWorkspace.id);
+    }
+  }, [workspaces, activeWorkspaceId]);
+
+  const handleOpenCreateModal = () => {
+    setEditingProject(null);
     setIsProjectModalOpen(true);
   };
 
-  const handleEditProject = (project: Project) => {
+  const handleOpenEditModal = (project: Project) => {
     setEditingProject(project);
     setIsProjectModalOpen(true);
   };
@@ -24,260 +45,95 @@ export default function Projects() {
   const handleSaveProject = (
     projectData: Omit<Project, "id" | "createdAt" | "updatedAt">
   ) => {
+    if (!activeWorkspaceId) return;
+
     if (editingProject) {
-      dispatch({
-        type: "UPDATE_PROJECT",
-        payload: {
-          ...editingProject,
-          ...projectData,
-          updatedAt: new Date(),
-        },
+      updateProjectMutation.mutate({
+        id: editingProject.id,
+        updates: projectData,
       });
     } else {
-      dispatch({
-        type: "ADD_PROJECT",
-        payload: {
-          ...projectData,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+      createProjectMutation.mutate({
+        ...projectData,
+        workspaceId: activeWorkspaceId,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
     }
+    setIsProjectModalOpen(false);
+    setEditingProject(null);
   };
 
   const handleDeleteProject = (projectId: string) => {
     if (
-      confirm(
-        "Tem certeza que deseja excluir este projeto? Todas as tarefas associadas também serão removidas."
+      window.confirm(
+        "Tem a certeza que quer apagar este projeto e todas as suas tarefas?"
       )
     ) {
-      dispatch({ type: "DELETE_PROJECT", payload: projectId });
+      deleteProjectMutation.mutate(projectId);
     }
   };
 
-  const currentWorkspaceProjects = state.projects.filter(
-    (p) => p.workspaceId === state.activeWorkspaceId
-  );
+  if (isLoadingProjects) {
+    return <div className="text-center p-4">A carregar projetos...</div>;
+  }
+
+  const filteredProjects =
+    projects?.filter((p) => p.workspaceId === activeWorkspaceId) || [];
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1
-          className="text-2xl font-bold"
-          style={{ color: state.currentTheme.colors.text }}
-        >
-          Projetos
-        </h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-dark-gray">Projetos</h1>
         <button
-          onClick={handleCreateProject}
-          className="flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
-          style={{
-            backgroundColor: state.currentTheme.colors.primary,
-            color: "white",
-          }}
+          onClick={handleOpenCreateModal}
+          className="flex items-center gap-2 px-4 py-2 bg-peach-pink text-dark-gray rounded-md hover:bg-opacity-80 transition-colors"
         >
-          <Plus className="w-4 h-4" />
-          <span>Novo Projeto</span>
+          <Plus size={20} />
+          Novo Projeto
         </button>
       </div>
 
-      {currentWorkspaceProjects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {currentWorkspaceProjects.map((project) => {
-            const projectTasks = state.tasks.filter(
-              (t) => t.projectId === project.id
-            );
-            const completedTasks = projectTasks.filter((t) => t.isCompleted);
-            const progress =
-              projectTasks.length > 0
-                ? (completedTasks.length / projectTasks.length) * 100
-                : 0;
-
-            return (
-              <div
-                key={project.id}
-                className="p-4 rounded-lg border relative overflow-hidden"
-                style={{
-                  backgroundColor: state.currentTheme.colors.surface,
-                  borderColor: state.currentTheme.colors.border,
-                }}
-              >
-                <div
-                  className="absolute top-0 left-0 w-full h-1"
-                  style={{ backgroundColor: project.color }}
-                />
-
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className="p-2 rounded-md"
-                      style={{ backgroundColor: project.color + "20" }}
-                    >
-                      <Folder
-                        className="w-4 h-4"
-                        style={{ color: project.color }}
-                      />
-                    </div>
-                    <div>
-                      <h3
-                        className="text-sm font-semibold"
-                        style={{ color: state.currentTheme.colors.text }}
-                      >
-                        {project.name}
-                      </h3>
-                      {project.description && (
-                        <p
-                          className="text-xs"
-                          style={{
-                            color: state.currentTheme.colors.textSecondary,
-                          }}
-                        >
-                          {project.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-1">
-                    <button
-                      onClick={() => handleEditProject(project)}
-                      className="p-1 rounded hover:bg-opacity-10 transition-colors"
-                      style={{
-                        backgroundColor:
-                          state.currentTheme.colors.primary + "20",
-                        color: state.currentTheme.colors.primary,
-                      }}
-                    >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteProject(project.id)}
-                      className="p-1 rounded hover:bg-opacity-10 transition-colors"
-                      style={{
-                        backgroundColor: state.currentTheme.colors.error + "20",
-                        color: state.currentTheme.colors.error,
-                      }}
-                    >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span
-                      className="text-xs font-medium"
-                      style={{ color: state.currentTheme.colors.text }}
-                    >
-                      Progresso
-                    </span>
-                    <span
-                      className="text-xs"
-                      style={{ color: state.currentTheme.colors.textSecondary }}
-                    >
-                      {completedTasks.length}/{projectTasks.length}
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div
-                      className="h-1.5 rounded-full transition-all duration-300"
-                      style={{
-                        backgroundColor: project.color,
-                        width: `${progress}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between text-xs">
-                  <span
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  >
-                    {projectTasks.length} tarefa
-                    {projectTasks.length !== 1 ? "s" : ""}
-                  </span>
-                  <span
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  >
-                    {Math.round(progress)}% concluído
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div
-          className="text-center py-8 rounded-lg"
-          style={{ backgroundColor: state.currentTheme.colors.surface }}
-        >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredProjects.map((project: Project) => (
           <div
-            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary + "20",
-            }}
+            key={project.id}
+            className="p-4 bg-ice-white border border-light-gray rounded-md shadow-sm"
           >
-            <Folder
-              className="w-6 h-6"
-              style={{ color: state.currentTheme.colors.primary }}
-            />
+            <div className="flex items-center gap-3 mb-2">
+              <Folder size={20} className="text-medium-gray" />
+              <h2 className="font-bold text-dark-gray">{project.name}</h2>
+            </div>
+            <p className="text-medium-gray text-sm mb-4">
+              {project.description}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleOpenEditModal(project)}
+                className="text-sm text-dark-gray hover:underline"
+              >
+                Editar
+              </button>
+              <button
+                onClick={() => handleDeleteProject(project.id)}
+                disabled={deleteProjectMutation.isPending}
+                className="text-sm text-red-500 hover:underline disabled:opacity-50"
+              >
+                Apagar
+              </button>
+            </div>
           </div>
-          <h3
-            className="text-lg font-semibold mb-1"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Nenhum projeto criado
-          </h3>
-          <p
-            className="text-sm mb-3"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            Organize suas tarefas em projetos para melhor produtividade
-          </p>
-          <button
-            onClick={handleCreateProject}
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary,
-              color: "white",
-            }}
-          >
-            Criar Primeiro Projeto
-          </button>
-        </div>
-      )}
+        ))}
+      </div>
 
-      <ProjectModal
-        isOpen={isProjectModalOpen}
-        onClose={() => setIsProjectModalOpen(false)}
-        project={editingProject}
-        onSave={handleSaveProject}
-      />
+      {isProjectModalOpen && (
+        <ProjectModal
+          isOpen={isProjectModalOpen}
+          onClose={() => setIsProjectModalOpen(false)}
+          onSave={handleSaveProject}
+          project={editingProject || undefined}
+        />
+      )}
     </div>
   );
 }

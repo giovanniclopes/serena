@@ -9,14 +9,25 @@ import { Calendar, Clock, Plus } from "lucide-react";
 import { useState } from "react";
 import CountdownModal from "../components/CountdownModal";
 import { useApp } from "../context/AppContext";
+import {
+  useCountdowns,
+  useCreateCountdown,
+  useDeleteCountdown,
+  useUpdateCountdown,
+} from "../features/countdowns/useCountdowns";
 import type { Countdown } from "../types";
 
 export default function Countdowns() {
-  const { state, dispatch } = useApp();
+  const { state } = useApp();
   const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
   const [editingCountdown, setEditingCountdown] = useState<
     Countdown | undefined
   >(undefined);
+
+  const { countdowns, isLoading, error } = useCountdowns();
+  const createCountdownMutation = useCreateCountdown();
+  const updateCountdownMutation = useUpdateCountdown();
+  const deleteCountdownMutation = useDeleteCountdown();
 
   const getTimeRemaining = (targetDate: Date) => {
     const now = new Date();
@@ -62,30 +73,24 @@ export default function Countdowns() {
     countdownData: Omit<Countdown, "id" | "createdAt" | "updatedAt">
   ) => {
     if (editingCountdown) {
-      dispatch({
-        type: "UPDATE_COUNTDOWN",
-        payload: {
-          ...editingCountdown,
-          ...countdownData,
-          updatedAt: new Date(),
-        },
+      updateCountdownMutation.mutate({
+        ...editingCountdown,
+        ...countdownData,
+        updatedAt: new Date(),
       });
     } else {
-      dispatch({
-        type: "ADD_COUNTDOWN",
-        payload: {
-          ...countdownData,
-          id: Math.random().toString(36).substr(2, 9),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
+      createCountdownMutation.mutate({
+        ...countdownData,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
     }
+    setIsCountdownModalOpen(false);
   };
 
   const handleDeleteCountdown = (countdownId: string) => {
     if (confirm("Tem certeza que deseja excluir esta contagem regressiva?")) {
-      dispatch({ type: "DELETE_COUNTDOWN", payload: countdownId });
+      deleteCountdownMutation.mutate(countdownId);
     }
   };
 
@@ -213,12 +218,40 @@ export default function Countdowns() {
     );
   };
 
-  const upcomingCountdowns = state.countdowns.filter(
-    (c) => !isOverdue(c.targetDate)
-  );
-  const pastCountdowns = state.countdowns.filter((c) =>
-    isOverdue(c.targetDate)
-  );
+  const upcomingCountdowns = countdowns.filter((c) => !isOverdue(c.targetDate));
+  const pastCountdowns = countdowns.filter((c) => isOverdue(c.targetDate));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div
+          className="text-center"
+          style={{ color: state.currentTheme.colors.textSecondary }}
+        >
+          Carregando contagens regressivas...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div
+          className="text-red-500 mb-2"
+          style={{ color: state.currentTheme.colors.error }}
+        >
+          Erro ao carregar contagens regressivas
+        </div>
+        <div
+          className="text-sm"
+          style={{ color: state.currentTheme.colors.textSecondary }}
+        >
+          Tente recarregar a página
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -242,7 +275,7 @@ export default function Countdowns() {
         </button>
       </div>
 
-      {state.countdowns.length > 0 ? (
+      {countdowns.length > 0 ? (
         <div className="space-y-4">
           {upcomingCountdowns.length > 0 && (
             <div>
