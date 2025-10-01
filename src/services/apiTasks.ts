@@ -7,7 +7,7 @@ export async function getTasks(): Promise<Task[]> {
     .select(
       `
       *,
-      subtasks:subtasks(*)
+      subtasks:subtasks!task_id(*)
     `
     )
     .order("created_at", { ascending: false });
@@ -22,37 +22,37 @@ export async function getTasks(): Promise<Task[]> {
       id: task.id,
       title: task.title,
       description: task.description,
-      projectId: task.projectId,
-      parentTaskId: task.parentTaskId,
+      projectId: task.project_id,
+      parentTaskId: task.parent_task_id,
       subtasks:
-        task.subtasks?.map((subtask: Task) => ({
+        task.subtasks?.map((subtask: any) => ({
           id: subtask.id,
           title: subtask.title,
           description: subtask.description,
-          projectId: subtask.projectId,
-          parentTaskId: subtask.parentTaskId,
+          projectId: subtask.project_id,
+          parentTaskId: subtask.parent_task_id,
           subtasks: [],
-          dueDate: subtask.dueDate ? new Date(subtask.dueDate) : undefined,
+          dueDate: subtask.due_date ? new Date(subtask.due_date) : undefined,
           priority: subtask.priority,
           reminders: subtask.reminders || [],
           tags: subtask.tags || [],
-          isCompleted: subtask.isCompleted,
-          completedAt: subtask.completedAt
-            ? new Date(subtask.completedAt)
+          isCompleted: subtask.is_completed,
+          completedAt: subtask.completed_at
+            ? new Date(subtask.completed_at)
             : undefined,
-          workspaceId: subtask.workspaceId,
-          createdAt: new Date(subtask.createdAt),
-          updatedAt: new Date(subtask.updatedAt),
+          workspaceId: subtask.workspace_id,
+          createdAt: new Date(subtask.created_at),
+          updatedAt: new Date(subtask.updated_at),
         })) || [],
-      dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+      dueDate: task.due_date ? new Date(task.due_date) : undefined,
       priority: task.priority,
       reminders: task.reminders || [],
       tags: task.tags || [],
-      isCompleted: task.isCompleted,
-      completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
-      workspaceId: task.workspaceId,
-      createdAt: new Date(task.createdAt),
-      updatedAt: new Date(task.updatedAt),
+      isCompleted: task.is_completed,
+      completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
+      workspaceId: task.workspace_id,
+      createdAt: new Date(task.created_at),
+      updatedAt: new Date(task.updated_at),
     })) || []
   );
 }
