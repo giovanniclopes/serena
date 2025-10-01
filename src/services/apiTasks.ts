@@ -206,3 +206,19 @@ export async function completeTask(taskId: string): Promise<Task> {
     updatedAt: new Date(data.updated_at),
   };
 }
+
+export async function completeAllTasks(taskIds: string[]): Promise<void> {
+  const { error } = await supabase
+    .from("tasks")
+    .update({
+      is_completed: true,
+      completed_at: formatDateForSupabase(new Date()),
+      updated_at: formatDateForSupabase(new Date()),
+    })
+    .in("id", taskIds);
+
+  if (error) {
+    console.error("Erro ao completar todas as tarefas:", error);
+    throw new Error("Falha ao completar todas as tarefas");
+  }
+}

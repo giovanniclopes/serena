@@ -2,10 +2,12 @@ import {
   addMonths,
   eachDayOfInterval,
   endOfMonth,
+  endOfWeek,
   format,
   isSameDay,
   isSameMonth,
   startOfMonth,
+  startOfWeek,
   subMonths,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -27,7 +29,12 @@ export default function Calendar() {
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const calendarDays = eachDayOfInterval({
+    start: calendarStart,
+    end: calendarEnd,
+  });
 
   const handlePrevMonth = () => {
     setCurrentDate(subMonths(currentDate, 1));
@@ -102,7 +109,7 @@ export default function Calendar() {
           </div>
         ))}
 
-        {monthDays.map((day) => {
+        {calendarDays.map((day) => {
           const dayTasks = getDayTasks(day);
           const isToday = isSameDay(day, new Date());
           const isSelected = selectedDate && isSameDay(day, selectedDate);

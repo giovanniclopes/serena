@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  completeAllTasks,
   completeTask,
   createTask,
   deleteTask,
@@ -81,6 +82,22 @@ export function useCompleteTask() {
     onError: (error) => {
       console.error("Erro ao completar tarefa:", error);
       toast.error("Erro ao concluir tarefa. Tente novamente.");
+    },
+  });
+}
+
+export function useCompleteAllTasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: completeAllTasks,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Todas as tarefas foram concluídas com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao completar todas as tarefas:", error);
+      toast.error("Erro ao concluir todas as tarefas. Tente novamente.");
     },
   });
 }

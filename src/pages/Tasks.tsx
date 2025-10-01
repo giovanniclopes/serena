@@ -5,6 +5,7 @@ import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
 import {
+  useCompleteAllTasks,
   useCompleteTask,
   useCreateTask,
   useTasks,
@@ -20,11 +21,13 @@ export default function Tasks() {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+  const [showCompleteAllModal, setShowCompleteAllModal] = useState(false);
 
   const { tasks, isLoading, error } = useTasks();
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
+  const completeAllTasksMutation = useCompleteAllTasks();
 
   const filteredTasks = filterTasks(searchTasks(tasks, searchQuery), {
     id: "default",
@@ -63,6 +66,15 @@ export default function Tasks() {
       });
     }
     setIsTaskModalOpen(false);
+  };
+
+  const handleCompleteAllTasks = () => {
+    const incompleteTasks = filteredTasks.filter((task) => !task.isCompleted);
+    if (incompleteTasks.length > 0) {
+      const taskIds = incompleteTasks.map((task) => task.id);
+      completeAllTasksMutation.mutate(taskIds);
+    }
+    setShowCompleteAllModal(false);
   };
 
   if (isLoading) {
@@ -192,7 +204,7 @@ export default function Tasks() {
         </div>
       </div>
 
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center justify-between">
         <label className="flex items-center space-x-2">
           <input
             type="checkbox"
@@ -208,6 +220,15 @@ export default function Tasks() {
             Mostrar concluídas
           </span>
         </label>
+
+        {filteredTasks.some((task) => !task.isCompleted) && (
+          <button
+            onClick={() => setShowCompleteAllModal(true)}
+            className="px-4 py-2 border border-pink-500 rounded-lg font-medium transition-colors text-pink-500 text-sm"
+          >
+            Concluir todas
+          </button>
+        )}
       </div>
 
       {filteredTasks.length > 0 ? (
@@ -268,6 +289,55 @@ export default function Tasks() {
         task={editingTask}
         onSave={handleSaveTask}
       />
+
+      {showCompleteAllModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+            style={{ backgroundColor: state.currentTheme.colors.surface }}
+          >
+            <h3
+              className="text-lg font-semibold mb-4"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Confirmar ação
+            </h3>
+            <p
+              className="text-sm mb-6"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              Tem certeza que deseja concluir todas as tarefas pendentes? Esta
+              ação não pode ser desfeita.
+            </p>
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={() => setShowCompleteAllModal(false)}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                style={{
+                  backgroundColor: state.currentTheme.colors.surface,
+                  color: state.currentTheme.colors.textSecondary,
+                  border: `1px solid ${state.currentTheme.colors.border}`,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCompleteAllTasks}
+                disabled={completeAllTasksMutation.isPending}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                style={{
+                  backgroundColor: state.currentTheme.colors.primary,
+                  color: "white",
+                }}
+              >
+                {completeAllTasksMutation.isPending
+                  ? "Concluindo..."
+                  : "Concluir todas"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <FloatingActionButton
         onClick={() => {
