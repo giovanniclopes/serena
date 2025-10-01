@@ -3,10 +3,10 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, CheckCircle, Clock, Target } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
-import ProfileCard from "../components/ProfileCard";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
+import { useProfile } from "../features/profile/useProfile";
 import {
   useCompleteTask,
   useCreateTask,
@@ -22,6 +22,7 @@ export default function Home() {
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
 
   const { tasks } = useTasks();
+  const { profile } = useProfile();
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
@@ -118,15 +119,16 @@ export default function Home() {
 
   return (
     <div className="space-y-4">
-      {/* Profile Section */}
-      <ProfileCard showEditButton={true} compact={true} />
-
       <div>
         <h1
           className="text-2xl font-bold mb-1"
           style={{ color: state.currentTheme.colors.text }}
         >
-          Olá! 👋
+          Olá
+          {profile?.firstName && profile?.lastName
+            ? `, ${profile.firstName} ${profile.lastName}`
+            : ""}
+          ! 👋
         </h1>
         <p
           className="text-base"

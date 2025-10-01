@@ -10,8 +10,10 @@ import {
 } from "../features/projects/useProjects";
 import { useWorkspaces } from "../features/workspaces/useWorkspaces";
 import type { Project } from "../types";
+import { useApp } from "../context/AppContext";
 
 export default function Projects() {
+  const { state } = useApp();
   const { workspaces } = useWorkspaces();
   const { projects, isLoading: isLoadingProjects } = useProjects();
   const createProjectMutation = useCreateProject();
@@ -83,10 +85,14 @@ export default function Projects() {
         <h1 className="text-2xl font-bold text-dark-gray">Projetos</h1>
         <button
           onClick={handleOpenCreateModal}
-          className="flex items-center gap-2 px-4 py-2 bg-peach-pink text-dark-gray rounded-md hover:bg-opacity-80 transition-colors"
+          className="flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
+          style={{
+            backgroundColor: state.currentTheme.colors.primary,
+            color: "white",
+          }}
         >
-          <Plus size={20} />
-          Novo Projeto
+          <Plus className="w-4 h-4" />
+          <span>Novo Projeto</span>
         </button>
       </div>
 

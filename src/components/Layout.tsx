@@ -7,7 +7,7 @@ import WorkspaceSelector from "./WorkspaceSelector";
 
 export default function Layout() {
   const { state } = useApp();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
 
   const handleSignOut = async () => {
     try {
@@ -40,12 +40,6 @@ export default function Layout() {
             <WorkspaceSelector />
           </div>
           <div className="flex items-center space-x-2">
-            <span
-              className="text-sm"
-              style={{ color: state.currentTheme.colors.textSecondary }}
-            >
-              {(user as { email: string })?.email}
-            </span>
             <button
               onClick={handleSignOut}
               className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
