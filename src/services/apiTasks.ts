@@ -67,12 +67,12 @@ export async function createTask(
       description: task.description,
       project_id: task.projectId,
       parent_task_id: task.parentTaskId,
-      dueDate: task.dueDate?.toISOString(),
+      due_date: task.dueDate?.toISOString(),
       priority: task.priority,
       reminders: task.reminders,
       tags: task.tags,
-      isCompleted: task.isCompleted,
-      completedAt: task.completedAt?.toISOString(),
+      is_completed: task.isCompleted,
+      completed_at: task.completedAt?.toISOString(),
       workspace_id: task.workspaceId,
     })
     .select()
@@ -90,15 +90,15 @@ export async function createTask(
     projectId: data.project_id,
     parentTaskId: data.parent_task_id,
     subtasks: [],
-    dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+    dueDate: data.due_date ? new Date(data.due_date) : undefined,
     priority: data.priority,
     reminders: data.reminders || [],
     tags: data.tags || [],
-    isCompleted: data.isCompleted,
-    completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
-    workspaceId: data.workspaceId,
-    createdAt: new Date(data.createdAt),
-    updatedAt: new Date(data.updatedAt),
+    isCompleted: data.is_completed,
+    completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
+    workspaceId: data.workspace_id,
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
   };
 }
 
@@ -110,14 +110,14 @@ export async function updateTask(task: Task): Promise<Task> {
       description: task.description,
       project_id: task.projectId,
       parent_task_id: task.parentTaskId,
-      dueDate: task.dueDate?.toISOString(),
+      due_date: task.dueDate?.toISOString(),
       priority: task.priority,
       reminders: task.reminders,
       tags: task.tags,
-      isCompleted: task.isCompleted,
+      is_completed: task.isCompleted,
       completed_at: task.completedAt?.toISOString(),
       workspace_id: task.workspaceId,
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq("id", task.id)
     .select()
@@ -135,15 +135,15 @@ export async function updateTask(task: Task): Promise<Task> {
     projectId: data.project_id,
     parentTaskId: data.parent_task_id,
     subtasks: [],
-    dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+    dueDate: data.due_date ? new Date(data.due_date) : undefined,
     priority: data.priority,
     reminders: data.reminders || [],
     tags: data.tags || [],
-    isCompleted: data.isCompleted,
-    completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+    isCompleted: data.is_completed,
+    completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
-    createdAt: new Date(data.createdAt),
-    updatedAt: new Date(data.updatedAt),
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
   };
 }
 
@@ -160,9 +160,9 @@ export async function completeTask(taskId: string): Promise<Task> {
   const { data, error } = await supabase
     .from("tasks")
     .update({
-      isCompleted: true,
-      completedAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      is_completed: true,
+      completed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq("id", taskId)
     .select()
@@ -187,8 +187,7 @@ export async function completeTask(taskId: string): Promise<Task> {
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
-    createdAt: new Date(data.createdAt),
+    createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
 }
-

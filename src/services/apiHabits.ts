@@ -23,8 +23,8 @@ export async function getHabits(): Promise<Habit[]> {
       icon: habit.icon,
       reminders: habit.reminders || [],
       workspaceId: habit.workspaceId,
-      createdAt: new Date(habit.createdAt),
-      updatedAt: new Date(habit.updatedAt),
+      createdAt: new Date(habit.created_at),
+      updatedAt: new Date(habit.updated_at),
     })) || []
   );
 }
@@ -62,8 +62,8 @@ export async function createHabit(
     icon: data.icon,
     reminders: data.reminders || [],
     workspaceId: data.workspaceId,
-    createdAt: new Date(data.createdAt),
-    updatedAt: new Date(data.updatedAt),
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
   };
 }
 
@@ -79,7 +79,7 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
       icon: habit.icon,
       reminders: habit.reminders,
       workspace_id: habit.workspaceId,
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq("id", habit.id)
     .select()
@@ -100,8 +100,8 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
     icon: data.icon,
     reminders: data.reminders || [],
     workspaceId: data.workspaceId,
-    createdAt: new Date(data.createdAt),
-    updatedAt: new Date(data.updatedAt),
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
   };
 }
 
@@ -118,7 +118,7 @@ export async function getHabitEntries(): Promise<HabitEntry[]> {
   const { data, error } = await supabase
     .from("habit_entries")
     .select("*")
-    .order("completionDate", { ascending: false });
+    .order("completion_date", { ascending: false });
 
   if (error) {
     console.error("Erro ao buscar entradas de hábitos:", error);
@@ -143,7 +143,7 @@ export async function createHabitEntry(
     .from("habit_entries")
     .insert({
       habit_id: entry.habitId,
-      completionDate: entry.date.toISOString().split("T")[0],
+      completion_date: entry.date.toISOString().split("T")[0],
       value: entry.value,
       notes: entry.notes,
     })
@@ -169,7 +169,7 @@ export async function updateHabitEntry(entry: HabitEntry): Promise<HabitEntry> {
     .from("habit_entries")
     .update({
       habit_id: entry.habitId,
-      completionDate: entry.date.toISOString().split("T")[0],
+      completion_date: entry.date.toISOString().split("T")[0],
       value: entry.value,
       notes: entry.notes,
     })
@@ -185,9 +185,8 @@ export async function updateHabitEntry(entry: HabitEntry): Promise<HabitEntry> {
   return {
     id: data.id,
     habitId: data.habitId,
-    date: new Date(data.completionDate),
+    date: new Date(data.completion_date),
     value: data.value || 1,
     notes: data.notes,
   };
 }
-

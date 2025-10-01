@@ -5,7 +5,7 @@ export async function getWorkspaces(): Promise<Workspace[]> {
   const { data, error } = await supabase
     .from("workspaces")
     .select("*")
-    .order("createdAt", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Erro ao buscar workspaces:", error);
@@ -38,7 +38,7 @@ export async function updateWorkspace(
 ): Promise<Workspace> {
   const { data, error } = await supabase
     .from("workspaces")
-    .update({ ...updates, updatedAt: new Date().toISOString() })
+    .update({ ...updates, updated_at: new Date().toISOString() })
     .eq("id", id)
     .select()
     .single();

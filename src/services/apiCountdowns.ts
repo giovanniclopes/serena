@@ -21,8 +21,8 @@ export async function getCountdowns(): Promise<Countdown[]> {
       color: countdown.color,
       icon: countdown.icon,
       workspaceId: countdown.workspaceId,
-      createdAt: new Date(countdown.createdAt),
-      updatedAt: new Date(countdown.updatedAt),
+      createdAt: new Date(countdown.created_at),
+      updatedAt: new Date(countdown.updated_at),
     })) || []
   );
 }
@@ -56,8 +56,8 @@ export async function createCountdown(
     color: data.color,
     icon: data.icon,
     workspaceId: data.workspaceId,
-    createdAt: new Date(data.createdAt),
-    updatedAt: new Date(data.updatedAt),
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
   };
 }
 
@@ -73,7 +73,7 @@ export async function updateCountdown(
       color: countdown.color,
       icon: countdown.icon,
       workspaceId: countdown.workspaceId,
-      updatedAt: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     })
     .eq("id", countdown.id)
     .select()
@@ -92,8 +92,8 @@ export async function updateCountdown(
     color: data.color,
     icon: data.icon,
     workspaceId: data.workspaceId,
-    createdAt: new Date(data.createdAt),
-    updatedAt: new Date(data.updatedAt),
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
   };
 }
 
