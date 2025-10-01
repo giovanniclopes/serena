@@ -43,26 +43,34 @@ export default function Habits() {
   const weekEnd = endOfWeek(new Date());
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
-  const handleHabitEntry = (habitId: string, date: Date, value: number) => {
+  const handleHabitEntry = (
+    habitId: string,
+    date: Date,
+    targetValue: number
+  ) => {
+    // Debug: verificar a data que está sendo enviada
+    console.log(
+      "Data clicada:",
+      date.toISOString(),
+      "Data local:",
+      date.toLocaleDateString()
+    );
+
     const existingEntry = entries.find(
       (entry) => entry.habitId === habitId && isSameDay(entry.date, date)
     );
 
     if (existingEntry) {
-      updateHabitEntryMutation.mutate({ ...existingEntry, value });
+      // Se já existe uma entrada, alterna entre 0 e o valor da meta
+      const newValue = existingEntry.value >= targetValue ? 0 : targetValue;
+      updateHabitEntryMutation.mutate({ ...existingEntry, value: newValue });
     } else {
       createHabitEntryMutation.mutate({
         habitId,
         date,
-        value,
+        value: targetValue,
       });
     }
-  };
-
-  const getHabitEntryForDate = (habitId: string, date: Date) => {
-    return entries.find(
-      (entry) => entry.habitId === habitId && isSameDay(entry.date, date)
-    );
   };
 
   const handleCreateHabit = () => {
@@ -167,42 +175,71 @@ export default function Habits() {
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-1">
-          {weekDays.map((day) => {
-            getHabitEntryForDate(habit.id, day);
-            const progress = getHabitProgress(habit, entries, day);
-            const isToday = isSameDay(day, new Date());
+        <div className="space-y-2">
+          {/* Labels dos dias da semana */}
+          <div className="grid grid-cols-7 gap-1">
+            {["D", "S", "T", "Q", "Q", "S", "S"].map((dayLabel, index) => (
+              <div
+                key={index}
+                className="text-center text-xs font-medium py-1"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                {dayLabel}
+              </div>
+            ))}
+          </div>
 
-            return (
-              <button
-                key={day.toISOString()}
-                onClick={() => handleHabitEntry(habit.id, day, habit.target)}
-                className={`aspect-square rounded-md text-xs font-medium transition-colors ${
-                  isToday ? "ring-1" : ""
-                }`}
-                style={{
-                  backgroundColor:
-                    progress > 0
-                      ? habit.color +
-                        Math.min(progress * 100, 100)
-                          .toString(16)
-                          .padStart(2, "0")
+          {/* Grid de dias */}
+          <div className="grid grid-cols-7 gap-1">
+            {weekDays.map((day) => {
+              const progress = getHabitProgress(habit, entries, day);
+              const isToday = isSameDay(day, new Date());
+              const isCompleted = progress >= 1;
+              const isPartial = progress > 0 && progress < 1;
+
+              return (
+                <button
+                  key={day.toISOString()}
+                  onClick={() => handleHabitEntry(habit.id, day, habit.target)}
+                  className={`relative aspect-square rounded-md text-xs font-medium transition-all duration-200 hover:scale-105 ${
+                    isToday ? "ring-2" : ""
+                  } ${isCompleted ? "shadow-md" : ""}`}
+                  style={{
+                    backgroundColor: isCompleted
+                      ? habit.color
+                      : isPartial
+                      ? habit.color + "60"
                       : state.currentTheme.colors.surface,
-                  color:
-                    progress > 0.5
-                      ? "white"
-                      : state.currentTheme.colors.textSecondary,
-                  ...(isToday && {
-                    borderColor: state.currentTheme.colors.primary,
+                    color:
+                      isCompleted || isPartial
+                        ? "white"
+                        : state.currentTheme.colors.textSecondary,
+                    borderColor: isToday
+                      ? state.currentTheme.colors.primary
+                      : isCompleted
+                      ? habit.color
+                      : state.currentTheme.colors.border,
                     borderWidth: "1px",
                     borderStyle: "solid",
-                  }),
-                }}
-              >
-                {format(day, "d")}
-              </button>
-            );
-          })}
+                  }}
+                  title={`${format(day, "dd/MM")} - ${
+                    isCompleted
+                      ? "Completo"
+                      : isPartial
+                      ? `${Math.round(progress * 100)}%`
+                      : "Não realizado"
+                  }`}
+                >
+                  {format(day, "d")}
+                  {isCompleted && (
+                    <div className="absolute top-1 right-1">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -261,6 +298,40 @@ export default function Habits() {
           <span>Novo Hábito</span>
         </button>
       </div>
+
+      {/* Instruções de uso */}
+      {habits.length > 0 && (
+        <div
+          className="p-3 rounded-lg border text-sm"
+          style={{
+            backgroundColor: state.currentTheme.colors.surface,
+            borderColor: state.currentTheme.colors.border,
+          }}
+        >
+          <div
+            className="font-medium mb-1"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            💡 Como usar:
+          </div>
+          <div
+            className="text-xs space-y-1"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          >
+            <div>• Clique nos dias para marcar/desmarcar o hábito</div>
+            <div>
+              • <span className="font-medium">Verde sólido:</span> Hábito
+              completo
+            </div>
+            <div>
+              • <span className="font-medium">Verde claro:</span> Hábito parcial
+            </div>
+            <div>
+              • <span className="font-medium">Borda azul:</span> Dia atual
+            </div>
+          </div>
+        </div>
+      )}
 
       {habits.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

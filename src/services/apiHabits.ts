@@ -1,6 +1,14 @@
 import { supabase } from "../lib/supabaseClient";
 import type { Habit, HabitEntry } from "../types";
 
+// Função para formatar data sem problemas de fuso horário
+function formatDateForDB(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export async function getHabits(): Promise<Habit[]> {
   const { data, error } = await supabase
     .from("habits")
@@ -161,7 +169,7 @@ export async function createHabitEntry(
     .insert({
       habit_id: entry.habitId,
       user_id: user.id,
-      completion_date: entry.date.toISOString().split("T")[0],
+      completion_date: formatDateForDB(entry.date),
       value: entry.value,
       notes: entry.notes,
     })
@@ -196,7 +204,7 @@ export async function updateHabitEntry(entry: HabitEntry): Promise<HabitEntry> {
     .update({
       habit_id: entry.habitId,
       user_id: user.id,
-      completion_date: entry.date.toISOString().split("T")[0],
+      completion_date: formatDateForDB(entry.date),
       value: entry.value,
       notes: entry.notes,
     })
