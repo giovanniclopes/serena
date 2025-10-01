@@ -119,24 +119,62 @@ export default function Calendar() {
             <button
               key={day.toISOString()}
               onClick={() => handleDateClick(day)}
-              className={`p-2 min-h-[70px] text-left rounded-lg transition-colors ${
+              className={`p-2 min-h-[70px] text-left rounded-lg transition-all duration-200 cursor-pointer hover:scale-105 ${
                 !isCurrentMonth ? "opacity-30" : ""
-              } ${isToday ? "ring-2" : ""} ${isSelected ? "ring-2" : ""}`}
+              } ${isToday ? "ring-2 ring-blue-400" : ""} ${
+                isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""
+              }`}
               style={{
                 backgroundColor: isSelected
-                  ? state.currentTheme.colors.primary + "20"
+                  ? state.currentTheme.colors.primary + "30"
+                  : isToday
+                  ? state.currentTheme.colors.primary + "10"
                   : state.currentTheme.colors.surface,
                 color: isCurrentMonth
                   ? state.currentTheme.colors.text
                   : state.currentTheme.colors.textSecondary,
-                ...(isToday || isSelected
-                  ? {
-                      borderColor: state.currentTheme.colors.primary,
-                    }
-                  : {}),
+                border: isSelected
+                  ? `2px solid ${state.currentTheme.colors.primary}`
+                  : isToday
+                  ? `2px solid ${state.currentTheme.colors.primary}80`
+                  : "2px solid transparent",
+                transform: isSelected ? "scale(1.02)" : "scale(1)",
+                boxShadow: isSelected
+                  ? `0 4px 12px ${state.currentTheme.colors.primary}30`
+                  : "none",
+              }}
+              onMouseEnter={(e) => {
+                if (!isSelected && isCurrentMonth) {
+                  e.currentTarget.style.backgroundColor =
+                    state.currentTheme.colors.primary + "15";
+                  e.currentTarget.style.borderColor =
+                    state.currentTheme.colors.primary + "40";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected && isCurrentMonth) {
+                  e.currentTarget.style.backgroundColor =
+                    state.currentTheme.colors.surface;
+                  e.currentTarget.style.borderColor = "transparent";
+                }
               }}
             >
-              <div className="font-medium mb-1 text-sm">{format(day, "d")}</div>
+              <div
+                className={`font-semibold mb-1 text-sm ${
+                  isSelected ? "text-white" : isToday ? "text-blue-600" : ""
+                }`}
+                style={{
+                  color: isSelected
+                    ? "white"
+                    : isToday
+                    ? state.currentTheme.colors.primary
+                    : isCurrentMonth
+                    ? state.currentTheme.colors.text
+                    : state.currentTheme.colors.textSecondary,
+                }}
+              >
+                {format(day, "d")}
+              </div>
 
               {dayTasks.length > 0 && (
                 <div className="space-y-0.5">
@@ -252,14 +290,32 @@ export default function Calendar() {
 
       {viewMode === "month" && renderMonthView()}
 
-      {selectedDate && (
-        <div className="mt-4">
-          <h3
-            className="text-lg font-semibold mb-3"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
-          </h3>
+      {selectedDate ? (
+        <div
+          className="mt-6 p-4 rounded-lg border"
+          style={{
+            backgroundColor: state.currentTheme.colors.surface,
+            borderColor: state.currentTheme.colors.primary + "30",
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3
+              className="text-lg font-semibold"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
+            </h3>
+            <button
+              onClick={() => setSelectedDate(null)}
+              className="text-sm px-3 py-1 rounded-full transition-colors"
+              style={{
+                backgroundColor: state.currentTheme.colors.primary + "20",
+                color: state.currentTheme.colors.primary,
+              }}
+            >
+              Fechar
+            </button>
+          </div>
 
           {getTasksForSelectedDate().length > 0 ? (
             <div className="space-y-2">
@@ -276,10 +332,7 @@ export default function Calendar() {
               ))}
             </div>
           ) : (
-            <div
-              className="text-center py-6 rounded-lg"
-              style={{ backgroundColor: state.currentTheme.colors.surface }}
-            >
+            <div className="text-center py-6">
               <p
                 className="text-base"
                 style={{ color: state.currentTheme.colors.textSecondary }}
@@ -288,6 +341,20 @@ export default function Calendar() {
               </p>
             </div>
           )}
+        </div>
+      ) : (
+        <div
+          className="mt-6 p-4 rounded-lg text-center"
+          style={{
+            backgroundColor: state.currentTheme.colors.surface + "50",
+          }}
+        >
+          <p
+            className="text-base"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          >
+            Clique em um dia para ver as tarefas
+          </p>
         </div>
       )}
     </div>
