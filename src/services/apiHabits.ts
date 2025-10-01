@@ -148,10 +148,19 @@ export async function getHabitEntries(): Promise<HabitEntry[]> {
 export async function createHabitEntry(
   entry: Omit<HabitEntry, "id">
 ): Promise<HabitEntry> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Usuário não autenticado");
+  }
+
   const { data, error } = await supabase
     .from("habit_entries")
     .insert({
       habit_id: entry.habitId,
+      user_id: user.id,
       completion_date: entry.date.toISOString().split("T")[0],
       value: entry.value,
       notes: entry.notes,
@@ -174,10 +183,19 @@ export async function createHabitEntry(
 }
 
 export async function updateHabitEntry(entry: HabitEntry): Promise<HabitEntry> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Usuário não autenticado");
+  }
+
   const { data, error } = await supabase
     .from("habit_entries")
     .update({
       habit_id: entry.habitId,
+      user_id: user.id,
       completion_date: entry.date.toISOString().split("T")[0],
       value: entry.value,
       notes: entry.notes,
