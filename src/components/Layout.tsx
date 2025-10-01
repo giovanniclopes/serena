@@ -44,7 +44,7 @@ export default function Layout() {
               className="text-sm"
               style={{ color: state.currentTheme.colors.textSecondary }}
             >
-              {user?.email}
+              {(user as { email: string })?.email}
             </span>
             <button
               onClick={handleSignOut}

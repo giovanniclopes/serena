@@ -22,37 +22,37 @@ export async function getTasks(): Promise<Task[]> {
       id: task.id,
       title: task.title,
       description: task.description,
-      projectId: task.project_id,
-      parentTaskId: task.parent_task_id,
+      projectId: task.projectId,
+      parentTaskId: task.parentTaskId,
       subtasks:
-        task.subtasks?.map((subtask: any) => ({
+        task.subtasks?.map((subtask: Task) => ({
           id: subtask.id,
           title: subtask.title,
           description: subtask.description,
-          projectId: subtask.project_id,
-          parentTaskId: subtask.parent_task_id,
+          projectId: subtask.projectId,
+          parentTaskId: subtask.parentTaskId,
           subtasks: [],
-          dueDate: subtask.due_date ? new Date(subtask.due_date) : undefined,
+          dueDate: subtask.dueDate ? new Date(subtask.dueDate) : undefined,
           priority: subtask.priority,
           reminders: subtask.reminders || [],
           tags: subtask.tags || [],
-          isCompleted: subtask.is_completed,
-          completedAt: subtask.completed_at
-            ? new Date(subtask.completed_at)
+          isCompleted: subtask.isCompleted,
+          completedAt: subtask.completedAt
+            ? new Date(subtask.completedAt)
             : undefined,
-          workspaceId: subtask.workspace_id,
-          createdAt: new Date(subtask.created_at),
-          updatedAt: new Date(subtask.updated_at),
+          workspaceId: subtask.workspaceId,
+          createdAt: new Date(subtask.createdAt),
+          updatedAt: new Date(subtask.updatedAt),
         })) || [],
-      dueDate: task.due_date ? new Date(task.due_date) : undefined,
+      dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
       priority: task.priority,
       reminders: task.reminders || [],
       tags: task.tags || [],
-      isCompleted: task.is_completed,
-      completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
-      workspaceId: task.workspace_id,
-      createdAt: new Date(task.created_at),
-      updatedAt: new Date(task.updated_at),
+      isCompleted: task.isCompleted,
+      completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
+      workspaceId: task.workspaceId,
+      createdAt: new Date(task.createdAt),
+      updatedAt: new Date(task.updatedAt),
     })) || []
   );
 }
@@ -67,12 +67,12 @@ export async function createTask(
       description: task.description,
       project_id: task.projectId,
       parent_task_id: task.parentTaskId,
-      due_date: task.dueDate?.toISOString(),
+      dueDate: task.dueDate?.toISOString(),
       priority: task.priority,
       reminders: task.reminders,
       tags: task.tags,
-      is_completed: task.isCompleted,
-      completed_at: task.completedAt?.toISOString(),
+      isCompleted: task.isCompleted,
+      completedAt: task.completedAt?.toISOString(),
       workspace_id: task.workspaceId,
     })
     .select()
@@ -90,15 +90,15 @@ export async function createTask(
     projectId: data.project_id,
     parentTaskId: data.parent_task_id,
     subtasks: [],
-    dueDate: data.due_date ? new Date(data.due_date) : undefined,
+    dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
     priority: data.priority,
     reminders: data.reminders || [],
     tags: data.tags || [],
-    isCompleted: data.is_completed,
-    completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
-    workspaceId: data.workspace_id,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+    isCompleted: data.isCompleted,
+    completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
+    workspaceId: data.workspaceId,
+    createdAt: new Date(data.createdAt),
+    updatedAt: new Date(data.updatedAt),
   };
 }
 
@@ -110,14 +110,14 @@ export async function updateTask(task: Task): Promise<Task> {
       description: task.description,
       project_id: task.projectId,
       parent_task_id: task.parentTaskId,
-      due_date: task.dueDate?.toISOString(),
+      dueDate: task.dueDate?.toISOString(),
       priority: task.priority,
       reminders: task.reminders,
       tags: task.tags,
-      is_completed: task.isCompleted,
+      isCompleted: task.isCompleted,
       completed_at: task.completedAt?.toISOString(),
       workspace_id: task.workspaceId,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
     .eq("id", task.id)
     .select()
@@ -135,15 +135,15 @@ export async function updateTask(task: Task): Promise<Task> {
     projectId: data.project_id,
     parentTaskId: data.parent_task_id,
     subtasks: [],
-    dueDate: data.due_date ? new Date(data.due_date) : undefined,
+    dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
     priority: data.priority,
     reminders: data.reminders || [],
     tags: data.tags || [],
-    isCompleted: data.is_completed,
-    completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
+    isCompleted: data.isCompleted,
+    completedAt: data.completedAt ? new Date(data.completedAt) : undefined,
     workspaceId: data.workspace_id,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+    createdAt: new Date(data.createdAt),
+    updatedAt: new Date(data.updatedAt),
   };
 }
 
@@ -160,9 +160,9 @@ export async function completeTask(taskId: string): Promise<Task> {
   const { data, error } = await supabase
     .from("tasks")
     .update({
-      is_completed: true,
-      completed_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      isCompleted: true,
+      completedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
     .eq("id", taskId)
     .select()
@@ -187,7 +187,7 @@ export async function completeTask(taskId: string): Promise<Task> {
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
-    createdAt: new Date(data.created_at),
+    createdAt: new Date(data.createdAt),
     updatedAt: new Date(data.updated_at),
   };
 }

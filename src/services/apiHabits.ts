@@ -22,9 +22,9 @@ export async function getHabits(): Promise<Habit[]> {
       color: habit.color,
       icon: habit.icon,
       reminders: habit.reminders || [],
-      workspaceId: habit.workspace_id,
-      createdAt: new Date(habit.created_at),
-      updatedAt: new Date(habit.updated_at),
+      workspaceId: habit.workspaceId,
+      createdAt: new Date(habit.createdAt),
+      updatedAt: new Date(habit.updatedAt),
     })) || []
   );
 }
@@ -42,7 +42,7 @@ export async function createHabit(
       color: habit.color,
       icon: habit.icon,
       reminders: habit.reminders,
-      workspace_id: habit.workspaceId,
+      workspaceId: habit.workspaceId,
     })
     .select()
     .single();
@@ -61,9 +61,9 @@ export async function createHabit(
     color: data.color,
     icon: data.icon,
     reminders: data.reminders || [],
-    workspaceId: data.workspace_id,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+    workspaceId: data.workspaceId,
+    createdAt: new Date(data.createdAt),
+    updatedAt: new Date(data.updatedAt),
   };
 }
 
@@ -79,7 +79,7 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
       icon: habit.icon,
       reminders: habit.reminders,
       workspace_id: habit.workspaceId,
-      updated_at: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     })
     .eq("id", habit.id)
     .select()
@@ -99,9 +99,9 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
     color: data.color,
     icon: data.icon,
     reminders: data.reminders || [],
-    workspaceId: data.workspace_id,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+    workspaceId: data.workspaceId,
+    createdAt: new Date(data.createdAt),
+    updatedAt: new Date(data.updatedAt),
   };
 }
 
@@ -118,7 +118,7 @@ export async function getHabitEntries(): Promise<HabitEntry[]> {
   const { data, error } = await supabase
     .from("habit_entries")
     .select("*")
-    .order("completion_date", { ascending: false });
+    .order("completionDate", { ascending: false });
 
   if (error) {
     console.error("Erro ao buscar entradas de hábitos:", error);
@@ -128,7 +128,7 @@ export async function getHabitEntries(): Promise<HabitEntry[]> {
   return (
     data?.map((entry) => ({
       id: entry.id,
-      habitId: entry.habit_id,
+      habitId: entry.habitId,
       date: new Date(entry.completion_date),
       value: entry.value || 1,
       notes: entry.notes,
@@ -143,7 +143,7 @@ export async function createHabitEntry(
     .from("habit_entries")
     .insert({
       habit_id: entry.habitId,
-      completion_date: entry.date.toISOString().split("T")[0],
+      completionDate: entry.date.toISOString().split("T")[0],
       value: entry.value,
       notes: entry.notes,
     })
@@ -157,7 +157,7 @@ export async function createHabitEntry(
 
   return {
     id: data.id,
-    habitId: data.habit_id,
+    habitId: data.habitId,
     date: new Date(data.completion_date),
     value: data.value || 1,
     notes: data.notes,
@@ -169,7 +169,7 @@ export async function updateHabitEntry(entry: HabitEntry): Promise<HabitEntry> {
     .from("habit_entries")
     .update({
       habit_id: entry.habitId,
-      completion_date: entry.date.toISOString().split("T")[0],
+      completionDate: entry.date.toISOString().split("T")[0],
       value: entry.value,
       notes: entry.notes,
     })
@@ -184,8 +184,8 @@ export async function updateHabitEntry(entry: HabitEntry): Promise<HabitEntry> {
 
   return {
     id: data.id,
-    habitId: data.habit_id,
-    date: new Date(data.completion_date),
+    habitId: data.habitId,
+    date: new Date(data.completionDate),
     value: data.value || 1,
     notes: data.notes,
   };

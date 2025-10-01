@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabaseClient";
 import { getCurrentUser, signIn, signOut, signUp } from "../services/auth";
 
 interface AuthContextType {
-  user: any | null;
+  user: unknown | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name?: string) => Promise<void>;
@@ -13,7 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<unknown | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -76,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

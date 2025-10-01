@@ -60,9 +60,8 @@ export default function TaskModal({
     }));
   };
 
-  const availableProjects = projects.filter(
-    (p) => p.workspaceId === state.activeWorkspaceId
-  );
+  const availableProjects =
+    projects?.filter((p) => p.workspaceId === state.activeWorkspaceId) || [];
   const availableTags = state.tags.filter(
     (t) => t.workspaceId === state.activeWorkspaceId
   );

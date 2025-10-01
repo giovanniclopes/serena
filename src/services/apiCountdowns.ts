@@ -15,14 +15,14 @@ export async function getCountdowns(): Promise<Countdown[]> {
   return (
     data?.map((countdown) => ({
       id: countdown.id,
-      title: countdown.event_name,
+      title: countdown.eventName,
       description: countdown.description,
-      targetDate: new Date(countdown.event_date),
+      targetDate: new Date(countdown.eventDate),
       color: countdown.color,
       icon: countdown.icon,
-      workspaceId: countdown.workspace_id,
-      createdAt: new Date(countdown.created_at),
-      updatedAt: new Date(countdown.updated_at),
+      workspaceId: countdown.workspaceId,
+      createdAt: new Date(countdown.createdAt),
+      updatedAt: new Date(countdown.updatedAt),
     })) || []
   );
 }
@@ -33,12 +33,12 @@ export async function createCountdown(
   const { data, error } = await supabase
     .from("countdowns")
     .insert({
-      event_name: countdown.title,
+      eventName: countdown.title,
       description: countdown.description,
-      event_date: countdown.targetDate.toISOString(),
+      eventDate: countdown.targetDate.toISOString(),
       color: countdown.color,
       icon: countdown.icon,
-      workspace_id: countdown.workspaceId,
+      workspaceId: countdown.workspaceId,
     })
     .select()
     .single();
@@ -50,14 +50,14 @@ export async function createCountdown(
 
   return {
     id: data.id,
-    title: data.event_name,
+    title: data.eventName,
     description: data.description,
-    targetDate: new Date(data.event_date),
+    targetDate: new Date(data.eventDate),
     color: data.color,
     icon: data.icon,
-    workspaceId: data.workspace_id,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+    workspaceId: data.workspaceId,
+    createdAt: new Date(data.createdAt),
+    updatedAt: new Date(data.updatedAt),
   };
 }
 
@@ -67,13 +67,13 @@ export async function updateCountdown(
   const { data, error } = await supabase
     .from("countdowns")
     .update({
-      event_name: countdown.title,
+      eventName: countdown.title,
       description: countdown.description,
-      event_date: countdown.targetDate.toISOString(),
+      eventDate: countdown.targetDate.toISOString(),
       color: countdown.color,
       icon: countdown.icon,
-      workspace_id: countdown.workspaceId,
-      updated_at: new Date().toISOString(),
+      workspaceId: countdown.workspaceId,
+      updatedAt: new Date().toISOString(),
     })
     .eq("id", countdown.id)
     .select()
@@ -86,14 +86,14 @@ export async function updateCountdown(
 
   return {
     id: data.id,
-    title: data.event_name,
+    title: data.eventName,
     description: data.description,
-    targetDate: new Date(data.event_date),
+    targetDate: new Date(data.eventDate),
     color: data.color,
     icon: data.icon,
-    workspaceId: data.workspace_id,
-    createdAt: new Date(data.created_at),
-    updatedAt: new Date(data.updated_at),
+    workspaceId: data.workspaceId,
+    createdAt: new Date(data.createdAt),
+    updatedAt: new Date(data.updatedAt),
   };
 }
 
@@ -108,4 +108,3 @@ export async function deleteCountdown(countdownId: string): Promise<void> {
     throw new Error("Falha ao excluir contagem regressiva");
   }
 }
-

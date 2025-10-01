@@ -1,13 +1,13 @@
-export type Priority = 'P1' | 'P2' | 'P3' | 'P4';
+export type Priority = "P1" | "P2" | "P3" | "P4";
 
-export type RecurrenceType = 
-  | 'daily' 
-  | 'weekly' 
-  | 'monthly' 
-  | 'yearly' 
-  | 'custom';
+export type RecurrenceType =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "yearly"
+  | "custom";
 
-export type RecurrenceEndType = 'never' | 'date' | 'count';
+export type RecurrenceEndType = "never" | "date" | "count";
 
 export interface Recurrence {
   type: RecurrenceType;
@@ -21,9 +21,9 @@ export interface Recurrence {
 
 export interface Reminder {
   id: string;
-  type: 'before' | 'at';
+  type: "before" | "at";
   value: number;
-  unit: 'minutes' | 'hours' | 'days';
+  unit: "minutes" | "hours" | "days";
 }
 
 export interface Tag {
@@ -153,14 +153,14 @@ export interface AppState {
   availableThemes: Theme[];
 }
 
-export type ViewMode = 'today' | 'week' | 'month' | 'list';
+export type ViewMode = "today" | "week" | "month" | "list";
 
 export interface CalendarEvent {
   id: string;
   title: string;
   date: Date;
   time?: Date;
-  type: 'task' | 'habit' | 'countdown';
+  type: "task" | "habit" | "countdown";
   priority?: Priority;
   color: string;
   projectId?: string;

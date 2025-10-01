@@ -12,7 +12,6 @@ import { useApp } from "../context/AppContext";
 import {
   useCountdowns,
   useCreateCountdown,
-  useDeleteCountdown,
   useUpdateCountdown,
 } from "../features/countdowns/useCountdowns";
 import type { Countdown } from "../types";
@@ -27,7 +26,6 @@ export default function Countdowns() {
   const { countdowns, isLoading, error } = useCountdowns();
   const createCountdownMutation = useCreateCountdown();
   const updateCountdownMutation = useUpdateCountdown();
-  const deleteCountdownMutation = useDeleteCountdown();
 
   const getTimeRemaining = (targetDate: Date) => {
     const now = new Date();
@@ -64,11 +62,6 @@ export default function Countdowns() {
     setIsCountdownModalOpen(true);
   };
 
-  const handleEditCountdown = (countdown: Countdown) => {
-    setEditingCountdown(countdown);
-    setIsCountdownModalOpen(true);
-  };
-
   const handleSaveCountdown = (
     countdownData: Omit<Countdown, "id" | "createdAt" | "updatedAt">
   ) => {
@@ -79,22 +72,12 @@ export default function Countdowns() {
         updatedAt: new Date(),
       });
     } else {
-      createCountdownMutation.mutate({
-        ...countdownData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      createCountdownMutation.mutate(countdownData);
     }
     setIsCountdownModalOpen(false);
   };
 
-  const handleDeleteCountdown = (countdownId: string) => {
-    if (confirm("Tem certeza que deseja excluir esta contagem regressiva?")) {
-      deleteCountdownMutation.mutate(countdownId);
-    }
-  };
-
-  const renderCountdownCard = (countdown: any) => {
+  const renderCountdownCard = (countdown: Countdown) => {
     const timeRemaining = getTimeRemaining(countdown.targetDate);
     const timeDetailed = getTimeRemainingDetailed(countdown.targetDate);
     const overdue = isOverdue(countdown.targetDate);

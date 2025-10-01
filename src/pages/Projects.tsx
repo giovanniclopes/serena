@@ -1,5 +1,3 @@
-// src/pages/Projects.tsx
-
 import { Folder, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import ProjectModal from "../components/ProjectModal";
@@ -23,7 +21,6 @@ export default function Projects() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>("");
 
-  // Definir workspace padrão quando os workspaces carregarem
   useEffect(() => {
     if (workspaces && workspaces.length > 0 && !activeWorkspaceId) {
       const defaultWorkspace =
@@ -56,8 +53,6 @@ export default function Projects() {
       createProjectMutation.mutate({
         ...projectData,
         workspaceId: activeWorkspaceId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       });
     }
     setIsProjectModalOpen(false);

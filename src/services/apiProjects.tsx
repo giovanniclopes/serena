@@ -5,7 +5,7 @@ export async function getProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("createdAt", { ascending: false });
 
   if (error) {
     console.error("Erro ao buscar projetos:", error);
@@ -16,7 +16,7 @@ export async function getProjects(): Promise<Project[]> {
 }
 
 export async function createProject(
-  project: Omit<Project, "id" | "created_at" | "updated_at">
+  project: Omit<Project, "id" | "createdAt" | "updatedAt">
 ): Promise<Project> {
   const { data, error } = await supabase
     .from("projects")
@@ -38,7 +38,7 @@ export async function updateProject(
 ): Promise<Project> {
   const { data, error } = await supabase
     .from("projects")
-    .update({ ...updates, updated_at: new Date().toISOString() })
+    .update({ ...updates, updatedAt: new Date().toISOString() })
     .eq("id", id)
     .select()
     .single();

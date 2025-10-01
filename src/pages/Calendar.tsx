@@ -112,10 +112,11 @@ export default function Calendar() {
                 color: isCurrentMonth
                   ? state.currentTheme.colors.text
                   : state.currentTheme.colors.textSecondary,
-                ringColor:
-                  isToday || isSelected
-                    ? state.currentTheme.colors.primary
-                    : "transparent",
+                ...(isToday || isSelected
+                  ? {
+                      borderColor: state.currentTheme.colors.primary,
+                    }
+                  : {}),
               }}
             >
               <div className="font-medium mb-1 text-sm">{format(day, "d")}</div>

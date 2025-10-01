@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { AppState } from "../types";
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   const [storedValue, setStoredValue] = useState<T>(initialValue);
@@ -33,7 +34,9 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
 }
 
 export function useAppStorage() {
-  const [appData, setAppData] = useLocalStorage("serena-app-data", {
+  const [appData, setAppData] = useLocalStorage<
+    Partial<AppState> & { currentThemeId: string }
+  >("serena-app-data", {
     workspaces: [],
     activeWorkspaceId: "",
     projects: [],

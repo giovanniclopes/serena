@@ -12,7 +12,6 @@ import { useApp } from "../context/AppContext";
 import {
   useCreateHabit,
   useCreateHabitEntry,
-  useDeleteHabit,
   useHabitEntries,
   useHabits,
   useUpdateHabit,
@@ -23,7 +22,6 @@ import { getHabitProgress, getHabitStreak } from "../utils";
 
 export default function Habits() {
   const { state } = useApp();
-  const [selectedHabit, setSelectedHabit] = useState<string | null>(null);
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(
     undefined
@@ -37,7 +35,6 @@ export default function Habits() {
   } = useHabitEntries();
   const createHabitMutation = useCreateHabit();
   const updateHabitMutation = useUpdateHabit();
-  const deleteHabitMutation = useDeleteHabit();
   const createHabitEntryMutation = useCreateHabitEntry();
   const updateHabitEntryMutation = useUpdateHabitEntry();
 
@@ -72,11 +69,6 @@ export default function Habits() {
     setIsHabitModalOpen(true);
   };
 
-  const handleEditHabit = (habit: Habit) => {
-    setEditingHabit(habit);
-    setIsHabitModalOpen(true);
-  };
-
   const handleSaveHabit = (
     habitData: Omit<Habit, "id" | "createdAt" | "updatedAt">
   ) => {
@@ -89,20 +81,13 @@ export default function Habits() {
     } else {
       createHabitMutation.mutate({
         ...habitData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        workspaceId: state.activeWorkspaceId,
       });
     }
     setIsHabitModalOpen(false);
   };
 
-  const handleDeleteHabit = (habitId: string) => {
-    if (confirm("Tem certeza que deseja excluir este hábito?")) {
-      deleteHabitMutation.mutate(habitId);
-    }
-  };
-
-  const renderHabitCard = (habit: any) => {
+  const renderHabitCard = (habit: Habit) => {
     const streak = getHabitStreak(habit, entries);
     const todayProgress = getHabitProgress(habit, entries, new Date());
 
@@ -183,7 +168,7 @@ export default function Habits() {
 
         <div className="grid grid-cols-7 gap-1">
           {weekDays.map((day) => {
-            const entry = getHabitEntryForDate(habit.id, day);
+            getHabitEntryForDate(habit.id, day);
             const progress = getHabitProgress(habit, entries, day);
             const isToday = isSameDay(day, new Date());
 
@@ -206,9 +191,11 @@ export default function Habits() {
                     progress > 0.5
                       ? "white"
                       : state.currentTheme.colors.textSecondary,
-                  ringColor: isToday
-                    ? state.currentTheme.colors.primary
-                    : "transparent",
+                  ...(isToday && {
+                    borderColor: state.currentTheme.colors.primary,
+                    borderWidth: "1px",
+                    borderStyle: "solid",
+                  }),
                 }}
               >
                 {format(day, "d")}

@@ -37,6 +37,13 @@ export async function signIn(email: string, password: string) {
 
   if (error) {
     console.error("Erro ao fazer login:", error);
+
+    if (error.message === "Invalid login credentials") {
+      throw new Error(
+        "Email ou senha incorretos. Verifique suas credenciais e tente novamente."
+      );
+    }
+
     throw new Error(error.message);
   }
 
@@ -52,14 +59,16 @@ export async function signOut() {
   }
 }
 
-export async function getCurrentUser(): Promise<any | null> {
+export async function getCurrentUser(): Promise<unknown | null> {
   const {
     data: { user },
     error,
   } = await supabase.auth.getUser();
 
   if (error) {
-    console.error("Erro ao obter usuário atual:", error);
+    if (error.message !== "Auth session missing!") {
+      console.error("Erro ao obter usuário atual:", error);
+    }
     return null;
   }
 

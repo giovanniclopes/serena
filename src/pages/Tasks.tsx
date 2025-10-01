@@ -6,7 +6,6 @@ import { useApp } from "../context/AppContext";
 import {
   useCompleteTask,
   useCreateTask,
-  useDeleteTask,
   useTasks,
   useUpdateTask,
 } from "../features/tasks/useTasks";
@@ -24,7 +23,6 @@ export default function Tasks() {
   const { tasks, isLoading, error } = useTasks();
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
-  const deleteTaskMutation = useDeleteTask();
   const completeTaskMutation = useCompleteTask();
 
   const filteredTasks = filterTasks(searchTasks(tasks, searchQuery), {
@@ -60,17 +58,10 @@ export default function Tasks() {
     } else {
       createTaskMutation.mutate({
         ...taskData,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        workspaceId: state.activeWorkspaceId,
       });
     }
     setIsTaskModalOpen(false);
-  };
-
-  const handleDeleteTask = (taskId: string) => {
-    if (confirm("Tem certeza que deseja excluir esta tarefa?")) {
-      deleteTaskMutation.mutate(taskId);
-    }
   };
 
   if (isLoading) {
