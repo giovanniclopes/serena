@@ -140,7 +140,7 @@ export async function updateTask(task: Task): Promise<Task> {
 
   if (error) {
     console.error("Erro ao atualizar tarefa:", error);
-    throw new Error("Falha ao atualizar tarefa");
+    throw error;
   }
 
   return {
@@ -185,7 +185,7 @@ export async function completeTask(taskId: string): Promise<Task> {
 
   if (error) {
     console.error("Erro ao completar tarefa:", error);
-    throw new Error("Falha ao completar tarefa");
+    throw error;
   }
 
   return {

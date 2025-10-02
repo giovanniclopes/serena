@@ -47,9 +47,24 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Tarefa atualizada com sucesso!");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Erro ao atualizar tarefa:", error);
-      toast.error("Erro ao atualizar tarefa. Tente novamente.");
+
+      if (
+        error?.message?.includes("subtasks") ||
+        error?.message?.includes("pendentes") ||
+        error?.message?.includes("pending") ||
+        error?.code === "P0001"
+      ) {
+        toast.error("Ação Bloqueada", {
+          description:
+            error.message ||
+            "Não é possível concluir uma tarefa que possui subtarefas pendentes. Complete todas as subtarefas primeiro.",
+          duration: 5000,
+        });
+      } else {
+        toast.error("Erro ao atualizar tarefa. Tente novamente.");
+      }
     },
   });
 }
@@ -79,9 +94,24 @@ export function useCompleteTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Tarefa concluída com sucesso!");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Erro ao completar tarefa:", error);
-      toast.error("Erro ao concluir tarefa. Tente novamente.");
+
+      if (
+        error?.message?.includes("subtasks") ||
+        error?.message?.includes("pendentes") ||
+        error?.message?.includes("pending") ||
+        error?.code === "P0001"
+      ) {
+        toast.error("Ação Bloqueada", {
+          description:
+            error.message ||
+            "Não é possível concluir uma tarefa que possui subtarefas pendentes. Complete todas as subtarefas primeiro.",
+          duration: 5000,
+        });
+      } else {
+        toast.error("Erro ao concluir tarefa. Tente novamente.");
+      }
     },
   });
 }
