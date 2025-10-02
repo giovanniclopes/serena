@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import "./App.css";
 import Layout from "./components/Layout";
+import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AppProvider } from "./context/AppContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -50,6 +51,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
+          <PWAInstallPrompt />
         </Router>
       </AppProvider>
     </AuthProvider>

@@ -28,6 +28,7 @@ dist-ssr
 
 # Outros
 docs
+scripts
 
 # Supabase
 supabase/
