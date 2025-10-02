@@ -59,7 +59,6 @@ export default function Register() {
 
     try {
       await signUp(email, password, name);
-      // O redirecionamento será feito pelo AuthContext
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar conta");
     }

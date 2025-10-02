@@ -16,14 +16,12 @@ export function useAutoProfile() {
       setIsChecking(true);
 
       try {
-        // Verificar se o usuário já tem um perfil
         const { data: existingProfile } = await supabase
           .from("profiles")
           .select("id")
           .eq("id", (user as any).id)
           .single();
 
-        // Se não tem perfil, criar um automaticamente
         if (!existingProfile) {
           await createProfile({
             username: (user as any).email?.split("@")[0] || "usuario",

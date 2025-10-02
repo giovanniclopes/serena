@@ -197,13 +197,15 @@ export function createProjectFromTemplate(
     color: template.color,
     icon: template.icon,
     workspaceId,
+    tasksCompletedCount: 0,
+    tasksTotalCount: 0,
   };
 
   const tasks: Omit<Task, "id" | "createdAt" | "updatedAt">[] =
     template.defaultTasks.map((task) => ({
       title: task.title,
       description: task.description,
-      projectId: "", // Será preenchido após criar o projeto
+      projectId: "",
       parentTaskId: undefined,
       subtasks: [],
       dueDate: undefined,

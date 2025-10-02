@@ -22,7 +22,6 @@ export async function getCurrentProfile(): Promise<UserProfile | null> {
 
   if (error) {
     if (error.code === "PGRST116") {
-      // Perfil não encontrado, retorna null
       return null;
     }
     console.error("Erro ao buscar perfil:", error);

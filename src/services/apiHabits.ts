@@ -1,7 +1,6 @@
 import { supabase } from "../lib/supabaseClient";
 import type { Habit, HabitEntry } from "../types";
 
-// Função para formatar data sem problemas de fuso horário
 function formatDateForDB(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");

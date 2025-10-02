@@ -44,7 +44,6 @@ export function DateTimePicker({
 
   React.useEffect(() => {
     setSelectedDate(value);
-    // Usar timezone de São Paulo para exibir o horário correto
     setTimeValue(value ? formatBrazilTime(value) : "");
   }, [value]);
 
@@ -52,7 +51,6 @@ export function DateTimePicker({
     setSelectedDate(date);
     if (date && timeValue) {
       const [hours, minutes] = timeValue.split(":").map(Number);
-      // Criar data usando helper do Brasil
       const newDateTime = createBrazilDateTime(date, hours, minutes);
       onChange?.(newDateTime);
     } else if (date) {
@@ -66,13 +64,10 @@ export function DateTimePicker({
   };
 
   const handleTimeChange = (time: string) => {
-    // Permitir digitação livre, mas validar no blur
     setTimeValue(time);
 
-    // Se o formato está correto, atualizar a data
     if (time && validateTime(time) && selectedDate) {
       const [hours, minutes] = time.split(":").map(Number);
-      // Criar data usando helper do Brasil
       const newDateTime = createBrazilDateTime(selectedDate, hours, minutes);
       onChange?.(newDateTime);
     }
@@ -82,7 +77,6 @@ export function DateTimePicker({
     const input = e.target as HTMLInputElement;
     const value = input.value;
 
-    // Permitir teclas de navegação e controle
     if (
       [
         "Backspace",
@@ -98,19 +92,16 @@ export function DateTimePicker({
       return;
     }
 
-    // Permitir apenas números e dois pontos
     if (!/\d|:/.test(e.key)) {
       e.preventDefault();
       return;
     }
 
-    // Se o usuário digitar dois pontos, permitir apenas se não existir
     if (e.key === ":" && value.includes(":")) {
       e.preventDefault();
       return;
     }
 
-    // Auto-formatar: adicionar ":" após 2 dígitos se não existir
     if (/\d/.test(e.key) && value.length === 1 && !value.includes(":")) {
       setTimeout(() => {
         const newValue = input.value;
@@ -118,7 +109,6 @@ export function DateTimePicker({
           const formattedValue = newValue + ":";
           input.value = formattedValue;
           handleTimeChange(formattedValue);
-          // Posicionar cursor após os dois pontos
           input.setSelectionRange(3, 3);
         }
       }, 0);
@@ -126,15 +116,12 @@ export function DateTimePicker({
   };
 
   const handleTimeBlur = () => {
-    // Tentar formatar o valor se estiver incompleto
     if (timeValue && !validateTime(timeValue)) {
-      // Se tem apenas números, tentar formatar
       if (/^\d{1,4}$/.test(timeValue)) {
         const digits = timeValue.padStart(4, "0");
         const hours = digits.substring(0, 2);
         const minutes = digits.substring(2, 4);
 
-        // Validar se é um horário válido
         const h = parseInt(hours);
         const m = parseInt(minutes);
 
@@ -142,9 +129,7 @@ export function DateTimePicker({
           const formattedTime = `${hours}:${minutes}`;
           setTimeValue(formattedTime);
 
-          // Atualizar a data se temos uma data selecionada
           if (selectedDate) {
-            // Criar data usando helper do Brasil
             const newDateTime = createBrazilDateTime(selectedDate, h, m);
             onChange?.(newDateTime);
           }
@@ -152,7 +137,6 @@ export function DateTimePicker({
         }
       }
 
-      // Se não conseguiu formatar, limpar o campo
       setTimeValue("");
     }
   };

@@ -70,7 +70,6 @@ export default function ProfileModal({
     setIsUploading(true);
     try {
       const avatarUrl = await uploadAvatarMutation.mutateAsync(file);
-      // Atualizar o perfil com a nova URL do avatar
       if (profile) {
         await updateProfileMutation.mutateAsync({ avatarUrl });
       }

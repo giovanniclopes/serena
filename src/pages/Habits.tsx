@@ -68,7 +68,6 @@ export default function Habits() {
     console.log("Existing entry found:", existingEntry);
 
     if (existingEntry) {
-      // Se já existe uma entrada, alterna entre 0 e o valor da meta
       const newValue = existingEntry.value >= targetValue ? 0 : targetValue;
       console.log("Updating entry with value:", newValue);
       updateHabitEntryMutation.mutate({ ...existingEntry, value: newValue });

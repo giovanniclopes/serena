@@ -24,7 +24,7 @@ export async function getSubtasks(taskId: string): Promise<Task[]> {
     description: subtask.description,
     projectId: subtask.project_id,
     parentTaskId: subtask.parent_task_id,
-    subtasks: [], // Subtarefas não têm sub-subtarefas
+    subtasks: [],
     dueDate: subtask.due_date ? new Date(subtask.due_date) : undefined,
     priority: subtask.priority,
     reminders: subtask.reminders || [],

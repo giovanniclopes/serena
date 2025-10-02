@@ -270,12 +270,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const isInitialMount = useRef(true);
 
-  // Carregar dados do Supabase apenas quando o usuário estiver autenticado
   useEffect(() => {
-    if (authLoading) return; // Aguardar autenticação
+    if (authLoading) return;
 
     if (!user) {
-      // Usuário não autenticado - limpar dados
       dispatch({
         type: "LOAD_DATA",
         payload: {
@@ -310,13 +308,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
             getCountdowns(),
           ]);
 
-        // Se não há workspaces, criar um padrão
         let finalWorkspaces = workspaces;
         let activeWorkspaceId =
           appData?.activeWorkspaceId || workspaces[0]?.id || "";
 
         if (workspaces.length === 0) {
-          // Criar workspace padrão
           const defaultWorkspace = {
             id: "default-workspace",
             name: "Pessoal",
@@ -341,7 +337,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             habits,
             habitEntries,
             countdowns,
-            tags: [], // TODO: Implementar API de tags
+            tags: [],
             filters: [],
             currentTheme: appData?.currentThemeId
               ? availableThemes.find((t) => t.id === appData.currentThemeId) ||
@@ -358,9 +354,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
 
     loadData();
-  }, [user, authLoading]);
+  }, [user, authLoading, appData?.activeWorkspaceId, appData.currentThemeId]);
 
-  // Persistir mudanças no localStorage (pular no mount inicial)
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;

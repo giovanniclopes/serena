@@ -21,8 +21,8 @@ export function useProjects() {
   } = useQuery({
     queryKey: ["projects"],
     queryFn: getProjects,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    gcTime: 1000 * 60 * 10, // 10 minutos
   });
 
   return { projects, isLoading, error };
@@ -41,7 +41,6 @@ export function useCreateProject() {
     }) => {
       const createdProject = await createProject(project);
 
-      // Se um template foi selecionado, criar as tarefas padrão
       if (templateId) {
         const template = getTemplateById(templateId);
         if (template) {
@@ -50,7 +49,6 @@ export function useCreateProject() {
             project.workspaceId
           );
 
-          // Criar as tarefas do template
           for (const taskTemplate of tasks) {
             try {
               await createTask({
