@@ -65,7 +65,7 @@ export function useDeleteSubtask() {
 
   return useMutation({
     mutationFn: deleteSubtask,
-    onSuccess: (_, subtaskId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subtasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Subtarefa excluída com sucesso!");
@@ -82,7 +82,7 @@ export function useCompleteSubtask() {
 
   return useMutation({
     mutationFn: completeSubtask,
-    onSuccess: (_, subtaskId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subtasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Subtarefa concluída!");

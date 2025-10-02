@@ -74,7 +74,9 @@ export default function TaskModal({
   };
 
   const availableProjects =
-    projects?.filter((p) => p.workspaceId === state.activeWorkspaceId) || [];
+    (projects as any[])?.filter(
+      (p: any) => p.workspaceId === state.activeWorkspaceId
+    ) || [];
   const availableTags = state.tags.filter(
     (t) => t.workspaceId === state.activeWorkspaceId
   );
@@ -131,7 +133,7 @@ export default function TaskModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Sem projeto</SelectItem>
-                {availableProjects.map((project) => (
+                {availableProjects.map((project: any) => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.name}
                   </SelectItem>

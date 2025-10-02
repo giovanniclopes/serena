@@ -41,7 +41,6 @@ export function DateTimePicker({
   const [timeValue, setTimeValue] = React.useState(
     value ? formatBrazilTime(value) : ""
   );
-  const [isTimeFocused, setIsTimeFocused] = React.useState(false);
 
   React.useEffect(() => {
     setSelectedDate(value);
@@ -82,7 +81,6 @@ export function DateTimePicker({
   const handleTimeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     const input = e.target as HTMLInputElement;
     const value = input.value;
-    const cursorPosition = input.selectionStart || 0;
 
     // Permitir teclas de navegação e controle
     if (
@@ -128,8 +126,6 @@ export function DateTimePicker({
   };
 
   const handleTimeBlur = () => {
-    setIsTimeFocused(false);
-
     // Tentar formatar o valor se estiver incompleto
     if (timeValue && !validateTime(timeValue)) {
       // Se tem apenas números, tentar formatar
@@ -198,7 +194,7 @@ export function DateTimePicker({
         value={timeValue}
         onChange={(e) => handleTimeChange(e.target.value)}
         onKeyDown={handleTimeKeyDown}
-        onFocus={() => setIsTimeFocused(true)}
+        onFocus={() => {}}
         onBlur={handleTimeBlur}
         placeholder="--:--"
         className="w-full"
