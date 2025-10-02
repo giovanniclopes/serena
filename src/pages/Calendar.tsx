@@ -11,7 +11,7 @@ import {
   subMonths,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import TaskCard from "../components/TaskCard";
 import { useApp } from "../context/AppContext";
@@ -254,16 +254,6 @@ export default function Calendar() {
         >
           Calendário
         </h1>
-        <button
-          className="flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
-          style={{
-            backgroundColor: state.currentTheme.colors.primary,
-            color: "white",
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nova Tarefa</span>
-        </button>
       </div>
 
       <div className="flex space-x-2">

@@ -5,7 +5,7 @@ import {
   format,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, Clock, Plus } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import { useState } from "react";
 import CountdownModal from "../components/CountdownModal";
 import FloatingActionButton from "../components/FloatingActionButton";
@@ -246,17 +246,6 @@ export default function Countdowns() {
         >
           Contagem Regressiva
         </h1>
-        <button
-          onClick={handleCreateCountdown}
-          className="flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
-          style={{
-            backgroundColor: state.currentTheme.colors.primary,
-            color: "white",
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nova Contagem</span>
-        </button>
       </div>
 
       {countdowns.length > 0 ? (

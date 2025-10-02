@@ -1,5 +1,5 @@
-import { Folder, Plus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Calendar, CheckCircle, Folder, Target } from "lucide-react";
+import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProjectModal from "../components/ProjectModal";
 import { useApp } from "../context/AppContext";
@@ -9,12 +9,11 @@ import {
   useProjects,
   useUpdateProject,
 } from "../features/projects/useProjects";
-import { useWorkspaces } from "../features/workspaces/useWorkspaces";
+import { useProjectProgress } from "../hooks/useProjectProgress";
 import type { Project } from "../types";
 
 export default function Projects() {
   const { state } = useApp();
-  const { workspaces } = useWorkspaces();
   const { projects, isLoading: isLoadingProjects } = useProjects();
   const createProjectMutation = useCreateProject();
   const updateProjectMutation = useUpdateProject();
@@ -22,15 +21,7 @@ export default function Projects() {
 
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [activeWorkspaceId, setActiveWorkspaceId] = useState<string>("");
-
-  useEffect(() => {
-    if (workspaces && workspaces.length > 0 && !activeWorkspaceId) {
-      const defaultWorkspace =
-        workspaces.find((w) => w.isDefault) || workspaces[0];
-      setActiveWorkspaceId(defaultWorkspace.id);
-    }
-  }, [workspaces, activeWorkspaceId]);
+  const activeWorkspaceId = state.activeWorkspaceId;
 
   const handleOpenCreateModal = () => {
     setEditingProject(null);
@@ -43,7 +34,8 @@ export default function Projects() {
   };
 
   const handleSaveProject = (
-    projectData: Omit<Project, "id" | "createdAt" | "updatedAt">
+    projectData: Omit<Project, "id" | "createdAt" | "updatedAt">,
+    templateId?: string
   ) => {
     if (!activeWorkspaceId) return;
 
@@ -54,8 +46,11 @@ export default function Projects() {
       });
     } else {
       createProjectMutation.mutate({
-        ...projectData,
-        workspaceId: activeWorkspaceId,
+        project: {
+          ...projectData,
+          workspaceId: activeWorkspaceId,
+        },
+        templateId,
       });
     }
     setIsProjectModalOpen(false);
@@ -72,46 +67,126 @@ export default function Projects() {
     }
   };
 
+  const filteredProjects = Array.isArray(projects)
+    ? projects.filter((p: Project) => p.workspaceId === activeWorkspaceId)
+    : [];
+
+  const projectProgress = useProjectProgress(filteredProjects);
+
   if (isLoadingProjects) {
     return <div className="text-center p-4">A carregar projetos...</div>;
   }
-
-  const filteredProjects =
-    projects?.filter((p) => p.workspaceId === activeWorkspaceId) || [];
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-dark-gray">Projetos</h1>
-        <button
-          onClick={handleOpenCreateModal}
-          className="flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
-          style={{
-            backgroundColor: state.currentTheme.colors.primary,
-            color: "white",
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          <span>Novo Projeto</span>
-        </button>
       </div>
 
       {filteredProjects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredProjects.map((project: Project) => (
-            <div
-              key={project.id}
-              className="p-4 bg-ice-white border border-light-gray rounded-md shadow-sm"
-            >
-              <div className="flex items-center gap-3 mb-2">
-                <Folder size={20} className="text-medium-gray" />
-                <h2 className="font-bold text-dark-gray">{project.name}</h2>
+          {filteredProjects.map((project: Project) => {
+            const progress = projectProgress.find(
+              (p) => p.projectId === project.id
+            );
+            return (
+              <div
+                key={project.id}
+                className="p-4 bg-ice-white border border-light-gray rounded-md shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-center gap-3 mb-3">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
+                    style={{ backgroundColor: project.color || "#ec4899" }}
+                  >
+                    <Folder size={16} />
+                  </div>
+                  <div className="flex-1">
+                    <h2 className="font-bold text-dark-gray">{project.name}</h2>
+                    <p className="text-medium-gray text-sm">
+                      {project.description}
+                    </p>
+                  </div>
+                </div>
+
+                {progress && progress.totalTasks > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <Target size={14} className="text-medium-gray" />
+                        <span className="text-sm text-medium-gray">
+                          {progress.completedTasks}/{progress.totalTasks}{" "}
+                          tarefas
+                        </span>
+                      </div>
+                      <span className="text-sm font-medium text-dark-gray">
+                        {progress.progressPercentage}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="h-2 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${progress.progressPercentage}%`,
+                          backgroundColor: project.color || "#ec4899",
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {progress?.nextTask && (
+                  <div className="mb-4 p-2 bg-gray-50 rounded-md">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle size={14} className="text-medium-gray" />
+                      <span className="text-sm font-medium text-dark-gray">
+                        Próxima tarefa:
+                      </span>
+                    </div>
+                    <p className="text-sm text-medium-gray ml-6">
+                      {progress.nextTask.title}
+                    </p>
+                    {progress.nextTask.dueDate && (
+                      <div className="flex items-center gap-1 ml-6 mt-1">
+                        <Calendar size={12} className="text-medium-gray" />
+                        <span className="text-xs text-medium-gray">
+                          {progress.nextTask.dueDate.toLocaleDateString(
+                            "pt-BR"
+                          )}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleOpenEditModal(project)}
+                    className="text-sm text-dark-gray border border-gray-500 rounded-lg px-2 py-1 hover:underline"
+                    style={{
+                      color: state.currentTheme.colors.text,
+                      opacity: deleteProjectMutation.isPending ? 0.5 : 1,
+                    }}
+                    disabled={deleteProjectMutation.isPending}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProject(project.id)}
+                    disabled={deleteProjectMutation.isPending}
+                    className="text-sm text-red-500 border border-red-500 rounded-lg px-2 py-1 hover:underline disabled:opacity-50"
+                    style={{
+                      backgroundColor: state.currentTheme.colors.error + "10",
+                      color: state.currentTheme.colors.error,
+                      opacity: deleteProjectMutation.isPending ? 0.5 : 1,
+                    }}
+                  >
+                    Apagar
+                  </button>
+                </div>
               </div>
-              <p className="text-medium-gray text-sm mb-4">
-                {project.description}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div
@@ -154,44 +229,13 @@ export default function Projects() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredProjects.map((project: Project) => (
-          <div
-            key={project.id}
-            className="p-4 bg-ice-white border border-light-gray rounded-md shadow-sm"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <Folder size={20} className="text-medium-gray" />
-              <h2 className="font-bold text-dark-gray">{project.name}</h2>
-            </div>
-            <p className="text-medium-gray text-sm mb-4">
-              {project.description}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleOpenEditModal(project)}
-                className="text-sm text-dark-gray hover:underline"
-              >
-                Editar
-              </button>
-              <button
-                onClick={() => handleDeleteProject(project.id)}
-                disabled={deleteProjectMutation.isPending}
-                className="text-sm text-red-500 hover:underline disabled:opacity-50"
-              >
-                Apagar
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-
       {isProjectModalOpen && (
         <ProjectModal
           isOpen={isProjectModalOpen}
           onClose={() => setIsProjectModalOpen(false)}
           onSave={handleSaveProject}
           project={editingProject || undefined}
+          workspaceId={activeWorkspaceId}
         />
       )}
 

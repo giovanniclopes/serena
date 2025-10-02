@@ -1,5 +1,4 @@
 import { Plus } from "lucide-react";
-import { Button } from "./ui/button";
 
 interface FloatingActionButtonProps {
   onClick: () => void;
@@ -11,23 +10,22 @@ export default function FloatingActionButton({
   className = "",
 }: FloatingActionButtonProps) {
   return (
-    <Button
+    <button
       onClick={onClick}
-      size="icon"
       className={`
         fixed bottom-24 right-4 z-50
-        w-16 h-16 rounded-full
-        bg-gradient-to-r from-pink-500 to-purple-600
-        hover:from-pink-600 hover:to-purple-700
-        shadow-2xl hover:shadow-3xl
-        transition-all duration-300
+        w-14 h-14 rounded-full
+        bg-pink-400 hover:bg-pink-600
+        shadow-lg hover:shadow-xl
+        transition-all duration-200
         active:scale-95
-        border-2 border-white
+        border-0
+        flex items-center justify-center
         ${className}
       `}
       aria-label="Adicionar item"
     >
-      <Plus className="w-7 h-7 text-white" />
-    </Button>
+      <Plus className="w-6 h-6 text-white" />
+    </button>
   );
 }

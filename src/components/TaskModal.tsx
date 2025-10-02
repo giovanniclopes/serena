@@ -4,6 +4,7 @@ import { useProjects } from "../features/projects/useProjects";
 import type { Priority, Task } from "../types";
 import DateTimeInput from "./DateTimeInput";
 import Modal from "./Modal";
+import SubtaskManager from "./SubtaskManager";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -198,6 +199,15 @@ export default function TaskModal({
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {task && (
+          <div className="pt-4 border-t">
+            <SubtaskManager
+              taskId={task.id}
+              workspaceId={state.activeWorkspaceId}
+            />
           </div>
         )}
 

@@ -1,4 +1,4 @@
-import { Filter, Grid, List, Plus, Search } from "lucide-react";
+import { Filter, Grid, List, Search } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import TaskCard from "../components/TaskCard";
@@ -42,11 +42,6 @@ export default function Tasks() {
 
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
-    setIsTaskModalOpen(true);
-  };
-
-  const handleCreateTask = () => {
-    setEditingTask(undefined);
     setIsTaskModalOpen(true);
   };
 
@@ -118,17 +113,6 @@ export default function Tasks() {
         >
           Tarefas
         </h1>
-        <button
-          onClick={handleCreateTask}
-          className="flex items-center space-x-2 px-3 py-2 rounded-lg font-medium transition-colors text-sm"
-          style={{
-            backgroundColor: state.currentTheme.colors.primary,
-            color: "white",
-          }}
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nova Tarefa</span>
-        </button>
       </div>
 
       <div className="flex items-center space-x-3">

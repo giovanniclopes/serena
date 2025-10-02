@@ -7,11 +7,11 @@ import {
   getPriorityColor,
   getPriorityLabel,
 } from "../utils";
+import SubtaskManager from "./SubtaskManager";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Checkbox } from "./ui/checkbox";
-import { Progress } from "./ui/progress";
 
 interface TaskCardProps {
   task: Task;
@@ -162,27 +162,7 @@ export default function TaskCard({
               )}
             </div>
 
-            {task.subtasks.length > 0 && (
-              <div className="mt-2">
-                <div className="flex items-center space-x-2">
-                  <Progress
-                    value={
-                      (task.subtasks.filter((st) => st.isCompleted).length /
-                        task.subtasks.length) *
-                      100
-                    }
-                    className="flex-1 h-1.5"
-                  />
-                  <span
-                    className="text-xs"
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  >
-                    {task.subtasks.filter((st) => st.isCompleted).length}/
-                    {task.subtasks.length}
-                  </span>
-                </div>
-              </div>
-            )}
+            <SubtaskManager taskId={task.id} workspaceId={task.workspaceId} />
           </div>
         </div>
       </CardContent>

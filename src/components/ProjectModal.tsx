@@ -1,4 +1,8 @@
 import { useState } from "react";
+import {
+  projectTemplates,
+  type ProjectTemplate,
+} from "../constants/projectTemplates";
 import { useApp } from "../context/AppContext";
 import type { Project } from "../types";
 import Modal from "./Modal";
@@ -7,7 +11,11 @@ interface ProjectModalProps {
   isOpen: boolean;
   onClose: () => void;
   project?: Project;
-  onSave: (project: Omit<Project, "id" | "createdAt" | "updatedAt">) => void;
+  workspaceId?: string;
+  onSave: (
+    project: Omit<Project, "id" | "createdAt" | "updatedAt">,
+    templateId?: string
+  ) => void;
 }
 
 const colors = [
@@ -27,6 +35,7 @@ export default function ProjectModal({
   isOpen,
   onClose,
   project,
+  workspaceId,
   onSave,
 }: ProjectModalProps) {
   const { state } = useApp();
@@ -35,6 +44,8 @@ export default function ProjectModal({
     description: project?.description || "",
     color: project?.color || colors[0],
   });
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [showTemplates, setShowTemplates] = useState(!project);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,11 +56,21 @@ export default function ProjectModal({
       name: formData.name.trim(),
       description: formData.description.trim() || undefined,
       color: formData.color,
-      workspaceId: state.activeWorkspaceId,
+      workspaceId: workspaceId || state.activeWorkspaceId,
     };
 
-    onSave(projectData);
+    onSave(projectData, selectedTemplate || undefined);
     onClose();
+  };
+
+  const handleTemplateSelect = (template: ProjectTemplate) => {
+    setSelectedTemplate(template.id);
+    setFormData({
+      name: template.name,
+      description: template.description,
+      color: template.color,
+    });
+    setShowTemplates(false);
   };
 
   return (
@@ -59,106 +80,187 @@ export default function ProjectModal({
       title={project ? "Editar Projeto" : "Novo Projeto"}
       size="md"
     >
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
+      {showTemplates && !project && (
+        <div className="mb-6">
+          <h3
+            className="text-lg font-semibold mb-3"
             style={{ color: state.currentTheme.colors.text }}
           >
-            Nome *
-          </label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-            className="w-full px-3 py-2 rounded-lg border transition-colors"
-            style={{
-              backgroundColor: state.currentTheme.colors.background,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
-            placeholder="Nome do projeto"
-            required
-          />
-        </div>
-
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Descrição
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, description: e.target.value }))
-            }
-            className="w-full px-3 py-2 rounded-lg border transition-colors resize-none"
-            style={{
-              backgroundColor: state.currentTheme.colors.background,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
-            placeholder="Descrição do projeto (opcional)"
-            rows={3}
-          />
-        </div>
-
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Cor
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {colors.map((color) => (
+            Escolha um template (opcional)
+          </h3>
+          <div className="grid grid-cols-1 gap-3 max-h-60 overflow-y-auto">
+            {projectTemplates.map((template) => (
               <button
-                key={color}
+                key={template.id}
                 type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, color }))}
-                className={`w-8 h-8 rounded-full border-2 transition-all ${
-                  formData.color === color ? "scale-110" : ""
-                }`}
+                onClick={() => handleTemplateSelect(template)}
+                className="p-3 rounded-lg border text-left transition-all hover:shadow-md"
                 style={{
-                  backgroundColor: color,
-                  borderColor:
-                    formData.color === color
-                      ? state.currentTheme.colors.text
-                      : "transparent",
+                  backgroundColor: state.currentTheme.colors.background,
+                  borderColor: state.currentTheme.colors.border,
                 }}
-              />
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
+                    style={{ backgroundColor: template.color }}
+                  >
+                    {template.icon === "book-open" && "📖"}
+                    {template.icon === "languages" && "🌍"}
+                    {template.icon === "dumbbell" && "💪"}
+                    {template.icon === "graduation-cap" && "🎓"}
+                    {template.icon === "palette" && "🎨"}
+                  </div>
+                  <div>
+                    <h4
+                      className="font-medium"
+                      style={{ color: state.currentTheme.colors.text }}
+                    >
+                      {template.name}
+                    </h4>
+                    <p
+                      className="text-sm"
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    >
+                      {template.description}
+                    </p>
+                  </div>
+                </div>
+              </button>
             ))}
           </div>
-        </div>
-
-        <div className="flex justify-end space-x-3 pt-4">
           <button
             type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg font-medium transition-colors"
-            style={{
-              backgroundColor: state.currentTheme.colors.surface,
-              color: state.currentTheme.colors.text,
-              borderColor: state.currentTheme.colors.border,
-            }}
+            onClick={() => setShowTemplates(false)}
+            className="mt-3 text-sm underline"
+            style={{ color: state.currentTheme.colors.textSecondary }}
           >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-white"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary,
-            }}
-          >
-            {project ? "Salvar" : "Criar"}
+            Ou criar projeto personalizado
           </button>
         </div>
-      </form>
+      )}
+
+      {!showTemplates && (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Nome *
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
+              className="w-full px-3 py-2 rounded-lg border transition-colors"
+              style={{
+                backgroundColor: state.currentTheme.colors.background,
+                borderColor: state.currentTheme.colors.border,
+                color: state.currentTheme.colors.text,
+              }}
+              placeholder="Nome do projeto"
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Descrição
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 rounded-lg border transition-colors resize-none"
+              style={{
+                backgroundColor: state.currentTheme.colors.background,
+                borderColor: state.currentTheme.colors.border,
+                color: state.currentTheme.colors.text,
+              }}
+              placeholder="Descrição do projeto (opcional)"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Cor
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {colors.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  onClick={() => setFormData((prev) => ({ ...prev, color }))}
+                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                    formData.color === color ? "scale-110" : ""
+                  }`}
+                  style={{
+                    backgroundColor: color,
+                    borderColor:
+                      formData.color === color
+                        ? state.currentTheme.colors.text
+                        : "transparent",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-between pt-4">
+            {!project && (
+              <button
+                type="button"
+                onClick={() => setShowTemplates(true)}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                style={{
+                  backgroundColor: state.currentTheme.colors.surface,
+                  color: state.currentTheme.colors.text,
+                  borderColor: state.currentTheme.colors.border,
+                }}
+              >
+                ← Voltar aos templates
+              </button>
+            )}
+            <div className="flex space-x-3 ml-auto">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 rounded-lg font-medium transition-colors"
+                style={{
+                  backgroundColor: state.currentTheme.colors.surface,
+                  color: state.currentTheme.colors.text,
+                  borderColor: state.currentTheme.colors.border,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-white"
+                style={{
+                  backgroundColor: state.currentTheme.colors.primary,
+                }}
+              >
+                {project ? "Salvar" : "Criar"}
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
     </Modal>
   );
 }
