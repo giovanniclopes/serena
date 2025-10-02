@@ -1,5 +1,7 @@
 import {
+  addDays,
   addMonths,
+  addWeeks,
   eachDayOfInterval,
   endOfMonth,
   endOfWeek,
@@ -8,7 +10,9 @@ import {
   isSameMonth,
   startOfMonth,
   startOfWeek,
+  subDays,
   subMonths,
+  subWeeks,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -44,6 +48,22 @@ export default function Calendar() {
     setCurrentDate(addMonths(currentDate, 1));
   };
 
+  const handlePrevWeek = () => {
+    setCurrentDate(subWeeks(currentDate, 1));
+  };
+
+  const handleNextWeek = () => {
+    setCurrentDate(addWeeks(currentDate, 1));
+  };
+
+  const handlePrevDay = () => {
+    setCurrentDate(subDays(currentDate, 1));
+  };
+
+  const handleNextDay = () => {
+    setCurrentDate(addDays(currentDate, 1));
+  };
+
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
   };
@@ -63,6 +83,254 @@ export default function Calendar() {
         !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
     );
     return getTasksForDate(filteredTasks, date);
+  };
+
+  const getWeekTasks = () => {
+    const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+    const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
+    const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+
+    const filteredTasks = tasks.filter(
+      (task) =>
+        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+    );
+
+    return weekDays.map((day) => ({
+      date: day,
+      tasks: getTasksForDate(filteredTasks, day),
+    }));
+  };
+
+  const getCurrentDayTasks = () => {
+    const filteredTasks = tasks.filter(
+      (task) =>
+        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+    );
+    return getTasksForDate(filteredTasks, currentDate);
+  };
+
+  const renderWeekView = () => {
+    const weekTasks = getWeekTasks();
+    const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
+    const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2
+            className="text-xl font-bold"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            {format(weekStart, "d 'de' MMMM", { locale: ptBR })} -{" "}
+            {format(weekEnd, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          </h2>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handlePrevWeek}
+              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              style={{
+                backgroundColor: state.currentTheme.colors.primary + "20",
+                color: state.currentTheme.colors.primary,
+              }}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleNextWeek}
+              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              style={{
+                backgroundColor: state.currentTheme.colors.primary + "20",
+                color: state.currentTheme.colors.primary,
+              }}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-7 gap-2">
+          {weekTasks.map((dayData, index) => {
+            const isToday = isSameDay(dayData.date, new Date());
+            const isSelected =
+              selectedDate && isSameDay(dayData.date, selectedDate);
+
+            return (
+              <div
+                key={dayData.date.toISOString()}
+                className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                  isToday ? "ring-2 ring-blue-400" : ""
+                } ${isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""}`}
+                style={{
+                  backgroundColor: isSelected
+                    ? state.currentTheme.colors.primary + "30"
+                    : isToday
+                    ? state.currentTheme.colors.primary + "10"
+                    : state.currentTheme.colors.surface,
+                  borderColor: isSelected
+                    ? state.currentTheme.colors.primary
+                    : isToday
+                    ? state.currentTheme.colors.primary + "80"
+                    : state.currentTheme.colors.primary + "20",
+                }}
+              >
+                <div className="text-center mb-2">
+                  <div
+                    className="text-xs font-medium mb-1"
+                    style={{ color: state.currentTheme.colors.textSecondary }}
+                  >
+                    {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][index]}
+                  </div>
+                  <div
+                    className={`text-lg font-bold ${
+                      isSelected ? "text-white" : isToday ? "text-blue-600" : ""
+                    }`}
+                    style={{
+                      color: isSelected
+                        ? "white"
+                        : isToday
+                        ? state.currentTheme.colors.primary
+                        : state.currentTheme.colors.text,
+                    }}
+                  >
+                    {format(dayData.date, "d")}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  {dayData.tasks.slice(0, 3).map((task) => (
+                    <div
+                      key={task.id}
+                      className="text-xs p-1 rounded truncate flex items-center space-x-1"
+                      style={{
+                        backgroundColor: task.projectId
+                          ? state.currentTheme.colors.primary + "20"
+                          : getPriorityColor(task.priority) + "20",
+                        color: task.projectId
+                          ? state.currentTheme.colors.primary
+                          : getPriorityColor(task.priority),
+                        borderLeft: `3px solid ${
+                          task.projectId
+                            ? state.currentTheme.colors.primary
+                            : getPriorityColor(task.priority)
+                        }`,
+                      }}
+                    >
+                      <div
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{
+                          backgroundColor: task.isCompleted
+                            ? "#10b981"
+                            : task.projectId
+                            ? state.currentTheme.colors.primary
+                            : getPriorityColor(task.priority),
+                        }}
+                      />
+                      <span
+                        className={
+                          task.isCompleted ? "line-through opacity-70" : ""
+                        }
+                      >
+                        {task.title}
+                      </span>
+                    </div>
+                  ))}
+                  {dayData.tasks.length > 3 && (
+                    <div
+                      className="text-xs font-medium text-center"
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    >
+                      +{dayData.tasks.length - 3} tarefas
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderDayView = () => {
+    const dayTasks = getCurrentDayTasks();
+    const isToday = isSameDay(currentDate, new Date());
+
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2
+            className="text-xl font-bold"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            {format(currentDate, "EEEE, d 'de' MMMM 'de' yyyy", {
+              locale: ptBR,
+            })}
+            {isToday && (
+              <span className="ml-2 text-sm font-normal text-blue-600">
+                (Hoje)
+              </span>
+            )}
+          </h2>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handlePrevDay}
+              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              style={{
+                backgroundColor: state.currentTheme.colors.primary + "20",
+                color: state.currentTheme.colors.primary,
+              }}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleNextDay}
+              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              style={{
+                backgroundColor: state.currentTheme.colors.primary + "20",
+                color: state.currentTheme.colors.primary,
+              }}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div
+          className="p-4 rounded-lg border-2"
+          style={{
+            backgroundColor: state.currentTheme.colors.surface,
+            borderColor: isToday
+              ? state.currentTheme.colors.primary + "80"
+              : state.currentTheme.colors.primary + "20",
+          }}
+        >
+          {dayTasks.length > 0 ? (
+            <div className="space-y-2">
+              {dayTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onComplete={(taskId) =>
+                    dispatch({ type: "COMPLETE_TASK", payload: taskId })
+                  }
+                  showProject={true}
+                  showDate={false}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <p
+                className="text-base"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Nenhuma tarefa para este dia
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   const renderMonthView = () => (
@@ -279,8 +547,10 @@ export default function Calendar() {
       </div>
 
       {viewMode === "month" && renderMonthView()}
+      {viewMode === "week" && renderWeekView()}
+      {viewMode === "day" && renderDayView()}
 
-      {selectedDate ? (
+      {viewMode === "month" && selectedDate ? (
         <div
           className="mt-6 p-4 rounded-lg border"
           style={{
@@ -332,7 +602,7 @@ export default function Calendar() {
             </div>
           )}
         </div>
-      ) : (
+      ) : viewMode === "month" ? (
         <div
           className="mt-6 p-4 rounded-lg text-center"
           style={{
@@ -346,7 +616,7 @@ export default function Calendar() {
             Clique em um dia para ver as tarefas
           </p>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
