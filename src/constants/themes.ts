@@ -67,4 +67,20 @@ export const availableThemes: Theme[] = [
       error: "#ef4444",
     },
   },
+  {
+    id: "dark-mode",
+    name: "Modo Escuro",
+    colors: {
+      primary: "#ffffff",
+      secondary: "#1f2937",
+      background: "#1f2937",
+      surface: "#374151",
+      text: "#ffffff",
+      textSecondary: "#9ca3af",
+      border: "#4b5563",
+      success: "#10b981",
+      warning: "#f59e0b",
+      error: "#ef4444",
+    },
+  },
 ];

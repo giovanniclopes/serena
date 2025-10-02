@@ -16,6 +16,7 @@ import EmailVerification from "./pages/EmailVerification";
 import Habits from "./pages/Habits";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import NewTask from "./pages/NewTask";
 import NotificationSettings from "./pages/NotificationSettings";
 import Profile from "./pages/Profile";
 import Projects from "./pages/Projects";
@@ -47,6 +48,7 @@ function App() {
               <Route index element={<Home />} />
               <Route path="calendar" element={<Calendar />} />
               <Route path="tasks" element={<Tasks />} />
+              <Route path="new-task" element={<NewTask />} />
               <Route path="projects" element={<Projects />} />
               <Route path="habits" element={<Habits />} />
               <Route path="countdowns" element={<Countdowns />} />

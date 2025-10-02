@@ -11,7 +11,13 @@ import { useClickOutside } from "../hooks/useClickOutside";
 import type { Workspace } from "../types";
 import WorkspaceModal from "./WorkspaceModal";
 
-export default function WorkspaceSelector() {
+export interface WorkspaceSelectorProps {
+  onWorkspaceChange?: () => void;
+}
+
+export default function WorkspaceSelector({
+  onWorkspaceChange,
+}: WorkspaceSelectorProps) {
   const { state, dispatch, workspaceChanging } = useApp();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -43,6 +49,10 @@ export default function WorkspaceSelector() {
 
     dispatch({ type: "SET_WORKSPACE_CHANGING", payload: true });
     setIsOpen(false);
+
+    if (onWorkspaceChange) {
+      onWorkspaceChange();
+    }
 
     setTimeout(() => {
       dispatch({ type: "SET_ACTIVE_WORKSPACE", payload: workspaceId });
@@ -127,7 +137,7 @@ export default function WorkspaceSelector() {
 
       {isOpen && (
         <div
-          className="absolute top-full left-0 mt-2 w-72 rounded-lg shadow-xl border z-50 animate-in fade-in-0 zoom-in-95 duration-200"
+          className="absolute top-full left-0 mt-2 w-full max-w-72 rounded-lg shadow-xl border z-50 animate-in fade-in-0 zoom-in-95 duration-200"
           style={{
             backgroundColor: state.currentTheme.colors.surface,
             borderColor: state.currentTheme.colors.border,
