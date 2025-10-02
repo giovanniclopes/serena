@@ -52,7 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const result = await signUp(email, password, name);
 
-      // Criar perfil automaticamente após cadastro bem-sucedido
       if (result?.user) {
         try {
           await createProfile({
@@ -63,13 +62,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log("✅ Perfil criado automaticamente");
         } catch (profileError) {
           console.log("⚠️ Erro ao criar perfil automaticamente:", profileError);
-          // Não falha o cadastro se não conseguir criar o perfil
         }
       }
 
       toast.success(
         "Conta criada com sucesso! Verifique seu email para confirmar."
       );
+
+      window.location.href = `/email-verification?email=${encodeURIComponent(
+        email
+      )}`;
     } catch (error) {
       console.log("❌ Erro ao criar conta:", error);
       setLoading(false);

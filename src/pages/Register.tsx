@@ -1,6 +1,7 @@
-import { Eye, EyeOff, Lock, Mail, Sparkles, User } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import SerenaLogo from "../../public/icons/icon.svg";
 import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
@@ -12,7 +13,6 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { signUp, loading } = useAuth();
-  const navigate = useNavigate();
 
   const getPasswordStrength = (password: string) => {
     let score = 0;
@@ -59,22 +59,22 @@ export default function Register() {
 
     try {
       await signUp(email, password, name);
-      navigate("/");
+      // O redirecionamento será feito pelo AuthContext
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar conta");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl shadow-lg">
-              <Sparkles className="h-8 w-8 text-white" />
+            <div className="shadow-lg">
+              <img src={SerenaLogo} alt="Serena" className="h-16 w-16" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-pink-500 bg-clip-text text-transparent">
             Serena
           </h1>
           <p className="text-gray-600 mt-2">
@@ -332,7 +332,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl text-sm font-medium text-white bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl text-sm font-medium text-white bg-pink-500 hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               {loading ? (
                 <>
@@ -350,7 +350,7 @@ export default function Register() {
               Já tem uma conta?{" "}
               <Link
                 to="/login"
-                className="font-medium text-purple-600 hover:text-purple-500 transition-colors duration-200"
+                className="font-medium text-pink-500 hover:text-pink-400 transition-colors duration-200"
               >
                 Fazer login
               </Link>

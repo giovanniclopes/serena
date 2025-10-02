@@ -12,6 +12,7 @@ import { AppProvider } from "./context/AppContext";
 import { AuthProvider } from "./context/AuthContext";
 import Calendar from "./pages/Calendar";
 import Countdowns from "./pages/Countdowns";
+import EmailVerification from "./pages/EmailVerification";
 import Habits from "./pages/Habits";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -33,6 +34,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/email-verification" element={<EmailVerification />} />
             <Route
               path="/"
               element={
