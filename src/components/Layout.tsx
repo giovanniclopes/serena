@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
-import CustomPointer from "./CustomPointer";
 import LogoutModal from "./LogoutModal";
 import Navigation from "./Navigation";
 import WorkspaceLoadingOverlay from "./WorkspaceLoadingOverlay";
@@ -97,8 +96,6 @@ export default function Layout() {
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
       />
-
-      <CustomPointer />
     </div>
   );
 }
