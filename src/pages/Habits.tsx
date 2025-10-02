@@ -48,23 +48,28 @@ export default function Habits() {
     date: Date,
     targetValue: number
   ) => {
-    // Debug: verificar a data que está sendo enviada
+    console.log("=== DEBUG HABIT ENTRY ===");
+    console.log("HabitId:", habitId);
+    console.log("Date clicked:", date.toISOString());
+    console.log("All entries:", entries);
     console.log(
-      "Data clicada:",
-      date.toISOString(),
-      "Data local:",
-      date.toLocaleDateString()
+      "Entries for this habit:",
+      entries.filter((e) => e.habitId === habitId)
     );
 
     const existingEntry = entries.find(
       (entry) => entry.habitId === habitId && isSameDay(entry.date, date)
     );
 
+    console.log("Existing entry found:", existingEntry);
+
     if (existingEntry) {
       // Se já existe uma entrada, alterna entre 0 e o valor da meta
       const newValue = existingEntry.value >= targetValue ? 0 : targetValue;
+      console.log("Updating entry with value:", newValue);
       updateHabitEntryMutation.mutate({ ...existingEntry, value: newValue });
     } else {
+      console.log("Creating new entry with value:", targetValue);
       createHabitEntryMutation.mutate({
         habitId,
         date,

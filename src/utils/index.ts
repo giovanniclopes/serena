@@ -159,9 +159,27 @@ export function getHabitProgress(
   entries: HabitEntry[],
   date: Date
 ): number {
-  const dayEntries = getHabitEntriesForDate(entries, date);
+  const dayEntries = entries.filter(
+    (entry) => entry.habitId === habit.id && isSameDay(entry.date, date)
+  );
   const totalValue = dayEntries.reduce((sum, entry) => sum + entry.value, 0);
-  return Math.min(totalValue / habit.target, 1);
+  const progress = Math.min(totalValue / habit.target, 1);
+
+  console.log("=== DEBUG HABIT PROGRESS ===");
+  console.log("Habit:", habit.name, "ID:", habit.id);
+  console.log("Date:", date.toISOString());
+  console.log("All entries:", entries);
+  console.log("Filtered entries for this habit and date:", dayEntries);
+  console.log(
+    "Total value:",
+    totalValue,
+    "Target:",
+    habit.target,
+    "Progress:",
+    progress
+  );
+
+  return progress;
 }
 
 export function getHabitStreak(habit: Habit, entries: HabitEntry[]): number {

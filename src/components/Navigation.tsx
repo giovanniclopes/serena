@@ -19,13 +19,13 @@ export default function Navigation() {
   // Itens principais - sempre visíveis
   const mainNavItems = [
     { path: "/", icon: Home, label: "Início" },
-    { path: "/tasks", icon: List, label: "Tarefas" },
+    { path: "/calendar", icon: Calendar, label: "Calendário" },
     { path: "/habits", icon: Target, label: "Hábitos" },
   ];
 
   // Itens secundários - no menu "Mais"
   const moreNavItems = [
-    { path: "/calendar", icon: Calendar, label: "Calendário" },
+    { path: "/tasks", icon: List, label: "Tarefas" },
     { path: "/projects", icon: Folder, label: "Projetos" },
     { path: "/countdowns", icon: Clock, label: "Contagem" },
     { path: "/profile", icon: User, label: "Perfil" },
