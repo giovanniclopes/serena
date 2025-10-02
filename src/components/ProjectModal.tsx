@@ -57,6 +57,8 @@ export default function ProjectModal({
       description: formData.description.trim() || undefined,
       color: formData.color,
       workspaceId: workspaceId || state.activeWorkspaceId,
+      tasksCompletedCount: 0,
+      tasksTotalCount: 0,
     };
 
     onSave(projectData, selectedTemplate || undefined);

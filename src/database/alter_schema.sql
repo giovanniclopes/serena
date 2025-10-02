@@ -460,3 +460,48 @@ SET
       t.project_id = p.id
       AND t.is_completed = true
   );
+
+-- =============================================================================
+-- 15. CONFIGURAÇÕES DE NOTIFICAÇÕES
+-- =============================================================================
+-- Adicionar colunas de notificação à tabela profiles
+ALTER TABLE
+  public.profiles
+ADD
+  COLUMN IF NOT EXISTS notifications_enabled BOOLEAN DEFAULT FALSE,
+ADD
+  COLUMN IF NOT EXISTS notification_preference_hours INT DEFAULT 24;
+
+-- Adicionar coluna de controle de notificação à tabela tasks
+ALTER TABLE
+  public.tasks
+ADD
+  COLUMN IF NOT EXISTS notification_sent_at TIMESTAMPTZ;
+
+-- Criar tabela para armazenar os tokens de notificação push
+CREATE TABLE IF NOT EXISTS public.push_notification_tokens (
+  id UUID NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  token JSONB NOT NULL,
+  -- Usamos JSONB para guardar o objeto de subscrição completo
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, token)
+);
+
+-- Habilitar RLS na tabela de tokens
+ALTER TABLE
+  public.push_notification_tokens ENABLE ROW LEVEL SECURITY;
+
+-- Criar política RLS para tokens de notificação
+DROP POLICY IF EXISTS "Utilizadores podem gerir os seus próprios tokens." ON public.push_notification_tokens;
+
+CREATE POLICY "Utilizadores podem gerir os seus próprios tokens." ON public.push_notification_tokens FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Adicionar comentários
+COMMENT ON TABLE public.push_notification_tokens IS 'Armazena tokens de notificação push dos dispositivos dos utilizadores';
+
+COMMENT ON COLUMN public.profiles.notifications_enabled IS 'Indica se o utilizador ativou as notificações';
+
+COMMENT ON COLUMN public.profiles.notification_preference_hours IS 'Horas antes do prazo para enviar notificação (ex: 24 horas antes)';
+
+COMMENT ON COLUMN public.tasks.notification_sent_at IS 'Timestamp da última notificação enviada para esta tarefa';

@@ -1,4 +1,5 @@
-import { User } from "lucide-react";
+import { Bell, User } from "lucide-react";
+import { Link } from "react-router-dom";
 import ProfileCard from "../components/ProfileCard";
 import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
@@ -71,6 +72,60 @@ export default function Profile() {
 
       <div className="max-w-2xl">
         <ProfileCard showEditButton={true} compact={false} />
+      </div>
+
+      <div className="max-w-2xl">
+        <div
+          className="rounded-lg border p-6"
+          style={{
+            backgroundColor: state.currentTheme.colors.surface,
+            borderColor: state.currentTheme.colors.border,
+          }}
+        >
+          <h2
+            className="text-lg font-semibold mb-4"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            Configurações
+          </h2>
+
+          <div className="space-y-3">
+            <Link
+              to="/notifications"
+              className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+              style={{
+                backgroundColor: state.currentTheme.colors.background,
+                borderColor: state.currentTheme.colors.border,
+              }}
+            >
+              <div
+                className="p-2 rounded-lg"
+                style={{
+                  backgroundColor: state.currentTheme.colors.primary + "20",
+                }}
+              >
+                <Bell
+                  className="w-5 h-5"
+                  style={{ color: state.currentTheme.colors.primary }}
+                />
+              </div>
+              <div className="flex-1">
+                <h3
+                  className="font-medium"
+                  style={{ color: state.currentTheme.colors.text }}
+                >
+                  Notificações
+                </h3>
+                <p
+                  className="text-sm"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  Configure lembretes de tarefas
+                </p>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
 
       {profile && (
