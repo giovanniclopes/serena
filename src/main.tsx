@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Analytics } from "@vercel/analytics/react";
 import { createRoot } from "react-dom/client";
 import { Toaster } from "sonner";
 import App from "./App.tsx";
@@ -23,5 +24,6 @@ createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <App />
     <Toaster richColors position="top-right" />
+    <Analytics />
   </QueryClientProvider>
 );
