@@ -11,13 +11,13 @@ export default function CustomPointer({ isVisible = true }: iOSPointerProps) {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const springX = useSpring(mouseX, { stiffness: 1000, damping: 50 });
-  const springY = useSpring(mouseY, { stiffness: 1000, damping: 50 });
+  const springX = useSpring(mouseX, { stiffness: 1500, damping: 60 });
+  const springY = useSpring(mouseY, { stiffness: 1500, damping: 60 });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      mouseX.set(e.clientX - 12);
-      mouseY.set(e.clientY - 12);
+      mouseX.set(e.clientX - 8);
+      mouseY.set(e.clientY - 8);
     };
 
     const handleMouseDown = () => {
@@ -57,10 +57,10 @@ export default function CustomPointer({ isVisible = true }: iOSPointerProps) {
       }}
       transition={{
         type: "spring",
-        stiffness: 1000,
-        damping: 50,
+        stiffness: 1500,
+        damping: 60,
       }}
-    >
+    >                                                                       
       <div className="relative">
         <motion.div
           className="w-4 h-4 rounded-full bg-white shadow-lg border border-blue-200"
@@ -73,8 +73,8 @@ export default function CustomPointer({ isVisible = true }: iOSPointerProps) {
           }}
           transition={{
             type: "spring",
-            stiffness: 600,
-            damping: 30,
+            stiffness: 1200,
+            damping: 20,
           }}
         />
 
@@ -90,8 +90,8 @@ export default function CustomPointer({ isVisible = true }: iOSPointerProps) {
           }}
           transition={{
             type: "spring",
-            stiffness: 600,
-            damping: 30,
+            stiffness: 1200,
+            damping: 20,
           }}
         />
 
@@ -107,8 +107,8 @@ export default function CustomPointer({ isVisible = true }: iOSPointerProps) {
           }}
           transition={{
             type: "spring",
-            stiffness: 600,
-            damping: 30,
+            stiffness: 1200,
+            damping: 20,
           }}
         />
 
