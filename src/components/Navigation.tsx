@@ -35,7 +35,6 @@ export default function Navigation() {
     <>
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 shadow-lg z-40">
         <div className="flex justify-around">
-          {/* Itens principais */}
           {mainNavItems.map(({ path, icon: Icon, label }) => (
             <NavLink
               key={path}
@@ -63,7 +62,6 @@ export default function Navigation() {
             </NavLink>
           ))}
 
-          {/* Botão "Mais" */}
           <button
             onClick={() => setShowMoreMenu(!showMoreMenu)}
             className="flex flex-col items-center space-y-1 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50"
@@ -75,16 +73,13 @@ export default function Navigation() {
         </div>
       </nav>
 
-      {/* Menu "Mais" - Overlay */}
       {showMoreMenu && (
         <div
           className="fixed inset-0 z-50"
           onClick={() => setShowMoreMenu(false)}
         >
-          {/* Backdrop */}
           <div className="absolute inset-0 bg-black bg-opacity-25" />
 
-          {/* Menu */}
           <div className="absolute bottom-20 left-4 right-4 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
             <div className="p-4">
               <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">

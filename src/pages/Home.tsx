@@ -125,7 +125,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-100 px-4 py-4">
         <div className="flex items-center justify-between">
           <div>
@@ -161,9 +160,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Content */}
       <div className="px-4 py-6 space-y-6">
-        {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">
           {stats.map((stat, index) => (
             <div
@@ -199,7 +196,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Overdue Tasks */}
         {overdueTasks.length > 0 && (
           <div>
             <div className="flex items-center space-x-2 mb-3">
@@ -226,7 +222,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Today's Tasks */}
         <div>
           <div className="flex items-center space-x-2 mb-3">
             <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
@@ -269,7 +264,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Upcoming Tasks */}
         {upcomingTasks.length > 0 && (
           <div>
             <div className="flex items-center space-x-2 mb-3">
@@ -305,10 +299,8 @@ export default function Home() {
         )}
       </div>
 
-      {/* Floating Action Button */}
       <FloatingActionButton onClick={() => setIsTaskModalOpen(true)} />
 
-      {/* Task Modal */}
       <TaskModal
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}

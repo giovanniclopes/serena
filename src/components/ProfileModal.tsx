@@ -149,7 +149,6 @@ export default function ProfileModal({
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Avatar Section */}
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 {profile?.avatarUrl ? (
@@ -205,7 +204,6 @@ export default function ProfileModal({
               )}
             </div>
 
-            {/* Username */}
             <div>
               <label
                 className="block text-sm font-medium mb-2"
@@ -228,7 +226,6 @@ export default function ProfileModal({
               />
             </div>
 
-            {/* First Name */}
             <div>
               <label
                 className="block text-sm font-medium mb-2"
@@ -251,7 +248,6 @@ export default function ProfileModal({
               />
             </div>
 
-            {/* Last Name */}
             <div>
               <label
                 className="block text-sm font-medium mb-2"
@@ -274,7 +270,6 @@ export default function ProfileModal({
               />
             </div>
 
-            {/* Birth Date */}
             <div>
               <label
                 className="block text-sm font-medium mb-2"
@@ -297,7 +292,6 @@ export default function ProfileModal({
               />
             </div>
 
-            {/* Status */}
             <div>
               <label
                 className="block text-sm font-medium mb-2"
@@ -322,7 +316,6 @@ export default function ProfileModal({
               </select>
             </div>
 
-            {/* Profile Info */}
             {profile && (
               <div
                 className="pt-4 border-t"
@@ -345,7 +338,6 @@ export default function ProfileModal({
               </div>
             )}
 
-            {/* Buttons */}
             <div className="flex space-x-3 pt-4">
               <button
                 type="button"

@@ -16,12 +16,10 @@ body {
   min-height: 100vh;
 }
 
-/* Smooth transitions for theme changes */
 * {
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -39,7 +37,6 @@ body {
   background: rgba(0, 0, 0, 0.3);
 }
 
-/* Focus styles */
 button:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
@@ -47,7 +44,6 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* Animation for task completion */
 @keyframes taskComplete {
   0% {
     transform: scale(1);

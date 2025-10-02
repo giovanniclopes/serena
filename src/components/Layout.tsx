@@ -36,7 +36,6 @@ export default function Layout() {
             <WorkspaceSelector />
           </div>
           <div className="flex items-center space-x-3">
-            {/* Avatar do usuário */}
             <div
               className="flex items-center space-x-2 px-3 py-2 rounded-xl transition-all duration-200 cursor-pointer"
               style={{
@@ -93,7 +92,6 @@ export default function Layout() {
       <Navigation />
       <WorkspaceLoadingOverlay />
 
-      {/* Modal de confirmação de logout */}
       <LogoutModal
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}

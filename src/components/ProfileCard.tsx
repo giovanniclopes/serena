@@ -84,7 +84,6 @@ export default function ProfileCard({
       <Card className={compact ? "p-3" : "p-4"}>
         <CardContent className="p-0">
           <div className="flex items-start space-x-4">
-            {/* Avatar */}
             <Avatar className={compact ? "w-12 h-12" : "w-16 h-16"}>
               <AvatarImage src={profile.avatarUrl} alt="Avatar" />
               <AvatarFallback>
@@ -95,7 +94,6 @@ export default function ProfileCard({
               </AvatarFallback>
             </Avatar>
 
-            {/* Profile Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -117,7 +115,6 @@ export default function ProfileCard({
                     </p>
                   )}
 
-                  {/* Status */}
                   <div className="flex items-center space-x-2 mt-1">
                     <Badge
                       variant="outline"
@@ -143,7 +140,6 @@ export default function ProfileCard({
                 )}
               </div>
 
-              {/* Additional Info */}
               {!compact && (
                 <div className="mt-3 space-y-2">
                   {profile.birthDate && (

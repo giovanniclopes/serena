@@ -43,7 +43,6 @@ export default function Profile() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center space-x-3">
         <div
           className="p-3 rounded-lg"
@@ -70,12 +69,10 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Profile Card */}
       <div className="max-w-2xl">
         <ProfileCard showEditButton={true} compact={false} />
       </div>
 
-      {/* Additional Info */}
       {profile && (
         <div className="max-w-2xl">
           <div

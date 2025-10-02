@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Forçar formato 24 horas em inputs de tempo */
 input[type="time"] {
   -webkit-appearance: none;
   -moz-appearance: none;

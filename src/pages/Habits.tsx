@@ -184,7 +184,6 @@ export default function Habits() {
         </div>
 
         <div className="space-y-2">
-          {/* Labels dos dias da semana */}
           <div className="grid grid-cols-7 gap-1">
             {["D", "S", "T", "Q", "Q", "S", "S"].map((dayLabel, index) => (
               <div
@@ -197,7 +196,6 @@ export default function Habits() {
             ))}
           </div>
 
-          {/* Grid de dias */}
           <div className="grid grid-cols-7 gap-1">
             {weekDays.map((day) => {
               const progress = getHabitProgress(habit, entries, day);
@@ -296,7 +294,6 @@ export default function Habits() {
         </h1>
       </div>
 
-      {/* Instruções de uso */}
       {filteredHabits.length > 0 && (
         <div
           className="p-3 rounded-lg border text-sm"
