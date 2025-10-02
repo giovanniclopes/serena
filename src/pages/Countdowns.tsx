@@ -28,6 +28,10 @@ export default function Countdowns() {
   const createCountdownMutation = useCreateCountdown();
   const updateCountdownMutation = useUpdateCountdown();
 
+  const filteredCountdowns = countdowns.filter(
+    (countdown) => countdown.workspaceId === state.activeWorkspaceId
+  );
+
   const getTimeRemaining = (targetDate: Date) => {
     const now = new Date();
     const days = differenceInDays(targetDate, now);
@@ -202,8 +206,12 @@ export default function Countdowns() {
     );
   };
 
-  const upcomingCountdowns = countdowns.filter((c) => !isOverdue(c.targetDate));
-  const pastCountdowns = countdowns.filter((c) => isOverdue(c.targetDate));
+  const upcomingCountdowns = filteredCountdowns.filter(
+    (c) => !isOverdue(c.targetDate)
+  );
+  const pastCountdowns = filteredCountdowns.filter((c) =>
+    isOverdue(c.targetDate)
+  );
 
   if (isLoading) {
     return (
@@ -248,7 +256,7 @@ export default function Countdowns() {
         </h1>
       </div>
 
-      {countdowns.length > 0 ? (
+      {filteredCountdowns.length > 0 ? (
         <div className="space-y-4">
           {upcomingCountdowns.length > 0 && (
             <div>

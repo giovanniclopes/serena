@@ -27,6 +27,10 @@ export default function Home() {
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
 
+  const filteredTasks = tasks.filter(
+    (task) => task.workspaceId === state.activeWorkspaceId
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -58,9 +62,9 @@ export default function Home() {
     );
   }
 
-  const todayTasks = getTodayTasks(tasks);
-  const overdueTasks = getOverdueTasks(tasks);
-  const upcomingTasks = getUpcomingTasks(tasks, 7);
+  const todayTasks = getTodayTasks(filteredTasks);
+  const overdueTasks = getOverdueTasks(filteredTasks);
+  const upcomingTasks = getUpcomingTasks(filteredTasks, 7);
 
   const handleCompleteTask = (taskId: string) => {
     completeTaskMutation.mutate(taskId);
@@ -106,7 +110,9 @@ export default function Home() {
     {
       icon: Target,
       label: "Hábitos Ativos",
-      value: state.habits.length,
+      value: state.habits.filter(
+        (habit) => habit.workspaceId === state.activeWorkspaceId
+      ).length,
       color: state.currentTheme.colors.primary,
     },
     {
@@ -148,7 +154,8 @@ export default function Home() {
                 color: state.currentTheme.colors.primary,
               }}
             >
-              Pessoal
+              {state.workspaces.find((w) => w.id === state.activeWorkspaceId)
+                ?.name || "Pessoal"}
             </div>
           </div>
         </div>

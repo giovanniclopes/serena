@@ -34,6 +34,10 @@ export default function Habits() {
     isLoading: entriesLoading,
     error: entriesError,
   } = useHabitEntries();
+
+  const filteredHabits = habits.filter(
+    (habit) => habit.workspaceId === state.activeWorkspaceId
+  );
   const createHabitMutation = useCreateHabit();
   const updateHabitMutation = useUpdateHabit();
   const createHabitEntryMutation = useCreateHabitEntry();
@@ -294,7 +298,7 @@ export default function Habits() {
       </div>
 
       {/* Instruções de uso */}
-      {habits.length > 0 && (
+      {filteredHabits.length > 0 && (
         <div
           className="p-3 rounded-lg border text-sm"
           style={{
@@ -327,9 +331,9 @@ export default function Habits() {
         </div>
       )}
 
-      {habits.length > 0 ? (
+      {filteredHabits.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {habits.map(renderHabitCard)}
+          {filteredHabits.map(renderHabitCard)}
         </div>
       ) : (
         <div
