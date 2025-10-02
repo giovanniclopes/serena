@@ -47,11 +47,17 @@ CREATE TABLE public.projects (
   description text,
   color text,
   icon text,
+  tasks_total_count integer NOT NULL DEFAULT 0,
+  tasks_completed_count integer NOT NULL DEFAULT 0,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 COMMENT ON TABLE public.projects IS 'Agrupa tarefas relacionadas a um objetivo comum.';
+
+COMMENT ON COLUMN public.projects.tasks_total_count IS 'Número total de tarefas associadas ao projeto';
+
+COMMENT ON COLUMN public.projects.tasks_completed_count IS 'Número de tarefas concluídas do projeto';
 
 -- Tabela principal para as tarefas.
 CREATE TABLE public.tasks (
@@ -257,3 +263,104 @@ CREATE INDEX idx_countdowns_workspace_id ON public.countdowns(workspace_id);
 CREATE INDEX idx_tags_user_id ON public.tags(user_id);
 
 CREATE INDEX idx_tags_workspace_id ON public.tags(workspace_id);
+
+-- =============================================================================
+-- 4. FUNÇÕES E TRIGGERS PARA MANTER CONTADORES ATUALIZADOS
+-- =============================================================================
+-- Função para atualizar automaticamente os contadores de tarefas dos projetos
+CREATE
+OR REPLACE FUNCTION update_project_tasks_count() RETURNS TRIGGER AS $ $ DECLARE affected_project_id uuid;
+
+BEGIN IF TG_OP = 'DELETE' THEN affected_project_id := OLD.project_id;
+
+ELSE affected_project_id := NEW.project_id;
+
+END IF;
+
+IF affected_project_id IS NOT NULL THEN
+UPDATE
+  public.projects
+SET
+  tasks_total_count = (
+    SELECT
+      COUNT(*)
+    FROM
+      public.tasks
+    WHERE
+      project_id = affected_project_id
+  ),
+  tasks_completed_count = (
+    SELECT
+      COUNT(*)
+    FROM
+      public.tasks
+    WHERE
+      project_id = affected_project_id
+      AND is_completed = true
+  )
+WHERE
+  id = affected_project_id;
+
+END IF;
+
+IF TG_OP = 'UPDATE'
+AND OLD.project_id IS DISTINCT
+FROM
+  NEW.project_id THEN IF OLD.project_id IS NOT NULL THEN
+UPDATE
+  public.projects
+SET
+  tasks_total_count = (
+    SELECT
+      COUNT(*)
+    FROM
+      public.tasks
+    WHERE
+      project_id = OLD.project_id
+  ),
+  tasks_completed_count = (
+    SELECT
+      COUNT(*)
+    FROM
+      public.tasks
+    WHERE
+      project_id = OLD.project_id
+      AND is_completed = true
+  )
+WHERE
+  id = OLD.project_id;
+
+END IF;
+
+END IF;
+
+RETURN COALESCE(NEW, OLD);
+
+END;
+
+$ $ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION update_project_tasks_count() IS 'Atualiza automaticamente os contadores de tarefas quando uma tarefa é inserida, atualizada ou deletada';
+
+-- Triggers para manter os contadores atualizados
+CREATE TRIGGER trigger_update_project_tasks_count_insert
+AFTER
+INSERT
+  ON public.tasks FOR EACH ROW EXECUTE FUNCTION update_project_tasks_count();
+
+CREATE TRIGGER trigger_update_project_tasks_count_update
+AFTER
+UPDATE
+  ON public.tasks FOR EACH ROW
+  WHEN (
+    OLD.project_id IS DISTINCT
+    FROM
+      NEW.project_id
+      OR OLD.is_completed IS DISTINCT
+    FROM
+      NEW.is_completed
+  ) EXECUTE FUNCTION update_project_tasks_count();
+
+CREATE TRIGGER trigger_update_project_tasks_count_delete
+AFTER
+  DELETE ON public.tasks FOR EACH ROW EXECUTE FUNCTION update_project_tasks_count();

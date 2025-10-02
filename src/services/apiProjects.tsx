@@ -4,7 +4,7 @@ import type { Project } from "../types";
 export async function getProjects(): Promise<Project[]> {
   const { data, error } = await supabase
     .from("projects")
-    .select("*")
+    .select("*, tasks_total_count, tasks_completed_count")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -19,6 +19,8 @@ export async function getProjects(): Promise<Project[]> {
     color: project.color,
     icon: project.icon,
     workspaceId: project.workspace_id,
+    tasksCompletedCount: project.tasks_completed_count || 0,
+    tasksTotalCount: project.tasks_total_count || 0,
     createdAt: new Date(project.created_at),
     updatedAt: new Date(project.updated_at),
   }));
@@ -62,6 +64,8 @@ export async function createProject(
     color: data.color,
     icon: data.icon,
     workspaceId: data.workspace_id,
+    tasksCompletedCount: data.tasks_completed_count || 0,
+    tasksTotalCount: data.tasks_total_count || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -100,6 +104,8 @@ export async function updateProject(
     color: data.color,
     icon: data.icon,
     workspaceId: data.workspace_id,
+    tasksCompletedCount: data.tasks_completed_count || 0,
+    tasksTotalCount: data.tasks_total_count || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };

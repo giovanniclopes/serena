@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle, Folder, Target } from "lucide-react";
+import { CheckCircle2, Folder, Target } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProjectModal from "../components/ProjectModal";
@@ -9,7 +9,6 @@ import {
   useProjects,
   useUpdateProject,
 } from "../features/projects/useProjects";
-import { useProjectProgress } from "../hooks/useProjectProgress";
 import type { Project } from "../types";
 
 export default function Projects() {
@@ -71,8 +70,6 @@ export default function Projects() {
     ? projects.filter((p: Project) => p.workspaceId === activeWorkspaceId)
     : [];
 
-  const projectProgress = useProjectProgress(filteredProjects);
-
   if (isLoadingProjects) {
     return <div className="text-center p-4">A carregar projetos...</div>;
   }
@@ -86,9 +83,14 @@ export default function Projects() {
       {filteredProjects.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProjects.map((project: Project) => {
-            const progress = projectProgress.find(
-              (p) => p.projectId === project.id
-            );
+            const completionPercentage =
+              project.tasksTotalCount > 0
+                ? Math.round(
+                    (project.tasksCompletedCount / project.tasksTotalCount) *
+                      100
+                  )
+                : 0;
+
             return (
               <div
                 key={project.id}
@@ -102,58 +104,47 @@ export default function Projects() {
                     <Folder size={16} />
                   </div>
                   <div className="flex-1">
-                    <h2 className="font-bold text-dark-gray">{project.name}</h2>
-                    <p className="text-medium-gray text-sm">
-                      {project.description}
-                    </p>
+                    <h2 className="font-bold text-dark-gray font-nunito">
+                      {project.name}
+                    </h2>
+                    {project.description && (
+                      <p className="text-medium-gray text-sm font-nunito">
+                        {project.description}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {progress && progress.totalTasks > 0 && (
+                {project.tasksTotalCount > 0 && (
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <Target size={14} className="text-medium-gray" />
-                        <span className="text-sm text-medium-gray">
-                          {progress.completedTasks}/{progress.totalTasks}{" "}
-                          tarefas
+                        <span className="text-sm text-medium-gray font-nunito">
+                          {project.tasksCompletedCount}/
+                          {project.tasksTotalCount} tarefas
                         </span>
                       </div>
-                      <span className="text-sm font-medium text-dark-gray">
-                        {progress.progressPercentage}%
+                      <span className="text-sm font-semibold text-dark-gray font-nunito">
+                        {completionPercentage}%
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="h-2 rounded-full transition-all duration-300"
                         style={{
-                          width: `${progress.progressPercentage}%`,
+                          width: `${completionPercentage}%`,
                           backgroundColor: project.color || "#ec4899",
                         }}
                       />
                     </div>
-                  </div>
-                )}
 
-                {progress?.nextTask && (
-                  <div className="mb-4 p-2 bg-gray-50 rounded-md">
-                    <div className="flex items-center gap-2 mb-1">
-                      <CheckCircle size={14} className="text-medium-gray" />
-                      <span className="text-sm font-medium text-dark-gray">
-                        Próxima tarefa:
-                      </span>
-                    </div>
-                    <p className="text-sm text-medium-gray ml-6">
-                      {progress.nextTask.title}
-                    </p>
-                    {progress.nextTask.dueDate && (
-                      <div className="flex items-center gap-1 ml-6 mt-1">
-                        <Calendar size={12} className="text-medium-gray" />
-                        <span className="text-xs text-medium-gray">
-                          {progress.nextTask.dueDate.toLocaleDateString(
-                            "pt-BR"
-                          )}
-                        </span>
+                    {completionPercentage === 100 && (
+                      <div className="flex items-center gap-2 mt-4 text-peach-pink">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <p className="text-sm font-semibold font-nunito">
+                          Projeto concluído!
+                        </p>
                       </div>
                     )}
                   </div>

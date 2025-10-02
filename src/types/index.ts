@@ -42,6 +42,8 @@ export interface Project {
   color: string;
   icon?: string;
   workspaceId: string;
+  tasksCompletedCount: number;
+  tasksTotalCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
