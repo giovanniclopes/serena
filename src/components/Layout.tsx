@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import BottomNavbar from "./BottomNavbar";
@@ -8,6 +8,17 @@ import SideMenu from "./SideMenu";
 import TopNavbar from "./TopNavbar";
 import WorkspaceLoadingOverlay from "./WorkspaceLoadingOverlay";
 
+const motivationalMessages = [
+  "Cada tarefa é um passo rumo aos seus sonhos",
+  "Transforme hoje em algo extraordinário",
+  "Disciplina é a ponte para conquistas",
+  "Sua dedicação de hoje é o sucesso de amanhã",
+  "Foque no progresso, não na perfeição",
+  "Cada ação te aproxima dos objetivos",
+  "Transforme desafios em oportunidades",
+  "Você é mais forte do que imagina",
+];
+
 export default function Layout() {
   const { state } = useApp();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -15,11 +26,16 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const motivationalMessage = useMemo(() => {
+    const randomIndex = Math.floor(Math.random() * motivationalMessages.length);
+    return `"${motivationalMessages[randomIndex]}"`;
+  }, []);
+
   const getPageTitle = () => {
     const path = location.pathname;
     switch (path) {
       case "/":
-        return "Gerenciar suas tarefas";
+        return motivationalMessage;
       case "/tasks":
         return "Tarefas";
       case "/new-task":
@@ -60,8 +76,7 @@ export default function Layout() {
         showCancelDone={location.pathname === "/new-task"}
         onMenuClick={() => setShowMenu(!showMenu)}
         onCancel={() => navigate("/tasks")}
-        onDone={() => {
-        }}
+        onDone={() => {}}
       />
 
       <main

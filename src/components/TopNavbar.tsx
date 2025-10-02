@@ -103,7 +103,7 @@ export default function TopNavbar({
         <div className="flex-1 flex justify-center">
           {title ? (
             <motion.h1
-              className="text-lg font-semibold"
+              className="text-sm font-medium italic text-center max-w-[280px] px-2"
               style={{ color: state.currentTheme.colors.text }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
