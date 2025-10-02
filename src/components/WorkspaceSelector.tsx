@@ -7,6 +7,7 @@ import {
   useUpdateWorkspace,
   useWorkspaces,
 } from "../features/workspaces/useWorkspaces";
+import { useClickOutside } from "../hooks/useClickOutside";
 import type { Workspace } from "../types";
 import WorkspaceModal from "./WorkspaceModal";
 
@@ -23,6 +24,12 @@ export default function WorkspaceSelector() {
   const createWorkspaceMutation = useCreateWorkspace();
   const updateWorkspaceMutation = useUpdateWorkspace();
   const deleteWorkspaceMutation = useDeleteWorkspace();
+
+  const containerRef = useClickOutside<HTMLDivElement>(() => {
+    if (isOpen) {
+      setIsOpen(false);
+    }
+  });
 
   const activeWorkspace = workspaces?.find(
     (w) => w.id === state.activeWorkspaceId
@@ -81,7 +88,7 @@ export default function WorkspaceSelector() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={workspaceChanging}

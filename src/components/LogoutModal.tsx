@@ -2,6 +2,7 @@ import { LogOut, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
+import { useClickOutside } from "../hooks/useClickOutside";
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -12,6 +13,12 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
   const { state } = useApp();
   const { signOut, loading } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
+
+  const modalRef = useClickOutside<HTMLDivElement>(() => {
+    if (isOpen) {
+      onClose();
+    }
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -48,12 +55,6 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
     }
   };
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -62,10 +63,10 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
         className={`fixed inset-0 bg-black transition-opacity duration-300 ${
           isVisible ? "bg-opacity-50" : "bg-opacity-0"
         }`}
-        onClick={handleBackdropClick}
       />
 
       <div
+        ref={modalRef}
         className={`relative bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 transform transition-all duration-300 ${
           isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
