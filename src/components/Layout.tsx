@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
 import Navigation from "./Navigation";
+import WorkspaceLoadingOverlay from "./WorkspaceLoadingOverlay";
 import WorkspaceSelector from "./WorkspaceSelector";
 
 export default function Layout() {
@@ -62,6 +63,7 @@ export default function Layout() {
       </main>
 
       <Navigation />
+      <WorkspaceLoadingOverlay />
     </div>
   );
 }

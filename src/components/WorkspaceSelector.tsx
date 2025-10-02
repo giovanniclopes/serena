@@ -12,6 +12,7 @@ import WorkspaceModal from "./WorkspaceModal";
 
 export default function WorkspaceSelector() {
   const { state, dispatch } = useApp();
+
   const [isOpen, setIsOpen] = useState(false);
   const [isWorkspaceModalOpen, setIsWorkspaceModalOpen] = useState(false);
   const [editingWorkspace, setEditingWorkspace] = useState<
@@ -28,8 +29,19 @@ export default function WorkspaceSelector() {
   );
 
   const handleWorkspaceChange = (workspaceId: string) => {
-    dispatch({ type: "SET_ACTIVE_WORKSPACE", payload: workspaceId });
+    if (workspaceId === state.activeWorkspaceId) {
+      setIsOpen(false);
+      return;
+    }
+
+    console.log("Iniciando mudança de workspace para:", workspaceId);
+    dispatch({ type: "SET_WORKSPACE_CHANGING", payload: true });
     setIsOpen(false);
+
+    setTimeout(() => {
+      dispatch({ type: "SET_ACTIVE_WORKSPACE", payload: workspaceId });
+      dispatch({ type: "SET_WORKSPACE_CHANGING", payload: false });
+    }, 800);
   };
 
   const handleCreateWorkspace = () => {

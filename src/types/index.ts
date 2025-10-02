@@ -153,6 +153,7 @@ export interface AppState {
   filters: Filter[];
   currentTheme: Theme;
   availableThemes: Theme[];
+  workspaceChanging: boolean;
 }
 
 export type ViewMode = "today" | "week" | "month" | "list";

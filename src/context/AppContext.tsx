@@ -32,6 +32,7 @@ interface AppContextType {
   dispatch: React.Dispatch<AppAction>;
   loading: boolean;
   error: string | null;
+  workspaceChanging: boolean;
 }
 
 type AppAction =
@@ -63,6 +64,7 @@ type AppAction =
   | { type: "SET_THEME"; payload: string }
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "SET_ERROR"; payload: string | null }
+  | { type: "SET_WORKSPACE_CHANGING"; payload: boolean }
   | { type: "LOAD_DATA"; payload: Partial<AppState> };
 
 const getInitialState = (): AppState => {
@@ -78,6 +80,7 @@ const getInitialState = (): AppState => {
     filters: [],
     currentTheme: defaultTheme,
     availableThemes,
+    workspaceChanging: false,
   };
 };
 
@@ -246,6 +249,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
       return theme ? { ...state, currentTheme: theme } : state;
     }
 
+    case "SET_WORKSPACE_CHANGING":
+      return { ...state, workspaceChanging: action.payload };
+
     case "LOAD_DATA":
       return { ...state, ...action.payload };
 
@@ -369,7 +375,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [state.activeWorkspaceId, state.currentTheme.id, setAppData]);
 
   return (
-    <AppContext.Provider value={{ state, dispatch, loading, error }}>
+    <AppContext.Provider
+      value={{
+        state,
+        dispatch,
+        loading,
+        error,
+        workspaceChanging: state.workspaceChanging,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );
