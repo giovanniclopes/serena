@@ -532,10 +532,8 @@ export function searchHabits(habits: Habit[], query: string): Habit[] {
 export function filterHabits(habits: Habit[], showCompleted: boolean): Habit[] {
   if (showCompleted) return habits;
 
-  return habits.filter((habit) => {
+  return habits.filter(() => {
     // Para hábitos, consideramos "concluído" se atingiu a meta hoje
-    const today = new Date();
-    const todayEntries = habits.filter((h) => h.id === habit.id);
     // Esta lógica pode ser refinada baseada na implementação específica
     return true; // Por enquanto, mostramos todos os hábitos
   });
