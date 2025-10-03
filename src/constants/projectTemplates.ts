@@ -212,6 +212,7 @@ export function createProjectFromTemplate(
       priority: task.priority,
       reminders: [],
       tags: [],
+      attachments: [],
       isCompleted: false,
       completedAt: undefined,
       workspaceId,

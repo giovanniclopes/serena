@@ -44,6 +44,7 @@ export default function SubtaskManager({
       priority: "P3",
       reminders: [],
       tags: [],
+      attachments: [],
       isCompleted: false,
       completedAt: undefined,
       workspaceId,

@@ -29,6 +29,7 @@ export async function getSubtasks(taskId: string): Promise<Task[]> {
     priority: subtask.priority,
     reminders: subtask.reminders || [],
     tags: subtask.tags || [],
+    attachments: subtask.attachments || [],
     isCompleted: subtask.is_completed,
     completedAt: subtask.completed_at
       ? new Date(subtask.completed_at)
@@ -85,6 +86,7 @@ export async function createSubtask(
     priority: data.priority,
     reminders: data.reminders || [],
     tags: data.tags || [],
+    attachments: data.attachments || [],
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
@@ -130,6 +132,7 @@ export async function updateSubtask(subtask: Task): Promise<Task> {
     priority: data.priority,
     reminders: data.reminders || [],
     tags: data.tags || [],
+    attachments: data.attachments || [],
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
@@ -178,6 +181,7 @@ export async function completeSubtask(subtaskId: string): Promise<Task> {
     priority: data.priority,
     reminders: data.reminders || [],
     tags: data.tags || [],
+    attachments: data.attachments || [],
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,

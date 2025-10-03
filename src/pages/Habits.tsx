@@ -207,7 +207,7 @@ export default function Habits() {
           </div>
 
           <div className="grid grid-cols-7 gap-1">
-            {weekDays.map((day, index) => {
+            {weekDays.map((day) => {
               const progress = getHabitProgress(habit, entries, day);
               const isToday = isSameDay(day, new Date());
               const isCompleted = progress >= 1;
