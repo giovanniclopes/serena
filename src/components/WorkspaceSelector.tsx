@@ -123,7 +123,7 @@ export default function WorkspaceSelector({
             }}
           />
         )}
-        <span className="font-medium">
+        <span className="font-medium text-sm">
           {workspaceChanging
             ? "Alterando..."
             : activeWorkspace?.name || "Selecionar Workspace"}
@@ -137,7 +137,7 @@ export default function WorkspaceSelector({
 
       {isOpen && (
         <div
-          className="absolute top-full left-0 mt-2 w-full max-w-72 rounded-lg shadow-xl border z-50 animate-in fade-in-0 zoom-in-95 duration-200"
+          className="absolute top-full right-0 mt-2 w-72 rounded-lg shadow-xl border z-50 animate-in fade-in-0 zoom-in-95 duration-200"
           style={{
             backgroundColor: state.currentTheme.colors.surface,
             borderColor: state.currentTheme.colors.border,

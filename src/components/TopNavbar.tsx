@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, Edit, Menu, Share, User } from "lucide-react";
+import { ArrowLeft, Edit, Menu, Share } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import WorkspaceSelector from "./WorkspaceSelector";
 
 interface TopNavbarProps {
   title?: string;
@@ -103,7 +104,7 @@ export default function TopNavbar({
         <div className="flex-1 flex justify-center">
           {title ? (
             <motion.h1
-              className="text-sm font-medium italic text-center max-w-[280px] px-2"
+              className="text-xs font-light italic text-center max-w-[280px] px-2"
               style={{ color: state.currentTheme.colors.text }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -162,17 +163,20 @@ export default function TopNavbar({
                   <Edit className="w-5 h-5" />
                 </motion.button>
               )}
-              <motion.div
-                className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{
-                  backgroundColor: state.currentTheme.colors.primary,
-                }}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                transition={{ duration: 0.2 }}
-              >
-                <User className="w-4 h-4 text-white" />
-              </motion.div>
+              {/* <div className="flex items-center space-x-2">
+                <div
+                  className="px-3 py-1.5 rounded-full text-sm font-medium"
+                  style={{
+                    backgroundColor: state.currentTheme.colors.primary + "10",
+                    color: state.currentTheme.colors.primary,
+                  }}
+                >
+                  {state.workspaces.find(
+                    (w) => w.id === state.activeWorkspaceId
+                  )?.name || "Pessoal"}
+                </div>
+              </div> */}
+              <WorkspaceSelector />
             </>
           )}
         </div>

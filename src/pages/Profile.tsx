@@ -1,12 +1,16 @@
-import { Bell, User } from "lucide-react";
+import { Bell, BookOpen, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import OnboardingModal from "../components/OnboardingModal";
 import ProfileCard from "../components/ProfileCard";
 import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
+import { useOnboarding } from "../hooks/useOnboarding";
 
 export default function Profile() {
   const { state } = useApp();
   const { profile, isLoading, error } = useProfile();
+  const { showOnboarding, showOnboardingAgain, hideOnboarding } =
+    useOnboarding();
 
   if (isLoading) {
     return (
@@ -244,6 +248,62 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      <div className="max-w-2xl">
+        <div
+          className="rounded-lg border p-6"
+          style={{
+            backgroundColor: state.currentTheme.colors.surface,
+            borderColor: state.currentTheme.colors.border,
+          }}
+        >
+          <h2
+            className="text-lg font-semibold mb-4"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            Ajuda e Suporte
+          </h2>
+
+          <div className="space-y-3">
+            <button
+              onClick={showOnboardingAgain}
+              className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors w-full text-left"
+              style={{
+                backgroundColor: state.currentTheme.colors.background,
+                borderColor: state.currentTheme.colors.border,
+              }}
+            >
+              <div
+                className="p-2 rounded-lg"
+                style={{
+                  backgroundColor: state.currentTheme.colors.primary + "20",
+                }}
+              >
+                <BookOpen
+                  className="w-5 h-5"
+                  style={{ color: state.currentTheme.colors.primary }}
+                />
+              </div>
+              <div className="flex-1">
+                <h3
+                  className="font-medium"
+                  style={{ color: state.currentTheme.colors.text }}
+                >
+                  Revisar Introdução
+                </h3>
+                <p
+                  className="text-sm"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  Veja novamente o tour dos módulos
+                </p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <OnboardingModal isOpen={showOnboarding} onClose={hideOnboarding} />
     </div>
   );
 }

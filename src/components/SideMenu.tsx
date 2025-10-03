@@ -16,7 +16,6 @@ import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
 import LogoutModal from "./LogoutModal";
-import WorkspaceSelector from "./WorkspaceSelector";
 
 interface SideMenuProps {
   isOpen: boolean;
@@ -96,7 +95,6 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.3 }}
               >
-                <WorkspaceSelector onWorkspaceChange={onClose} />
               </motion.div>
 
               <div className="mb-8">

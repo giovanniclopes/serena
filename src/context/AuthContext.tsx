@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useOnboarding } from "../hooks/useOnboarding";
 import { supabase } from "../lib/supabaseClient";
 import { createProfile } from "../services/apiProfile";
 import { signIn, signOut, signUp } from "../services/auth";
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<unknown | null>(null);
   const [loading, setLoading] = useState(true);
+  const { markAsNewUser } = useOnboarding();
 
   useEffect(() => {
     const {
@@ -60,6 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             status: "active",
           });
           console.log("✅ Perfil criado automaticamente");
+          markAsNewUser();
         } catch (profileError) {
           console.log("⚠️ Erro ao criar perfil automaticamente:", profileError);
         }

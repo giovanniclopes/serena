@@ -145,18 +145,6 @@ export default function Home() {
               {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
             </p>
           </div>
-          <div className="flex items-center space-x-2">
-            <div
-              className="px-3 py-1.5 rounded-full text-sm font-medium"
-              style={{
-                backgroundColor: state.currentTheme.colors.primary + "10",
-                color: state.currentTheme.colors.primary,
-              }}
-            >
-              {state.workspaces.find((w) => w.id === state.activeWorkspaceId)
-                ?.name || "Pessoal"}
-            </div>
-          </div>
         </div>
       </div>
 

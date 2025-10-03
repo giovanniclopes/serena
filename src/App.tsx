@@ -5,7 +5,7 @@ import {
   Routes,
 } from "react-router-dom";
 import "./App.css";
-import Layout from "./components/Layout";
+import AppWithOnboarding from "./components/AppWithOnboarding";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AppProvider } from "./context/AppContext";
@@ -41,7 +41,7 @@ function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <Layout />
+                  <AppWithOnboarding />
                 </ProtectedRoute>
               }
             >
