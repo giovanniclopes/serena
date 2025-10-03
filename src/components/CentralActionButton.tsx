@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckSquare, Clock, Folder, Plus, Target, X } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
+import { useHapticFeedback } from "../hooks/useHapticFeedback";
 
 interface CentralActionButtonProps {
   onTaskClick: () => void;
@@ -17,6 +18,7 @@ export default function CentralActionButton({
   onProjectClick,
 }: CentralActionButtonProps) {
   const { state } = useApp();
+  const { triggerHaptic } = useHapticFeedback();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const subButtons = [
@@ -51,10 +53,12 @@ export default function CentralActionButton({
   ];
 
   const handleMainButtonClick = () => {
+    triggerHaptic("medium");
     setIsExpanded(!isExpanded);
   };
 
   const handleSubButtonClick = (onClick: () => void) => {
+    triggerHaptic("light");
     onClick();
     setIsExpanded(false);
   };

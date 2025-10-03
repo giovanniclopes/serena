@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Calendar, Folder, Home, User } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import CentralActionButton from "./CentralActionButton";
 
 interface BottomNavbarProps {
@@ -18,6 +19,7 @@ export default function BottomNavbar({
   onProjectClick,
 }: BottomNavbarProps) {
   const { state } = useApp();
+  const { triggerHaptic } = useHapticFeedback();
 
   const navItems = [
     { path: "/", icon: Home, label: "Início" },
@@ -71,6 +73,7 @@ export default function BottomNavbar({
                     scale: 0.9,
                     transition: { duration: 0.1 },
                   }}
+                  onTap={() => triggerHaptic("light")}
                 >
                   <Icon className="w-5 h-5" />
                 </motion.div>
@@ -133,6 +136,7 @@ export default function BottomNavbar({
                     scale: 0.9,
                     transition: { duration: 0.1 },
                   }}
+                  onTap={() => triggerHaptic("light")}
                 >
                   <Icon className="w-5 h-5" />
                 </motion.div>

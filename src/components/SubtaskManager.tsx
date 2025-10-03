@@ -164,13 +164,15 @@ export default function SubtaskManager({
               <button
                 onClick={() => handleCompleteSubtask(subtask.id)}
                 disabled={completeSubtaskMutation.isPending}
-                className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${
+                className={`w-1.5 h-1.5 sm:w-4 sm:h-4 rounded border-2 flex items-center justify-center transition-colors ${
                   subtask.isCompleted
                     ? "bg-green-500 border-green-500 text-white"
                     : "border-gray-300 hover:border-green-500"
                 }`}
               >
-                {subtask.isCompleted && <Check size={10} />}
+                {subtask.isCompleted && (
+                  <Check size={3} className="sm:w-2.5 sm:h-2.5" />
+                )}
               </button>
 
               {editingSubtaskId === subtask.id ? (

@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, CheckCircle, Clock, Target } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
+import PullToRefreshIndicator from "../components/PullToRefreshIndicator";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
@@ -13,11 +14,14 @@ import {
   useTasks,
   useUpdateTask,
 } from "../features/tasks/useTasks";
+import { useHapticFeedback } from "../hooks/useHapticFeedback";
+import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import type { Task } from "../types";
 import { getOverdueTasks, getTodayTasks, getUpcomingTasks } from "../utils";
 
 export default function Home() {
   const { state, loading, error } = useApp();
+  const { triggerHaptic, triggerSuccess } = useHapticFeedback();
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
 
@@ -26,6 +30,16 @@ export default function Home() {
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
+
+  const { elementRef, isRefreshing, pullDistance, progress } = usePullToRefresh(
+    {
+      onRefresh: async () => {
+        // Simular refresh - em uma implementação real, você chamaria as APIs
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        triggerSuccess();
+      },
+    }
+  );
 
   const filteredTasks = tasks.filter(
     (task) => task.workspaceId === state.activeWorkspaceId
@@ -67,10 +81,12 @@ export default function Home() {
   const upcomingTasks = getUpcomingTasks(filteredTasks, 7);
 
   const handleCompleteTask = (taskId: string) => {
+    triggerHaptic("light");
     completeTaskMutation.mutate(taskId);
   };
 
   const handleEditTask = (task: Task) => {
+    triggerHaptic("light");
     setEditingTask(task);
     setIsTaskModalOpen(true);
   };
@@ -124,7 +140,16 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div
+      ref={elementRef as React.RefObject<HTMLDivElement>}
+      className="min-h-screen bg-gray-50 pb-20"
+      style={{ backgroundColor: state.currentTheme.colors.background }}
+    >
+      <PullToRefreshIndicator
+        progress={progress}
+        isRefreshing={isRefreshing}
+        pullDistance={pullDistance}
+      />
       <div className="bg-white shadow-sm border-b border-gray-100 px-4 py-4">
         <div className="flex items-center justify-between">
           <div>

@@ -194,7 +194,7 @@ export default function Tasks() {
             type="checkbox"
             checked={showCompleted}
             onChange={(e) => setShowCompleted(e.target.checked)}
-            className="w-4 h-4 rounded"
+            className="w-1.5 h-1.5 sm:w-4 sm:h-4 rounded"
             style={{ accentColor: state.currentTheme.colors.primary }}
           />
           <span

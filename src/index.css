@@ -2,6 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smooth scrolling for mobile */
+html {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Better touch targets for mobile */
+@media (max-width: 768px) {
+
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Make checkboxes smaller and more discrete on mobile */
+  input[type="checkbox"] {
+    transform: scale(0.5);
+    margin-right: 2px;
+  }
+
+  /* Ensure checkbox touch area is still adequate */
+  input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    right: -12px;
+    bottom: -12px;
+  }
+
+  /* Make Radix UI checkboxes smaller on mobile */
+  [data-radix-collection-item] button[role="checkbox"],
+  button[role="checkbox"] {
+    transform: scale(0.5);
+  }
+}
+
+/* Prevent zoom on input focus on iOS */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+
+  select,
+  textarea,
+  input[type="text"],
+  input[type="password"],
+  input[type="datetime"],
+  input[type="datetime-local"],
+  input[type="date"],
+  input[type="month"],
+  input[type="time"],
+  input[type="week"],
+  input[type="number"],
+  input[type="email"],
+  input[type="url"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="color"] {
+    font-size: 16px;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Better focus styles for accessibility */
+*:focus {
+  outline: 2px solid #ec4899;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for all interactive elements */
+button,
+[role="button"],
+a,
+input,
+select,
+textarea {
+  transition: all 0.2s ease-in-out;
+}
+
 input[type="time"] {
   -webkit-appearance: none;
   -moz-appearance: none;

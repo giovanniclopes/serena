@@ -5,6 +5,7 @@ import { useCreateCountdown } from "../features/countdowns/useCountdowns";
 import { useCreateHabit } from "../features/habits/useHabits";
 import { useCreateProject } from "../features/projects/useProjects";
 import { useCreateTask } from "../features/tasks/useTasks";
+import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import type { Countdown, Habit, Project, Task } from "../types";
 import BottomNavbar from "./BottomNavbar";
 import CountdownModal from "./CountdownModal";
@@ -30,6 +31,7 @@ const motivationalMessages = [
 
 export default function Layout() {
   const { state } = useApp();
+  const { triggerHaptic } = useHapticFeedback();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
@@ -82,18 +84,22 @@ export default function Layout() {
   ].includes(location.pathname);
 
   const handleTaskClick = () => {
+    triggerHaptic("medium");
     setIsTaskModalOpen(true);
   };
 
   const handleHabitClick = () => {
+    triggerHaptic("medium");
     setIsHabitModalOpen(true);
   };
 
   const handleCountdownClick = () => {
+    triggerHaptic("medium");
     setIsCountdownModalOpen(true);
   };
 
   const handleProjectClick = () => {
+    triggerHaptic("medium");
     setIsProjectModalOpen(true);
   };
 
