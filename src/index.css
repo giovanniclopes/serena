@@ -40,6 +40,15 @@ html {
   button[role="checkbox"] {
     transform: scale(0.5);
   }
+
+  /* Make subtask checkboxes smaller on mobile */
+  .subtask-checkbox {
+    transform: scale(0.6) !important;
+    width: 8px !important;
+    height: 8px !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+  }
 }
 
 /* Prevent zoom on input focus on iOS */
