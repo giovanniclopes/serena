@@ -181,23 +181,29 @@ export default function HabitModal({
             <button
               type="button"
               onClick={() => setShowTemplates(!showTemplates)}
-              className="w-full px-4 py-2 rounded-lg border-2 border-dashed transition-colors text-sm font-medium"
+              className="w-full px-4 py-2 rounded-lg border-2 border-dashed transition-colors text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
                 backgroundColor: state.currentTheme.colors.surface,
                 borderColor: state.currentTheme.colors.border,
                 color: state.currentTheme.colors.text,
               }}
+              aria-label="Usar template de hábito"
+              aria-expanded={showTemplates}
+              aria-controls="templates-list"
             >
               📋 Usar Template
             </button>
 
             {showTemplates && (
               <div
+                id="templates-list"
                 className="mt-3 p-3 rounded-lg border"
                 style={{
                   backgroundColor: state.currentTheme.colors.surface,
                   borderColor: state.currentTheme.colors.border,
                 }}
+                role="region"
+                aria-label="Lista de templates de hábitos"
               >
                 <div
                   className="text-sm font-medium mb-2"
@@ -205,18 +211,23 @@ export default function HabitModal({
                 >
                   Escolha um template:
                 </div>
-                <div className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto">
+                <div
+                  className="grid grid-cols-1 gap-2 max-h-40 overflow-y-auto"
+                  role="list"
+                >
                   {habitTemplates.map((template, index) => (
                     <button
                       key={index}
                       type="button"
                       onClick={() => handleTemplateSelect(template)}
-                      className="text-left p-2 rounded border transition-colors hover:scale-[1.02]"
+                      className="text-left p-2 rounded border transition-colors hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-1"
                       style={{
                         backgroundColor: state.currentTheme.colors.background,
                         borderColor: state.currentTheme.colors.border,
                         color: state.currentTheme.colors.text,
                       }}
+                      aria-label={`Usar template: ${template.name} - ${template.description}`}
+                      role="listitem"
                     >
                       <div className="font-medium text-sm">{template.name}</div>
                       <div className="text-xs opacity-70">
@@ -316,7 +327,7 @@ export default function HabitModal({
               <button
                 type="button"
                 onClick={() => setCustomTarget(!customTarget)}
-                className="text-xs px-2 py-1 rounded border transition-colors"
+                className="text-xs px-2 py-1 rounded border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1"
                 style={{
                   backgroundColor: customTarget
                     ? state.currentTheme.colors.primary
@@ -326,6 +337,10 @@ export default function HabitModal({
                     ? "white"
                     : state.currentTheme.colors.text,
                 }}
+                aria-label={`Alternar para ${
+                  customTarget ? "valores comuns" : "valor personalizado"
+                } para meta`}
+                aria-pressed={customTarget}
               >
                 {customTarget ? "Personalizado" : "Comum"}
               </button>
@@ -386,7 +401,7 @@ export default function HabitModal({
               <button
                 type="button"
                 onClick={() => setCustomUnit(!customUnit)}
-                className="text-xs px-2 py-1 rounded border transition-colors"
+                className="text-xs px-2 py-1 rounded border transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1"
                 style={{
                   backgroundColor: customUnit
                     ? state.currentTheme.colors.primary
@@ -394,6 +409,10 @@ export default function HabitModal({
                   borderColor: state.currentTheme.colors.border,
                   color: customUnit ? "white" : state.currentTheme.colors.text,
                 }}
+                aria-label={`Alternar para ${
+                  customUnit ? "unidades comuns" : "unidade personalizada"
+                }`}
+                aria-pressed={customUnit}
               >
                 {customUnit ? "Personalizado" : "Comum"}
               </button>
@@ -445,13 +464,17 @@ export default function HabitModal({
           >
             Cor
           </label>
-          <div className="flex flex-wrap gap-2">
+          <div
+            className="flex flex-wrap gap-2"
+            role="radiogroup"
+            aria-label="Escolher cor do hábito"
+          >
             {colors.map((color) => (
               <button
                 key={color}
                 type="button"
                 onClick={() => setFormData((prev) => ({ ...prev, color }))}
-                className={`w-8 h-8 rounded-full border-2 transition-all ${
+                className={`w-8 h-8 rounded-full border-2 transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   formData.color === color ? "scale-110" : ""
                 }`}
                 style={{
@@ -461,6 +484,10 @@ export default function HabitModal({
                       ? state.currentTheme.colors.text
                       : "transparent",
                 }}
+                aria-label={`Escolher cor ${color}`}
+                aria-pressed={formData.color === color}
+                role="radio"
+                aria-checked={formData.color === color}
               />
             ))}
           </div>

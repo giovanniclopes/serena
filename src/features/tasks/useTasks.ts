@@ -17,6 +17,8 @@ export function useTasks() {
   } = useQuery({
     queryKey: ["tasks"],
     queryFn: getTasks,
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    gcTime: 1000 * 60 * 10, // 10 minutos
   });
 
   return { tasks: tasks || [], isLoading, error };

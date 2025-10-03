@@ -18,11 +18,13 @@ import {
   useUpdateHabit,
   useUpdateHabitEntry,
 } from "../features/habits/useHabits";
+import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import type { Habit } from "../types";
 import { getHabitProgress, getHabitStreak } from "../utils";
 
 export default function Habits() {
   const { state } = useApp();
+  const { triggerHaptic, triggerSuccess } = useHapticFeedback();
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(
     undefined
@@ -53,6 +55,8 @@ export default function Habits() {
     date: Date,
     targetValue: number
   ) => {
+    triggerHaptic("light");
+
     const normalizedDate = new Date(
       Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
     );
@@ -74,12 +78,16 @@ export default function Habits() {
     if (existingEntry) {
       const newValue = existingEntry.value >= targetValue ? 0 : targetValue;
       updateHabitEntryMutation.mutate({ ...existingEntry, value: newValue });
+      if (newValue > 0) {
+        triggerSuccess();
+      }
     } else {
       createHabitEntryMutation.mutate({
         habitId,
         date,
         value: targetValue,
       });
+      triggerSuccess();
     }
   };
 
@@ -89,6 +97,7 @@ export default function Habits() {
   };
 
   const handleEditHabit = (habit: Habit) => {
+    triggerHaptic("light");
     setEditingHabit(habit);
     setIsHabitModalOpen(true);
   };
@@ -172,11 +181,12 @@ export default function Habits() {
 
             <button
               onClick={() => handleEditHabit(habit)}
-              className="p-1.5 rounded-md transition-colors hover:scale-105"
+              className="p-1.5 rounded-md transition-colors hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2"
               style={{
                 backgroundColor: state.currentTheme.colors.surface,
                 color: state.currentTheme.colors.textSecondary,
               }}
+              aria-label={`Editar hábito ${habit.name}`}
               title="Editar hábito"
             >
               <Edit3 className="w-4 h-4" />
@@ -235,7 +245,7 @@ export default function Habits() {
                 <button
                   key={day.toISOString()}
                   onClick={() => handleHabitEntry(habit.id, day, habit.target)}
-                  className={`relative aspect-square rounded-md text-xs font-medium transition-all duration-200 hover:scale-105 ${
+                  className={`relative aspect-square rounded-md text-xs font-medium transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
                     isToday ? "ring-2" : ""
                   } ${isCompleted ? "shadow-md" : ""}`}
                   style={{
@@ -261,6 +271,13 @@ export default function Habits() {
                     borderStyle: "solid",
                     opacity: isPast && !isCompleted && !isPartial ? 0.6 : 1,
                   }}
+                  aria-label={`${format(day, "dd/MM")} - ${
+                    isCompleted
+                      ? "Completo"
+                      : isPartial
+                      ? `${Math.round(progress * 100)}%`
+                      : "Não realizado"
+                  }`}
                   title={`${format(day, "dd/MM")} - ${
                     isCompleted
                       ? "Completo"

@@ -23,9 +23,23 @@ import type {
   Project,
   Tag,
   Task,
+  Theme,
   Workspace,
 } from "../types";
 import { useAuth } from "./AuthContext";
+
+interface LoadDataPayload {
+  workspaces: Workspace[];
+  activeWorkspaceId: string;
+  projects: Project[];
+  tasks: Task[];
+  habits: Habit[];
+  habitEntries: HabitEntry[];
+  countdowns: Countdown[];
+  tags: Tag[];
+  filters: Filter[];
+  currentTheme: Theme;
+}
 
 interface AppContextType {
   state: AppState;
@@ -36,6 +50,16 @@ interface AppContextType {
 }
 
 type AppAction =
+  | { type: "LOAD_DATA"; payload: LoadDataPayload }
+  | {
+      type: "LOAD_SECONDARY_DATA";
+      payload: {
+        projects: Project[];
+        habits: Habit[];
+        habitEntries: HabitEntry[];
+        countdowns: Countdown[];
+      };
+    }
   | { type: "SET_ACTIVE_WORKSPACE"; payload: string }
   | { type: "ADD_WORKSPACE"; payload: Workspace }
   | { type: "UPDATE_WORKSPACE"; payload: Workspace }
@@ -86,6 +110,21 @@ const getInitialState = (): AppState => {
 
 function appReducer(state: AppState, action: AppAction): AppState {
   switch (action.type) {
+    case "LOAD_DATA":
+      return {
+        ...state,
+        ...action.payload,
+      };
+
+    case "LOAD_SECONDARY_DATA":
+      return {
+        ...state,
+        projects: action.payload.projects,
+        habits: action.payload.habits,
+        habitEntries: action.payload.habitEntries,
+        countdowns: action.payload.countdowns,
+      };
+
     case "SET_ACTIVE_WORKSPACE":
       return { ...state, activeWorkspaceId: action.payload };
 
@@ -252,9 +291,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case "SET_WORKSPACE_CHANGING":
       return { ...state, workspaceChanging: action.payload };
 
-    case "LOAD_DATA":
-      return { ...state, ...action.payload };
-
     default:
       return state;
   }
@@ -298,15 +334,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setLoading(true);
         setError(null);
 
-        const [workspaces, projects, tasks, habits, habitEntries, countdowns] =
-          await Promise.all([
-            getWorkspaces(),
-            getProjects(),
-            getTasks(),
-            getHabits(),
-            getHabitEntries(),
-            getCountdowns(),
-          ]);
+        // Carregar dados essenciais primeiro
+        const [workspaces, tasks] = await Promise.all([
+          getWorkspaces(),
+          getTasks(),
+        ]);
 
         let finalWorkspaces = workspaces;
         let activeWorkspaceId =
@@ -327,22 +359,42 @@ export function AppProvider({ children }: { children: ReactNode }) {
           activeWorkspaceId = defaultWorkspace.id;
         }
 
+        // Dispatch com dados essenciais primeiro
         dispatch({
           type: "LOAD_DATA",
           payload: {
             workspaces: finalWorkspaces,
             activeWorkspaceId,
-            projects,
+            projects: [],
             tasks,
-            habits,
-            habitEntries,
-            countdowns,
+            habits: [],
+            habitEntries: [],
+            countdowns: [],
             tags: [],
             filters: [],
             currentTheme: appData?.currentThemeId
               ? availableThemes.find((t) => t.id === appData.currentThemeId) ||
                 defaultTheme
               : defaultTheme,
+          },
+        });
+
+        // Carregar dados secundários em background
+        const [projects, habits, habitEntries, countdowns] = await Promise.all([
+          getProjects(),
+          getHabits(),
+          getHabitEntries(),
+          getCountdowns(),
+        ]);
+
+        // Atualizar com dados secundários
+        dispatch({
+          type: "LOAD_SECONDARY_DATA",
+          payload: {
+            projects,
+            habits,
+            habitEntries,
+            countdowns,
           },
         });
       } catch (err) {

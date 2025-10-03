@@ -16,6 +16,8 @@ export function useProfile() {
   } = useQuery({
     queryKey: ["profile"],
     queryFn: getCurrentProfile,
+    staleTime: 1000 * 60 * 15, // 15 minutos (perfil muda pouco)
+    gcTime: 1000 * 60 * 30, // 30 minutos
   });
 
   return { profile, isLoading, error };
