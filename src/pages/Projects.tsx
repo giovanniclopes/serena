@@ -1,7 +1,9 @@
 import { CheckCircle2, Folder, Target } from "lucide-react";
 import { useState } from "react";
+import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProjectModal from "../components/ProjectModal";
+import StandardCard from "../components/StandardCard";
 import { useApp } from "../context/AppContext";
 import {
   useCreateProject,
@@ -10,6 +12,7 @@ import {
   useUpdateProject,
 } from "../features/projects/useProjects";
 import type { Project } from "../types";
+import { filterProjects, searchProjects } from "../utils";
 
 export default function Projects() {
   const { state } = useApp();
@@ -20,6 +23,9 @@ export default function Projects() {
 
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const activeWorkspaceId = state.activeWorkspaceId;
 
   const handleOpenCreateModal = () => {
@@ -66,9 +72,14 @@ export default function Projects() {
     }
   };
 
-  const filteredProjects = Array.isArray(projects)
+  const workspaceProjects = Array.isArray(projects)
     ? projects.filter((p: Project) => p.workspaceId === activeWorkspaceId)
     : [];
+
+  const filteredProjects = filterProjects(
+    searchProjects(workspaceProjects, searchQuery),
+    showCompleted
+  );
 
   if (isLoadingProjects) {
     return <div className="text-center p-4">A carregar projetos...</div>;
@@ -76,12 +87,34 @@ export default function Projects() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-dark-gray">Projetos</h1>
+      <div className="flex items-center justify-between">
+        <h1
+          className="text-2xl font-bold"
+          style={{ color: state.currentTheme.colors.text }}
+        >
+          Projetos
+        </h1>
       </div>
 
+      <FilterControls
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showCompleted={showCompleted}
+        onShowCompletedChange={setShowCompleted}
+        searchPlaceholder="Buscar projetos..."
+        showCompletedLabel="Mostrar concluídos"
+      />
+
       {filteredProjects.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          className={`${
+            viewMode === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              : "space-y-4"
+          }`}
+        >
           {filteredProjects.map((project: Project) => {
             const completionPercentage =
               project.tasksTotalCount > 0
@@ -92,23 +125,33 @@ export default function Projects() {
                 : 0;
 
             return (
-              <div
-                key={project.id}
-                className="p-4 bg-ice-white border border-light-gray rounded-md shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center gap-3 mb-3">
+              <StandardCard key={project.id} color={project.color}>
+                <div className="flex items-start gap-4 mb-4">
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm"
-                    style={{ backgroundColor: project.color || "#ec4899" }}
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
+                    style={{
+                      backgroundColor: project.color || "#ec4899",
+                      background: `linear-gradient(135deg, ${
+                        project.color || "#ec4899"
+                      }, ${project.color || "#ec4899"}dd)`,
+                    }}
                   >
-                    <Folder size={16} />
+                    <Folder size={20} />
                   </div>
-                  <div className="flex-1">
-                    <h2 className="font-bold text-dark-gray font-nunito">
+                  <div className="flex-1 min-w-0">
+                    <h2
+                      className="font-bold text-lg mb-1 truncate"
+                      style={{ color: state.currentTheme.colors.text }}
+                    >
                       {project.name}
                     </h2>
                     {project.description && (
-                      <p className="text-medium-gray text-sm font-nunito">
+                      <p
+                        className="text-sm leading-relaxed line-clamp-2"
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                      >
                         {project.description}
                       </p>
                     )}
@@ -116,66 +159,122 @@ export default function Projects() {
                 </div>
 
                 {project.tasksTotalCount > 0 && (
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
+                  <div className="mb-5">
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
-                        <Target size={14} className="text-medium-gray" />
-                        <span className="text-sm text-medium-gray font-nunito">
+                        <div
+                          className="w-6 h-6 rounded-lg flex items-center justify-center"
+                          style={{
+                            backgroundColor:
+                              (project.color || "#ec4899") + "20",
+                          }}
+                        >
+                          <Target
+                            size={12}
+                            style={{ color: project.color || "#ec4899" }}
+                          />
+                        </div>
+                        <span
+                          className="text-sm font-medium"
+                          style={{
+                            color: state.currentTheme.colors.textSecondary,
+                          }}
+                        >
                           {project.tasksCompletedCount}/
                           {project.tasksTotalCount} tarefas
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-dark-gray font-nunito">
-                        {completionPercentage}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
                       <div
-                        className="h-2 rounded-full transition-all duration-300"
+                        className="px-3 py-1 rounded-full text-xs font-bold"
                         style={{
-                          width: `${completionPercentage}%`,
-                          backgroundColor: project.color || "#ec4899",
+                          backgroundColor: (project.color || "#ec4899") + "20",
+                          color: project.color || "#ec4899",
                         }}
-                      />
+                      >
+                        {completionPercentage}%
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <div
+                        className="w-full rounded-full h-3 overflow-hidden"
+                        style={{
+                          backgroundColor:
+                            state.currentTheme.colors.border + "40",
+                        }}
+                      >
+                        <div
+                          className="h-full rounded-full transition-all duration-500 ease-out relative"
+                          style={{
+                            width: `${completionPercentage}%`,
+                            background: `linear-gradient(90deg, ${
+                              project.color || "#ec4899"
+                            }, ${project.color || "#ec4899"}cc)`,
+                          }}
+                        >
+                          <div
+                            className="absolute inset-0 rounded-full opacity-30"
+                            style={{
+                              background:
+                                "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                              animation: "shimmer 2s infinite",
+                            }}
+                          />
+                        </div>
+                      </div>
                     </div>
 
                     {completionPercentage === 100 && (
-                      <div className="flex items-center gap-2 mt-4 text-peach-pink">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <p className="text-sm font-semibold font-nunito">
-                          Projeto concluído!
+                      <div
+                        className="flex items-center gap-2 mt-4 p-3 rounded-xl"
+                        style={{
+                          backgroundColor:
+                            state.currentTheme.colors.success + "15",
+                        }}
+                      >
+                        <CheckCircle2
+                          className="w-5 h-5 flex-shrink-0"
+                          style={{ color: state.currentTheme.colors.success }}
+                        />
+                        <p
+                          className="text-sm font-semibold"
+                          style={{ color: state.currentTheme.colors.success }}
+                        >
+                          Projeto concluído! 🎉
                         </p>
                       </div>
                     )}
                   </div>
                 )}
 
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={() => handleOpenEditModal(project)}
-                    className="text-sm text-dark-gray border border-gray-500 rounded-lg px-2 py-1 hover:underline"
+                    className="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                     style={{
+                      backgroundColor: state.currentTheme.colors.background,
                       color: state.currentTheme.colors.text,
+                      border: `1px solid ${state.currentTheme.colors.border}`,
                       opacity: deleteProjectMutation.isPending ? 0.5 : 1,
                     }}
                     disabled={deleteProjectMutation.isPending}
                   >
-                    Editar
+                    ✏️ Editar
                   </button>
                   <button
                     onClick={() => handleDeleteProject(project.id)}
                     disabled={deleteProjectMutation.isPending}
-                    className="text-sm text-red-500 border border-red-500 rounded-lg px-2 py-1 hover:underline disabled:opacity-50"
+                    className="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                     style={{
                       backgroundColor: state.currentTheme.colors.error + "10",
                       color: state.currentTheme.colors.error,
-                      opacity: deleteProjectMutation.isPending ? 0.5 : 1,
+                      border: `1px solid ${state.currentTheme.colors.error}30`,
                     }}
                   >
-                    Apagar
+                    🗑️ Apagar
                   </button>
                 </div>
-              </div>
+              </StandardCard>
             );
           })}
         </div>

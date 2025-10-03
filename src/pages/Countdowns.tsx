@@ -8,7 +8,9 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, Clock } from "lucide-react";
 import { useState } from "react";
 import CountdownModal from "../components/CountdownModal";
+import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
+import StandardCard from "../components/StandardCard";
 import { useApp } from "../context/AppContext";
 import {
   useCountdowns,
@@ -16,6 +18,7 @@ import {
   useUpdateCountdown,
 } from "../features/countdowns/useCountdowns";
 import type { Countdown } from "../types";
+import { filterCountdowns, searchCountdowns } from "../utils";
 
 export default function Countdowns() {
   const { state } = useApp();
@@ -23,13 +26,21 @@ export default function Countdowns() {
   const [editingCountdown, setEditingCountdown] = useState<
     Countdown | undefined
   >(undefined);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const { countdowns, isLoading, error } = useCountdowns();
   const createCountdownMutation = useCreateCountdown();
   const updateCountdownMutation = useUpdateCountdown();
 
-  const filteredCountdowns = countdowns.filter(
+  const workspaceCountdowns = countdowns.filter(
     (countdown) => countdown.workspaceId === state.activeWorkspaceId
+  );
+
+  const filteredCountdowns = filterCountdowns(
+    searchCountdowns(workspaceCountdowns, searchQuery),
+    showCompleted
   );
 
   const getTimeRemaining = (targetDate: Date) => {
@@ -88,14 +99,7 @@ export default function Countdowns() {
     const overdue = isOverdue(countdown.targetDate);
 
     return (
-      <div
-        key={countdown.id}
-        className="p-4 rounded-lg border relative overflow-hidden"
-        style={{
-          backgroundColor: state.currentTheme.colors.surface,
-          borderColor: state.currentTheme.colors.border,
-        }}
-      >
+      <StandardCard key={countdown.id} color={countdown.color}>
         <div
           className="absolute top-0 left-0 w-full h-1"
           style={{ backgroundColor: countdown.color }}
@@ -202,7 +206,7 @@ export default function Countdowns() {
             })}
           </span>
         </div>
-      </div>
+      </StandardCard>
     );
   };
 
@@ -256,6 +260,17 @@ export default function Countdowns() {
         </h1>
       </div>
 
+      <FilterControls
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showCompleted={showCompleted}
+        onShowCompletedChange={setShowCompleted}
+        searchPlaceholder="Buscar countdowns..."
+        showCompletedLabel="Mostrar concluídos"
+      />
+
       {filteredCountdowns.length > 0 ? (
         <div className="space-y-4">
           {upcomingCountdowns.length > 0 && (
@@ -266,7 +281,13 @@ export default function Countdowns() {
               >
                 🔮 Próximos Eventos
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div
+                className={`${
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                    : "space-y-4"
+                }`}
+              >
                 {upcomingCountdowns.map(renderCountdownCard)}
               </div>
             </div>
@@ -280,7 +301,13 @@ export default function Countdowns() {
               >
                 📅 Eventos Passados
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div
+                className={`${
+                  viewMode === "grid"
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+                    : "space-y-4"
+                }`}
+              >
                 {pastCountdowns.map(renderCountdownCard)}
               </div>
             </div>

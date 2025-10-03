@@ -7,8 +7,10 @@ import {
 } from "date-fns";
 import { Edit3, Target } from "lucide-react";
 import { useState } from "react";
+import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import HabitModal from "../components/HabitModal";
+import StandardCard from "../components/StandardCard";
 import { useApp } from "../context/AppContext";
 import {
   useCreateHabit,
@@ -20,7 +22,12 @@ import {
 } from "../features/habits/useHabits";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import type { Habit } from "../types";
-import { getHabitProgress, getHabitStreak } from "../utils";
+import {
+  filterHabits,
+  getHabitProgress,
+  getHabitStreak,
+  searchHabits,
+} from "../utils";
 
 export default function Habits() {
   const { state } = useApp();
@@ -29,6 +36,9 @@ export default function Habits() {
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(
     undefined
   );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const { habits, isLoading: habitsLoading, error: habitsError } = useHabits();
   const {
@@ -37,8 +47,13 @@ export default function Habits() {
     error: entriesError,
   } = useHabitEntries();
 
-  const filteredHabits = habits.filter(
+  const workspaceHabits = habits.filter(
     (habit) => habit.workspaceId === state.activeWorkspaceId
+  );
+
+  const filteredHabits = filterHabits(
+    searchHabits(workspaceHabits, searchQuery),
+    showCompleted
   );
   const createHabitMutation = useCreateHabit();
   const updateHabitMutation = useUpdateHabit();
@@ -125,14 +140,7 @@ export default function Habits() {
     const todayProgress = getHabitProgress(habit, entries, new Date());
 
     return (
-      <div
-        key={habit.id}
-        className="p-4 rounded-lg border"
-        style={{
-          backgroundColor: state.currentTheme.colors.surface,
-          borderColor: state.currentTheme.colors.border,
-        }}
-      >
+      <StandardCard key={habit.id} color={habit.color}>
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center space-x-2 flex-1">
             <div
@@ -297,7 +305,7 @@ export default function Habits() {
             })}
           </div>
         </div>
-      </div>
+      </StandardCard>
     );
   };
 
@@ -344,6 +352,17 @@ export default function Habits() {
         </h1>
       </div>
 
+      <FilterControls
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showCompleted={showCompleted}
+        onShowCompletedChange={setShowCompleted}
+        searchPlaceholder="Buscar hábitos..."
+        showCompletedLabel="Mostrar concluídos"
+      />
+
       {filteredHabits.length > 0 && (
         <div
           className="p-3 rounded-lg border text-sm"
@@ -378,7 +397,13 @@ export default function Habits() {
       )}
 
       {filteredHabits.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div
+          className={`${
+            viewMode === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              : "space-y-4"
+          }`}
+        >
           {filteredHabits.map(renderHabitCard)}
         </div>
       ) : (

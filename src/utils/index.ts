@@ -17,6 +17,7 @@ import type {
   Habit,
   HabitEntry,
   Priority,
+  Project,
   Recurrence,
   Task,
 } from "../types";
@@ -484,4 +485,85 @@ export function throttle<T extends (...args: unknown[]) => unknown>(
       setTimeout(() => (inThrottle = false), limit);
     }
   };
+}
+
+export function searchProjects(projects: Project[], query: string): Project[] {
+  if (!query.trim()) return projects;
+
+  const searchTerm = query.toLowerCase();
+  return projects.filter(
+    (project) =>
+      project.name.toLowerCase().includes(searchTerm) ||
+      (project.description &&
+        project.description.toLowerCase().includes(searchTerm))
+  );
+}
+
+export function filterProjects(
+  projects: Project[],
+  showCompleted: boolean
+): Project[] {
+  if (showCompleted) return projects;
+
+  return projects.filter((project) => {
+    const completionPercentage =
+      project.tasksTotalCount > 0
+        ? Math.round(
+            (project.tasksCompletedCount / project.tasksTotalCount) * 100
+          )
+        : 0;
+    return completionPercentage < 100;
+  });
+}
+
+export function searchHabits(habits: Habit[], query: string): Habit[] {
+  if (!query.trim()) return habits;
+
+  const searchTerm = query.toLowerCase();
+  return habits.filter(
+    (habit) =>
+      habit.name.toLowerCase().includes(searchTerm) ||
+      (habit.description &&
+        habit.description.toLowerCase().includes(searchTerm)) ||
+      habit.category.toLowerCase().includes(searchTerm)
+  );
+}
+
+export function filterHabits(habits: Habit[], showCompleted: boolean): Habit[] {
+  if (showCompleted) return habits;
+
+  return habits.filter((habit) => {
+    // Para hábitos, consideramos "concluído" se atingiu a meta hoje
+    const today = new Date();
+    const todayEntries = habits.filter((h) => h.id === habit.id);
+    // Esta lógica pode ser refinada baseada na implementação específica
+    return true; // Por enquanto, mostramos todos os hábitos
+  });
+}
+
+export function searchCountdowns(
+  countdowns: Countdown[],
+  query: string
+): Countdown[] {
+  if (!query.trim()) return countdowns;
+
+  const searchTerm = query.toLowerCase();
+  return countdowns.filter(
+    (countdown) =>
+      countdown.title.toLowerCase().includes(searchTerm) ||
+      (countdown.description &&
+        countdown.description.toLowerCase().includes(searchTerm))
+  );
+}
+
+export function filterCountdowns(
+  countdowns: Countdown[],
+  showCompleted: boolean
+): Countdown[] {
+  if (showCompleted) return countdowns;
+
+  return countdowns.filter((countdown) => {
+    const now = new Date();
+    return countdown.targetDate > now; // Mostrar apenas countdowns futuros
+  });
 }
