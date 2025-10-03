@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Bell, Folder, Home, User } from "lucide-react";
+import { Calendar, Folder, Home, User } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import CentralActionButton from "./CentralActionButton";
@@ -21,8 +21,8 @@ export default function BottomNavbar({
 
   const navItems = [
     { path: "/", icon: Home, label: "Início" },
+    { path: "/calendar", icon: Calendar, label: "Calendário" },
     { path: "/projects", icon: Folder, label: "Projetos" },
-    { path: "/notifications", icon: Bell, label: "Notificações" },
     { path: "/profile", icon: User, label: "Perfil" },
   ];
 

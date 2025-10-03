@@ -15,11 +15,18 @@ import {
   subWeeks,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+} from "lucide-react";
 import { useState } from "react";
 import TaskCard from "../components/TaskCard";
 import { useApp } from "../context/AppContext";
 import { useTasks } from "../features/tasks/useTasks";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 import { getPriorityColor, getTasksForDate } from "../utils";
 
 type ViewMode = "month" | "week" | "day";
@@ -30,6 +37,7 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -124,31 +132,39 @@ export default function Calendar() {
             {format(weekStart, "d 'de' MMMM", { locale: ptBR })} -{" "}
             {format(weekEnd, "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
           </h2>
-          <div className="flex items-center space-x-2">
+          <div
+            className={`flex items-center ${
+              isMobile ? "space-x-1" : "space-x-2"
+            }`}
+          >
             <button
               onClick={handlePrevWeek}
-              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              className={`${isMobile ? "p-3" : "p-2"} rounded-lg ${
+                isMobile ? "active:scale-95" : "hover:bg-opacity-10"
+              } transition-colors`}
               style={{
                 backgroundColor: state.currentTheme.colors.primary + "20",
                 color: state.currentTheme.colors.primary,
               }}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className={`${isMobile ? "w-5 h-5" : "w-4 h-4"}`} />
             </button>
             <button
               onClick={handleNextWeek}
-              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              className={`${isMobile ? "p-3" : "p-2"} rounded-lg ${
+                isMobile ? "active:scale-95" : "hover:bg-opacity-10"
+              } transition-colors`}
               style={{
                 backgroundColor: state.currentTheme.colors.primary + "20",
                 color: state.currentTheme.colors.primary,
               }}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className={`${isMobile ? "w-5 h-5" : "w-4 h-4"}`} />
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-7 gap-2">
+        <div className={`grid grid-cols-7 ${isMobile ? "gap-1" : "gap-2"}`}>
           {weekTasks.map((dayData, index) => {
             const isToday = isSameDay(dayData.date, new Date());
             const isSelected =
@@ -157,7 +173,9 @@ export default function Calendar() {
             return (
               <div
                 key={dayData.date.toISOString()}
-                className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                className={`${
+                  isMobile ? "p-2" : "p-3"
+                } rounded-lg border-2 transition-all duration-200 ${
                   isToday ? "ring-2 ring-blue-400" : ""
                 } ${isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""}`}
                 style={{
@@ -175,13 +193,17 @@ export default function Calendar() {
               >
                 <div className="text-center mb-2">
                   <div
-                    className="text-xs font-medium mb-1"
+                    className={`${
+                      isMobile ? "text-xs" : "text-xs"
+                    } font-medium mb-1`}
                     style={{ color: state.currentTheme.colors.textSecondary }}
                   >
                     {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"][index]}
                   </div>
                   <div
-                    className={`text-lg font-bold ${
+                    className={`${
+                      isMobile ? "text-base" : "text-lg"
+                    } font-bold ${
                       isSelected ? "text-white" : isToday ? "text-blue-600" : ""
                     }`}
                     style={{
@@ -197,50 +219,96 @@ export default function Calendar() {
                 </div>
 
                 <div className="space-y-1">
-                  {dayData.tasks.slice(0, 3).map((task) => (
-                    <div
-                      key={task.id}
-                      className="text-xs p-1 rounded truncate flex items-center space-x-1"
-                      style={{
-                        backgroundColor: task.projectId
-                          ? state.currentTheme.colors.primary + "20"
-                          : getPriorityColor(task.priority) + "20",
-                        color: task.projectId
-                          ? state.currentTheme.colors.primary
-                          : getPriorityColor(task.priority),
-                        borderLeft: `3px solid ${
-                          task.projectId
-                            ? state.currentTheme.colors.primary
-                            : getPriorityColor(task.priority)
-                        }`,
-                      }}
-                    >
-                      <div
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{
-                          backgroundColor: task.isCompleted
-                            ? "#10b981"
-                            : task.projectId
-                            ? state.currentTheme.colors.primary
-                            : getPriorityColor(task.priority),
-                        }}
-                      />
-                      <span
-                        className={
-                          task.isCompleted ? "line-through opacity-70" : ""
-                        }
-                      >
-                        {task.title}
-                      </span>
-                    </div>
-                  ))}
-                  {dayData.tasks.length > 3 && (
-                    <div
-                      className="text-xs font-medium text-center"
-                      style={{ color: state.currentTheme.colors.textSecondary }}
-                    >
-                      +{dayData.tasks.length - 3} tarefas
-                    </div>
+                  {isMobile ? (
+                    <>
+                      {dayData.tasks.slice(0, 2).map((task) => (
+                        <div
+                          key={task.id}
+                          className="flex items-center justify-center p-1 rounded"
+                          style={{
+                            backgroundColor: task.projectId
+                              ? state.currentTheme.colors.primary + "20"
+                              : getPriorityColor(task.priority) + "20",
+                          }}
+                        >
+                          {task.isCompleted ? (
+                            <CheckCircle className="w-3 h-3 text-green-500" />
+                          ) : task.projectId ? (
+                            <CalendarIcon
+                              className="w-3 h-3"
+                              style={{
+                                color: state.currentTheme.colors.primary,
+                              }}
+                            />
+                          ) : (
+                            <Clock
+                              className="w-3 h-3"
+                              style={{ color: getPriorityColor(task.priority) }}
+                            />
+                          )}
+                        </div>
+                      ))}
+                      {dayData.tasks.length > 2 && (
+                        <div
+                          className="text-xs font-medium text-center"
+                          style={{
+                            color: state.currentTheme.colors.textSecondary,
+                          }}
+                        >
+                          +{dayData.tasks.length - 2}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {dayData.tasks.slice(0, 3).map((task) => (
+                        <div
+                          key={task.id}
+                          className="text-xs p-1 rounded truncate flex items-center space-x-1"
+                          style={{
+                            backgroundColor: task.projectId
+                              ? state.currentTheme.colors.primary + "20"
+                              : getPriorityColor(task.priority) + "20",
+                            color: task.projectId
+                              ? state.currentTheme.colors.primary
+                              : getPriorityColor(task.priority),
+                            borderLeft: `3px solid ${
+                              task.projectId
+                                ? state.currentTheme.colors.primary
+                                : getPriorityColor(task.priority)
+                            }`,
+                          }}
+                        >
+                          <div
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{
+                              backgroundColor: task.isCompleted
+                                ? "#10b981"
+                                : task.projectId
+                                ? state.currentTheme.colors.primary
+                                : getPriorityColor(task.priority),
+                            }}
+                          />
+                          <span
+                            className={
+                              task.isCompleted ? "line-through opacity-70" : ""
+                            }
+                          >
+                            {task.title}
+                          </span>
+                        </div>
+                      ))}
+                      {dayData.tasks.length > 3 && (
+                        <div
+                          className="text-xs font-medium text-center"
+                          style={{
+                            color: state.currentTheme.colors.textSecondary,
+                          }}
+                        >
+                          +{dayData.tasks.length - 3} tarefas
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -271,26 +339,34 @@ export default function Calendar() {
               </span>
             )}
           </h2>
-          <div className="flex items-center space-x-2">
+          <div
+            className={`flex items-center ${
+              isMobile ? "space-x-1" : "space-x-2"
+            }`}
+          >
             <button
               onClick={handlePrevDay}
-              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              className={`${isMobile ? "p-3" : "p-2"} rounded-lg ${
+                isMobile ? "active:scale-95" : "hover:bg-opacity-10"
+              } transition-colors`}
               style={{
                 backgroundColor: state.currentTheme.colors.primary + "20",
                 color: state.currentTheme.colors.primary,
               }}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className={`${isMobile ? "w-5 h-5" : "w-4 h-4"}`} />
             </button>
             <button
               onClick={handleNextDay}
-              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              className={`${isMobile ? "p-3" : "p-2"} rounded-lg ${
+                isMobile ? "active:scale-95" : "hover:bg-opacity-10"
+              } transition-colors`}
               style={{
                 backgroundColor: state.currentTheme.colors.primary + "20",
                 color: state.currentTheme.colors.primary,
               }}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className={`${isMobile ? "w-5 h-5" : "w-4 h-4"}`} />
             </button>
           </div>
         </div>
@@ -342,38 +418,48 @@ export default function Calendar() {
         >
           {format(currentDate, "MMMM yyyy", { locale: ptBR })}
         </h2>
-        <div className="flex items-center space-x-2">
+        <div
+          className={`flex items-center ${
+            isMobile ? "space-x-1" : "space-x-2"
+          }`}
+        >
           <button
             onClick={handlePrevMonth}
-            className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+            className={`${isMobile ? "p-3" : "p-2"} rounded-lg ${
+              isMobile ? "active:scale-95" : "hover:bg-opacity-10"
+            } transition-colors`}
             style={{
               backgroundColor: state.currentTheme.colors.primary + "20",
               color: state.currentTheme.colors.primary,
             }}
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className={`${isMobile ? "w-5 h-5" : "w-4 h-4"}`} />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+            className={`${isMobile ? "p-3" : "p-2"} rounded-lg ${
+              isMobile ? "active:scale-95" : "hover:bg-opacity-10"
+            } transition-colors`}
             style={{
               backgroundColor: state.currentTheme.colors.primary + "20",
               color: state.currentTheme.colors.primary,
             }}
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className={`${isMobile ? "w-5 h-5" : "w-4 h-4"}`} />
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-7 gap-1">
+      <div className={`grid grid-cols-7 ${isMobile ? "gap-0.5" : "gap-1"}`}>
         {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((day) => (
           <div
             key={day}
-            className="p-2 text-center font-medium text-xs"
+            className={`${isMobile ? "p-1" : "p-2"} text-center font-medium ${
+              isMobile ? "text-xs" : "text-xs"
+            }`}
             style={{ color: state.currentTheme.colors.textSecondary }}
           >
-            {day}
+            {isMobile ? day.charAt(0) : day}
           </div>
         ))}
 
@@ -387,11 +473,13 @@ export default function Calendar() {
             <button
               key={day.toISOString()}
               onClick={() => handleDateClick(day)}
-              className={`p-2 min-h-[70px] text-left rounded-lg transition-all duration-200 cursor-pointer hover:scale-105 ${
-                !isCurrentMonth ? "opacity-30" : ""
-              } ${isToday ? "ring-2 ring-blue-400" : ""} ${
-                isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""
-              }`}
+              className={`${isMobile ? "p-1" : "p-2"} ${
+                isMobile ? "min-h-[50px]" : "min-h-[70px]"
+              } text-left rounded-lg transition-all duration-200 cursor-pointer ${
+                isMobile ? "" : "hover:scale-105"
+              } ${!isCurrentMonth ? "opacity-30" : ""} ${
+                isToday ? "ring-2 ring-blue-400" : ""
+              } ${isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""}`}
               style={{
                 backgroundColor: isSelected
                   ? state.currentTheme.colors.primary + "30"
@@ -412,7 +500,7 @@ export default function Calendar() {
                   : "none",
               }}
               onMouseEnter={(e) => {
-                if (!isSelected && isCurrentMonth) {
+                if (!isMobile && !isSelected && isCurrentMonth) {
                   e.currentTarget.style.backgroundColor =
                     state.currentTheme.colors.primary + "15";
                   e.currentTarget.style.borderColor =
@@ -420,7 +508,7 @@ export default function Calendar() {
                 }
               }}
               onMouseLeave={(e) => {
-                if (!isSelected && isCurrentMonth) {
+                if (!isMobile && !isSelected && isCurrentMonth) {
                   e.currentTarget.style.backgroundColor =
                     state.currentTheme.colors.surface;
                   e.currentTarget.style.borderColor = "transparent";
@@ -428,7 +516,9 @@ export default function Calendar() {
               }}
             >
               <div
-                className={`font-semibold mb-1 text-sm ${
+                className={`font-semibold ${isMobile ? "mb-0.5" : "mb-1"} ${
+                  isMobile ? "text-xs" : "text-sm"
+                } ${
                   isSelected ? "text-white" : isToday ? "text-blue-600" : ""
                 }`}
                 style={{
@@ -445,51 +535,99 @@ export default function Calendar() {
               </div>
 
               {dayTasks.length > 0 && (
-                <div className="space-y-0.5">
-                  {dayTasks.slice(0, 2).map((task) => (
-                    <div
-                      key={task.id}
-                      className="text-xs p-1 rounded truncate flex items-center space-x-1"
-                      style={{
-                        backgroundColor: task.projectId
-                          ? state.currentTheme.colors.primary + "20"
-                          : getPriorityColor(task.priority) + "20",
-                        color: task.projectId
-                          ? state.currentTheme.colors.primary
-                          : getPriorityColor(task.priority),
-                        borderLeft: `3px solid ${
-                          task.projectId
-                            ? state.currentTheme.colors.primary
-                            : getPriorityColor(task.priority)
-                        }`,
-                      }}
-                    >
-                      <div
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{
-                          backgroundColor: task.isCompleted
-                            ? "#10b981"
-                            : task.projectId
-                            ? state.currentTheme.colors.primary
-                            : getPriorityColor(task.priority),
-                        }}
-                      />
-                      <span
-                        className={
-                          task.isCompleted ? "line-through opacity-70" : ""
-                        }
-                      >
-                        {task.title}
-                      </span>
-                    </div>
-                  ))}
-                  {dayTasks.length > 2 && (
-                    <div
-                      className="text-xs font-medium"
-                      style={{ color: state.currentTheme.colors.textSecondary }}
-                    >
-                      +{dayTasks.length - 2} tarefas
-                    </div>
+                <div className={`${isMobile ? "space-y-0" : "space-y-0.5"}`}>
+                  {isMobile ? (
+                    // Mobile: Mostrar apenas ícones
+                    <>
+                      {dayTasks.slice(0, 1).map((task) => (
+                        <div
+                          key={task.id}
+                          className="flex items-center justify-center p-0.5 rounded"
+                          style={{
+                            backgroundColor: task.projectId
+                              ? state.currentTheme.colors.primary + "20"
+                              : getPriorityColor(task.priority) + "20",
+                          }}
+                        >
+                          {task.isCompleted ? (
+                            <CheckCircle className="w-2.5 h-2.5 text-green-500" />
+                          ) : task.projectId ? (
+                            <CalendarIcon
+                              className="w-2.5 h-2.5"
+                              style={{
+                                color: state.currentTheme.colors.primary,
+                              }}
+                            />
+                          ) : (
+                            <Clock
+                              className="w-2.5 h-2.5"
+                              style={{ color: getPriorityColor(task.priority) }}
+                            />
+                          )}
+                        </div>
+                      ))}
+                      {dayTasks.length > 1 && (
+                        <div
+                          className="text-xs font-medium text-center"
+                          style={{
+                            color: state.currentTheme.colors.textSecondary,
+                          }}
+                        >
+                          +{dayTasks.length - 1}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    // Desktop: Mostrar texto completo
+                    <>
+                      {dayTasks.slice(0, 2).map((task) => (
+                        <div
+                          key={task.id}
+                          className="text-xs p-1 rounded truncate flex items-center space-x-1"
+                          style={{
+                            backgroundColor: task.projectId
+                              ? state.currentTheme.colors.primary + "20"
+                              : getPriorityColor(task.priority) + "20",
+                            color: task.projectId
+                              ? state.currentTheme.colors.primary
+                              : getPriorityColor(task.priority),
+                            borderLeft: `3px solid ${
+                              task.projectId
+                                ? state.currentTheme.colors.primary
+                                : getPriorityColor(task.priority)
+                            }`,
+                          }}
+                        >
+                          <div
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{
+                              backgroundColor: task.isCompleted
+                                ? "#10b981"
+                                : task.projectId
+                                ? state.currentTheme.colors.primary
+                                : getPriorityColor(task.priority),
+                            }}
+                          />
+                          <span
+                            className={
+                              task.isCompleted ? "line-through opacity-70" : ""
+                            }
+                          >
+                            {task.title}
+                          </span>
+                        </div>
+                      ))}
+                      {dayTasks.length > 2 && (
+                        <div
+                          className="text-xs font-medium"
+                          style={{
+                            color: state.currentTheme.colors.textSecondary,
+                          }}
+                        >
+                          +{dayTasks.length - 2} tarefas
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
@@ -524,13 +662,17 @@ export default function Calendar() {
         </h1>
       </div>
 
-      <div className="flex space-x-2">
+      <div className={`flex ${isMobile ? "space-x-1" : "space-x-2"}`}>
         {(["month", "week", "day"] as ViewMode[]).map((mode) => (
           <button
             key={mode}
             onClick={() => setViewMode(mode)}
-            className={`px-3 py-2 rounded-lg font-medium transition-colors text-sm ${
-              viewMode === mode ? "text-white" : ""
+            className={`${
+              isMobile ? "px-2 py-2" : "px-3 py-2"
+            } rounded-lg font-medium transition-colors ${
+              isMobile ? "text-xs" : "text-sm"
+            } ${viewMode === mode ? "text-white" : ""} ${
+              isMobile ? "active:scale-95" : ""
             }`}
             style={{
               backgroundColor:
