@@ -4,6 +4,7 @@ import {
   createHabit,
   createHabitEntry,
   deleteHabit,
+  deleteHabitEntry,
   getHabitEntries,
   getHabits,
   updateHabit,
@@ -113,6 +114,22 @@ export function useUpdateHabitEntry() {
     onError: (error) => {
       console.error("Erro ao atualizar entrada de hábito:", error);
       toast.error("Erro ao atualizar entrada de hábito. Tente novamente.");
+    },
+  });
+}
+
+export function useDeleteHabitEntry() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteHabitEntry,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["habitEntries"] });
+      toast.success("Entrada de hábito removida com sucesso!");
+    },
+    onError: (error) => {
+      console.error("Erro ao remover entrada de hábito:", error);
+      toast.error("Erro ao remover entrada de hábito. Tente novamente.");
     },
   });
 }

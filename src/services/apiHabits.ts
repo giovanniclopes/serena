@@ -2,9 +2,9 @@ import { supabase } from "../lib/supabaseClient";
 import type { Habit, HabitEntry } from "../types";
 
 function formatDateForDB(date: Date): string {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -144,8 +144,8 @@ export async function getHabitEntries(): Promise<HabitEntry[]> {
   return (
     data?.map((entry) => ({
       id: entry.id,
-      habitId: entry.habitId,
-      date: new Date(entry.completion_date),
+      habitId: entry.habit_id,
+      date: new Date(entry.completion_date + "T00:00:00.000Z"),
       value: entry.value || 1,
       notes: entry.notes,
     })) || []
@@ -182,8 +182,8 @@ export async function createHabitEntry(
 
   return {
     id: data.id,
-    habitId: data.habitId,
-    date: new Date(data.completion_date),
+    habitId: data.habit_id,
+    date: new Date(data.completion_date + "T00:00:00.000Z"),
     value: data.value || 1,
     notes: data.notes,
   };
@@ -196,6 +196,11 @@ export async function updateHabitEntry(entry: HabitEntry): Promise<HabitEntry> {
 
   if (!user) {
     throw new Error("Usuário não autenticado");
+  }
+
+  if (entry.value === 0) {
+    await deleteHabitEntry(entry.id);
+    return entry;
   }
 
   const { data, error } = await supabase
@@ -218,9 +223,21 @@ export async function updateHabitEntry(entry: HabitEntry): Promise<HabitEntry> {
 
   return {
     id: data.id,
-    habitId: data.habitId,
-    date: new Date(data.completion_date),
+    habitId: data.habit_id,
+    date: new Date(data.completion_date + "T00:00:00.000Z"),
     value: data.value || 1,
     notes: data.notes,
   };
+}
+
+export async function deleteHabitEntry(entryId: string): Promise<void> {
+  const { error } = await supabase
+    .from("habit_entries")
+    .delete()
+    .eq("id", entryId);
+
+  if (error) {
+    console.error("Erro ao excluir entrada de hábito:", error);
+    throw new Error("Falha ao excluir entrada de hábito");
+  }
 }

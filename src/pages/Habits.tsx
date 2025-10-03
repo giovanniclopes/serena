@@ -43,8 +43,9 @@ export default function Habits() {
   const createHabitEntryMutation = useCreateHabitEntry();
   const updateHabitEntryMutation = useUpdateHabitEntry();
 
-  const weekStart = startOfWeek(new Date());
-  const weekEnd = endOfWeek(new Date());
+  const today = new Date();
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+  const weekEnd = endOfWeek(today, { weekStartsOn: 0 });
   const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
   const handleHabitEntry = (
@@ -52,27 +53,28 @@ export default function Habits() {
     date: Date,
     targetValue: number
   ) => {
-    console.log("=== DEBUG HABIT ENTRY ===");
-    console.log("HabitId:", habitId);
-    console.log("Date clicked:", date.toISOString());
-    console.log("All entries:", entries);
-    console.log(
-      "Entries for this habit:",
-      entries.filter((e) => e.habitId === habitId)
+    const normalizedDate = new Date(
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
     );
 
-    const existingEntry = entries.find(
-      (entry) => entry.habitId === habitId && isSameDay(entry.date, date)
-    );
-
-    console.log("Existing entry found:", existingEntry);
+    const existingEntry = entries.find((entry) => {
+      const entryDate = new Date(
+        Date.UTC(
+          entry.date.getUTCFullYear(),
+          entry.date.getUTCMonth(),
+          entry.date.getUTCDate()
+        )
+      );
+      return (
+        entry.habitId === habitId &&
+        entryDate.getTime() === normalizedDate.getTime()
+      );
+    });
 
     if (existingEntry) {
       const newValue = existingEntry.value >= targetValue ? 0 : targetValue;
-      console.log("Updating entry with value:", newValue);
       updateHabitEntryMutation.mutate({ ...existingEntry, value: newValue });
     } else {
-      console.log("Creating new entry with value:", targetValue);
       createHabitEntryMutation.mutate({
         habitId,
         date,
@@ -83,6 +85,11 @@ export default function Habits() {
 
   const handleCreateHabit = () => {
     setEditingHabit(undefined);
+    setIsHabitModalOpen(true);
+  };
+
+  const handleEditHabit = (habit: Habit) => {
+    setEditingHabit(habit);
     setIsHabitModalOpen(true);
   };
 
@@ -118,7 +125,10 @@ export default function Habits() {
         }}
       >
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center space-x-2">
+          <div
+            className="flex items-center space-x-2 cursor-pointer flex-1"
+            onClick={() => handleEditHabit(habit)}
+          >
             <div
               className="p-2 rounded-md"
               style={{ backgroundColor: habit.color + "20" }}
@@ -197,11 +207,12 @@ export default function Habits() {
           </div>
 
           <div className="grid grid-cols-7 gap-1">
-            {weekDays.map((day) => {
+            {weekDays.map((day, index) => {
               const progress = getHabitProgress(habit, entries, day);
               const isToday = isSameDay(day, new Date());
               const isCompleted = progress >= 1;
               const isPartial = progress > 0 && progress < 1;
+              const isPast = day < new Date() && !isToday;
 
               return (
                 <button
@@ -215,11 +226,15 @@ export default function Habits() {
                       ? habit.color
                       : isPartial
                       ? habit.color + "60"
-                      : state.currentTheme.colors.surface,
+                      : isPast
+                      ? state.currentTheme.colors.surface
+                      : state.currentTheme.colors.background,
                     color:
                       isCompleted || isPartial
                         ? "white"
-                        : state.currentTheme.colors.textSecondary,
+                        : isPast
+                        ? state.currentTheme.colors.textSecondary
+                        : state.currentTheme.colors.text,
                     borderColor: isToday
                       ? state.currentTheme.colors.primary
                       : isCompleted
@@ -227,6 +242,7 @@ export default function Habits() {
                       : state.currentTheme.colors.border,
                     borderWidth: "1px",
                     borderStyle: "solid",
+                    opacity: isPast && !isCompleted && !isPartial ? 0.6 : 1,
                   }}
                   title={`${format(day, "dd/MM")} - ${
                     isCompleted

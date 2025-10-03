@@ -159,25 +159,26 @@ export function getHabitProgress(
   entries: HabitEntry[],
   date: Date
 ): number {
-  const dayEntries = entries.filter(
-    (entry) => entry.habitId === habit.id && isSameDay(entry.date, date)
+  const normalizedDate = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
   );
+
+  const dayEntries = entries.filter((entry) => {
+    const entryDate = new Date(
+      Date.UTC(
+        entry.date.getUTCFullYear(),
+        entry.date.getUTCMonth(),
+        entry.date.getUTCDate()
+      )
+    );
+    return (
+      entry.habitId === habit.id &&
+      entryDate.getTime() === normalizedDate.getTime()
+    );
+  });
+
   const totalValue = dayEntries.reduce((sum, entry) => sum + entry.value, 0);
   const progress = Math.min(totalValue / habit.target, 1);
-
-  console.log("=== DEBUG HABIT PROGRESS ===");
-  console.log("Habit:", habit.name, "ID:", habit.id);
-  console.log("Date:", date.toISOString());
-  console.log("All entries:", entries);
-  console.log("Filtered entries for this habit and date:", dayEntries);
-  console.log(
-    "Total value:",
-    totalValue,
-    "Target:",
-    habit.target,
-    "Progress:",
-    progress
-  );
 
   return progress;
 }
@@ -191,14 +192,29 @@ export function getHabitStreak(habit: Habit, entries: HabitEntry[]): number {
   let currentDate = startOfDay(new Date());
 
   for (const entry of sortedEntries) {
-    if (isSameDay(entry.date, currentDate)) {
+    const entryDate = new Date(
+      Date.UTC(
+        entry.date.getUTCFullYear(),
+        entry.date.getUTCMonth(),
+        entry.date.getUTCDate()
+      )
+    );
+    const normalizedCurrentDate = new Date(
+      Date.UTC(
+        currentDate.getUTCFullYear(),
+        currentDate.getUTCMonth(),
+        currentDate.getUTCDate()
+      )
+    );
+
+    if (entryDate.getTime() === normalizedCurrentDate.getTime()) {
       if (entry.value >= habit.target) {
         streak++;
         currentDate = subDays(currentDate, 1);
       } else {
         break;
       }
-    } else if (entry.date < currentDate) {
+    } else if (entryDate < normalizedCurrentDate) {
       break;
     }
   }

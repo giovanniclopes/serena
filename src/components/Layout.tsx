@@ -63,7 +63,7 @@ export default function Layout() {
       case "/habits":
         return "Háitos";
       case "/calendar":
-        return "Calndário";
+        return "";
       case "/countdowns":
         return "";
       case "/profile":
