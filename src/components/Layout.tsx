@@ -41,17 +41,17 @@ export default function Layout() {
       case "/new-task":
         return "Nova Tarefa";
       case "/projects":
-        return "Projetos";
+        return "";
       case "/habits":
-        return "Hábitos";
+        return "Háitos";
       case "/calendar":
-        return "Calendário";
+        return "Calndário";
       case "/countdowns":
-        return "Contagem";
+        return "";
       case "/profile":
-        return "Perfil";
+        return "";
       case "/notifications":
-        return "Notificações";
+        return "";
       default:
         return null;
     }
