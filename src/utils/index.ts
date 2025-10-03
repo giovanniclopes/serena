@@ -291,6 +291,12 @@ export function getUpcomingTasks(tasks: Task[], days: number = 7): Task[] {
 export function filterTasks(tasks: Task[], filter: Filter): Task[] {
   let filtered = tasks;
 
+  if (filter.workspaceId) {
+    filtered = filtered.filter(
+      (task) => task.workspaceId === filter.workspaceId
+    );
+  }
+
   if (filter.projectIds && filter.projectIds.length > 0) {
     filtered = filtered.filter(
       (task) => task.projectId && filter.projectIds!.includes(task.projectId)
