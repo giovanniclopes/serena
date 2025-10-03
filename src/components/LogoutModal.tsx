@@ -67,7 +67,7 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
 
       <div
         ref={modalRef}
-        className={`relative bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-4 transform transition-all duration-300 ${
+        className={`relative bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-2 sm:mx-4 transform transition-all duration-300 ${
           isVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
         style={{
@@ -75,7 +75,7 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
           borderColor: state.currentTheme.colors.border,
         }}
       >
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div
@@ -113,10 +113,10 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
             novamente para acessar seus dados.
           </p>
 
-          <div className="flex space-x-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full sm:flex-1 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
               style={{
                 backgroundColor: state.currentTheme.colors.surface,
                 color: state.currentTheme.colors.text,
@@ -127,7 +127,7 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
             <button
               onClick={handleLogout}
               disabled={loading}
-              className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 group"
+              className="w-full sm:flex-1 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 group"
               style={{
                 backgroundColor: state.currentTheme.colors.error,
                 color: "white",

@@ -3,7 +3,7 @@ import { useApp } from "../context/AppContext";
 import { useProjects } from "../features/projects/useProjects";
 import type { Priority, Task } from "../types";
 import DateTimeInput from "./DateTimeInput";
-import Modal from "./Modal";
+import ResponsiveModal from "./ResponsiveModal";
 import SubtaskManager from "./SubtaskManager";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -82,11 +82,12 @@ export default function TaskModal({
   );
 
   return (
-    <Modal
+    <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
       title={task ? "Editar Tarefa" : "Nova Tarefa"}
       size="md"
+      description=""
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -116,7 +117,7 @@ export default function TaskModal({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <Label htmlFor="project">Projeto</Label>
             <Select
@@ -213,13 +214,20 @@ export default function TaskModal({
           </div>
         )}
 
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="w-full sm:w-auto"
+          >
             Cancelar
           </Button>
-          <Button type="submit">{task ? "Salvar" : "Criar"}</Button>
+          <Button type="submit" className="w-full sm:w-auto">
+            {task ? "Salvar" : "Criar"}
+          </Button>
         </div>
       </form>
-    </Modal>
+    </ResponsiveModal>
   );
 }

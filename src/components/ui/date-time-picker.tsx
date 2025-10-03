@@ -155,11 +155,11 @@ export function DateTimePicker({
             style={style}
             disabled={disabled}
           >
-            <CalendarIcon className="mr-2 h-4 w-4" />
+            <CalendarIcon className="h-4 w-4" />
             {selectedDate ? (
               formatBrazilDate(selectedDate)
             ) : (
-              <span>Selecione uma data</span>
+              <span>Selecione a data</span>
             )}
           </Button>
         </PopoverTrigger>

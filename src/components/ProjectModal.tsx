@@ -5,7 +5,7 @@ import {
 } from "../constants/projectTemplates";
 import { useApp } from "../context/AppContext";
 import type { Project } from "../types";
-import Modal from "./Modal";
+import ResponsiveModal from "./ResponsiveModal";
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -76,11 +76,12 @@ export default function ProjectModal({
   };
 
   return (
-    <Modal
+    <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
       title={project ? "Editar Projeto" : "Novo Projeto"}
       size="md"
+      description="Organize suas tarefas em projetos"
     >
       {showTemplates && !project && (
         <div className="mb-6">
@@ -90,7 +91,7 @@ export default function ProjectModal({
           >
             Escolha um template (opcional)
           </h3>
-          <div className="grid grid-cols-1 gap-3 max-h-60 overflow-y-auto">
+          <div className="grid grid-cols-1 gap-2 sm:gap-3 max-h-48 sm:max-h-60 overflow-y-auto">
             {projectTemplates.map((template) => (
               <button
                 key={template.id}
@@ -222,12 +223,12 @@ export default function ProjectModal({
             </div>
           </div>
 
-          <div className="flex justify-between pt-4">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 pt-3 sm:pt-4">
             {!project && (
               <button
                 type="button"
                 onClick={() => setShowTemplates(true)}
-                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors text-sm order-2 sm:order-1"
                 style={{
                   backgroundColor: state.currentTheme.colors.surface,
                   color: state.currentTheme.colors.text,
@@ -237,11 +238,11 @@ export default function ProjectModal({
                 ← Voltar aos templates
               </button>
             )}
-            <div className="flex space-x-3 ml-auto">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:ml-auto order-1 sm:order-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-lg font-medium transition-colors"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors"
                 style={{
                   backgroundColor: state.currentTheme.colors.surface,
                   color: state.currentTheme.colors.text,
@@ -252,7 +253,7 @@ export default function ProjectModal({
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-lg font-medium transition-colors text-white"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors text-white"
                 style={{
                   backgroundColor: state.currentTheme.colors.primary,
                 }}
@@ -263,6 +264,6 @@ export default function ProjectModal({
           </div>
         </form>
       )}
-    </Modal>
+    </ResponsiveModal>
   );
 }

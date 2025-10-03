@@ -1,10 +1,19 @@
 import { useMemo, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { useCreateCountdown } from "../features/countdowns/useCountdowns";
+import { useCreateHabit } from "../features/habits/useHabits";
+import { useCreateProject } from "../features/projects/useProjects";
+import { useCreateTask } from "../features/tasks/useTasks";
+import type { Countdown, Habit, Project, Task } from "../types";
 import BottomNavbar from "./BottomNavbar";
+import CountdownModal from "./CountdownModal";
+import HabitModal from "./HabitModal";
 import LogoutModal from "./LogoutModal";
 import PageTransition from "./PageTransition";
+import ProjectModal from "./ProjectModal";
 import SideMenu from "./SideMenu";
+import TaskModal from "./TaskModal";
 import TopNavbar from "./TopNavbar";
 import WorkspaceLoadingOverlay from "./WorkspaceLoadingOverlay";
 
@@ -23,8 +32,17 @@ export default function Layout() {
   const { state } = useApp();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
+  const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const createTaskMutation = useCreateTask();
+  const createHabitMutation = useCreateHabit();
+  const createCountdownMutation = useCreateCountdown();
+  const createProjectMutation = useCreateProject();
 
   const motivationalMessage = useMemo(() => {
     const randomIndex = Math.floor(Math.random() * motivationalMessages.length);
@@ -63,6 +81,88 @@ export default function Layout() {
     "/email-verification",
   ].includes(location.pathname);
 
+  const handleTaskClick = () => {
+    setIsTaskModalOpen(true);
+  };
+
+  const handleHabitClick = () => {
+    setIsHabitModalOpen(true);
+  };
+
+  const handleCountdownClick = () => {
+    setIsCountdownModalOpen(true);
+  };
+
+  const handleProjectClick = () => {
+    setIsProjectModalOpen(true);
+  };
+
+  const handleSaveTask = (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => {
+    createTaskMutation.mutate(
+      {
+        ...taskData,
+        workspaceId: state.activeWorkspaceId,
+      },
+      {
+        onSuccess: () => {
+          setIsTaskModalOpen(false);
+        },
+      }
+    );
+  };
+
+  const handleSaveHabit = (
+    habitData: Omit<Habit, "id" | "createdAt" | "updatedAt">
+  ) => {
+    createHabitMutation.mutate(
+      {
+        ...habitData,
+        workspaceId: state.activeWorkspaceId,
+      },
+      {
+        onSuccess: () => {
+          setIsHabitModalOpen(false);
+        },
+      }
+    );
+  };
+
+  const handleSaveCountdown = (
+    countdownData: Omit<Countdown, "id" | "createdAt" | "updatedAt">
+  ) => {
+    createCountdownMutation.mutate(
+      {
+        ...countdownData,
+        workspaceId: state.activeWorkspaceId,
+      },
+      {
+        onSuccess: () => {
+          setIsCountdownModalOpen(false);
+        },
+      }
+    );
+  };
+
+  const handleSaveProject = (
+    projectData: Omit<Project, "id" | "createdAt" | "updatedAt">
+  ) => {
+    createProjectMutation.mutate(
+      {
+        project: {
+          ...projectData,
+          workspaceId: state.activeWorkspaceId,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsProjectModalOpen(false);
+        },
+      }
+    );
+  };
+
   return (
     <div
       className="min-h-screen flex flex-col"
@@ -90,13 +190,45 @@ export default function Layout() {
         </div>
       </main>
 
-      {shouldShowBottomNav && <BottomNavbar />}
+      {shouldShowBottomNav && (
+        <BottomNavbar
+          onTaskClick={handleTaskClick}
+          onHabitClick={handleHabitClick}
+          onCountdownClick={handleCountdownClick}
+          onProjectClick={handleProjectClick}
+        />
+      )}
       <SideMenu isOpen={showMenu} onClose={() => setShowMenu(false)} />
       <WorkspaceLoadingOverlay />
 
       <LogoutModal
         isOpen={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
+      />
+
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSave={handleSaveTask}
+      />
+
+      <HabitModal
+        isOpen={isHabitModalOpen}
+        onClose={() => setIsHabitModalOpen(false)}
+        onSave={handleSaveHabit}
+      />
+
+      <CountdownModal
+        isOpen={isCountdownModalOpen}
+        onClose={() => setIsCountdownModalOpen(false)}
+        onSave={handleSaveCountdown}
+      />
+
+      <ProjectModal
+        isOpen={isProjectModalOpen}
+        onClose={() => setIsProjectModalOpen(false)}
+        onSave={handleSaveProject}
+        workspaceId={state.activeWorkspaceId}
       />
     </div>
   );

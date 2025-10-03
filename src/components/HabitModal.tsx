@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Habit } from "../types";
-import Modal from "./Modal";
+import ResponsiveModal from "./ResponsiveModal";
 
 interface HabitModalProps {
   isOpen: boolean;
@@ -58,11 +58,12 @@ export default function HabitModal({
   };
 
   return (
-    <Modal
+    <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
       title={habit ? "Editar Hábito" : "Novo Hábito"}
       size="md"
+      description=""
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -112,7 +113,7 @@ export default function HabitModal({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -193,11 +194,11 @@ export default function HabitModal({
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-medium transition-colors"
+            className="w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors"
             style={{
               backgroundColor: state.currentTheme.colors.surface,
               color: state.currentTheme.colors.text,
@@ -208,7 +209,7 @@ export default function HabitModal({
           </button>
           <button
             type="submit"
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-white"
+            className="w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors text-white"
             style={{
               backgroundColor: state.currentTheme.colors.primary,
             }}
@@ -217,6 +218,6 @@ export default function HabitModal({
           </button>
         </div>
       </form>
-    </Modal>
+    </ResponsiveModal>
   );
 }

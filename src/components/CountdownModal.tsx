@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Countdown } from "../types";
 import DateTimeInput from "./DateTimeInput";
-import Modal from "./Modal";
+import ResponsiveModal from "./ResponsiveModal";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -64,13 +64,14 @@ export default function CountdownModal({
   };
 
   return (
-    <Modal
+    <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
       title={
         countdown ? "Editar Contagem Regressiva" : "Nova Contagem Regressiva"
       }
       size="md"
+      description=""
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -136,13 +137,20 @@ export default function CountdownModal({
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            className="w-full sm:w-auto"
+          >
             Cancelar
           </Button>
-          <Button type="submit">{countdown ? "Salvar" : "Criar"}</Button>
+          <Button type="submit" className="w-full sm:w-auto">
+            {countdown ? "Salvar" : "Criar"}
+          </Button>
         </div>
       </form>
-    </Modal>
+    </ResponsiveModal>
   );
 }

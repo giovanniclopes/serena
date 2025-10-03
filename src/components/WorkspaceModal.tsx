@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Workspace } from "../types";
-import Modal from "./Modal";
+import ResponsiveModal from "./ResponsiveModal";
 
 interface WorkspaceModalProps {
   isOpen: boolean;
@@ -55,11 +55,12 @@ export default function WorkspaceModal({
   };
 
   return (
-    <Modal
+    <ResponsiveModal
       isOpen={isOpen}
       onClose={onClose}
       title={workspace ? "Editar Workspace" : "Novo Workspace"}
       size="md"
+      description="Organize seus espaços de trabalho"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -137,11 +138,11 @@ export default function WorkspaceModal({
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg font-medium transition-colors"
+            className="w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors"
             style={{
               backgroundColor: state.currentTheme.colors.surface,
               color: state.currentTheme.colors.text,
@@ -152,7 +153,7 @@ export default function WorkspaceModal({
           </button>
           <button
             type="submit"
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-white"
+            className="w-full sm:w-auto px-4 py-2 rounded-lg font-medium transition-colors text-white"
             style={{
               backgroundColor: state.currentTheme.colors.primary,
             }}
@@ -161,6 +162,6 @@ export default function WorkspaceModal({
           </button>
         </div>
       </form>
-    </Modal>
+    </ResponsiveModal>
   );
 }

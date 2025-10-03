@@ -24,20 +24,26 @@ export function Modal({
   size = "md",
 }: ModalProps) {
   const sizeClasses = {
-    sm: "max-w-md",
-    md: "max-w-lg",
-    lg: "max-w-2xl",
-    xl: "max-w-4xl",
+    sm: "max-w-sm sm:max-w-md",
+    md: "max-w-sm sm:max-w-lg",
+    lg: "max-w-sm sm:max-w-2xl",
+    xl: "max-w-sm sm:max-w-4xl",
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
-        className={cn(sizeClasses[size], "max-h-[90vh] overflow-y-auto")}
+        className={cn(
+          sizeClasses[size],
+          "max-h-[95vh] sm:max-h-[90vh] overflow-y-auto",
+          "w-[95vw] sm:w-full",
+          "mx-2 sm:mx-0",
+          "p-4 sm:p-6"
+        )}
       >
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
+        <DialogHeader className="pb-2 sm:pb-4">
+          <DialogTitle className="text-lg sm:text-xl">{title}</DialogTitle>
+          <DialogDescription className="text-sm">
             {title.includes("Tarefa")
               ? "Gerencie suas tarefas"
               : title.includes("Contagem")
@@ -47,7 +53,7 @@ export function Modal({
               : "Configure as opções"}
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-4">{children}</div>
+        <div className="space-y-3 sm:space-y-4">{children}</div>
       </DialogContent>
     </Dialog>
   );
