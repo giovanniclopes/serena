@@ -3,6 +3,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, CheckCircle, Clock, Target } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
+import NextEventAlert from "../components/NextEventAlert";
 import PullToRefreshIndicator from "../components/PullToRefreshIndicator";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
@@ -172,6 +173,8 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <NextEventAlert />
 
       <div className="px-4 py-6 space-y-6">
         <div className="grid grid-cols-2 gap-3">
