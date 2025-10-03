@@ -55,13 +55,13 @@ export default function Layout() {
       case "/":
         return motivationalMessage;
       case "/tasks":
-        return "Tarefas";
+        return "";
       case "/new-task":
         return "Nova Tarefa";
       case "/projects":
         return "";
       case "/habits":
-        return "Háitos";
+        return "";
       case "/calendar":
         return "";
       case "/countdowns":
