@@ -144,6 +144,8 @@ ADD
 ADD
   COLUMN IF NOT EXISTS icon text,
 ADD
+  COLUMN IF NOT EXISTS category text NOT NULL DEFAULT 'outro',
+ADD
   COLUMN IF NOT EXISTS reminders jsonb DEFAULT '[]',
 ADD
   COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();

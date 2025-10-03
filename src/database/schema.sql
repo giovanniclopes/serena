@@ -116,6 +116,7 @@ CREATE TABLE public.habits (
   unit text NOT NULL DEFAULT 'vez',
   color text,
   icon text,
+  category text NOT NULL DEFAULT 'outro',
   reminders jsonb DEFAULT '[]',
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()

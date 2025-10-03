@@ -5,7 +5,7 @@ import {
   isSameDay,
   startOfWeek,
 } from "date-fns";
-import { Target } from "lucide-react";
+import { Edit3, Target } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import HabitModal from "../components/HabitModal";
@@ -125,10 +125,7 @@ export default function Habits() {
         }}
       >
         <div className="flex items-start justify-between mb-3">
-          <div
-            className="flex items-center space-x-2 cursor-pointer flex-1"
-            onClick={() => handleEditHabit(habit)}
-          >
+          <div className="flex items-center space-x-2 flex-1">
             <div
               className="p-2 rounded-md"
               style={{ backgroundColor: habit.color + "20" }}
@@ -148,22 +145,42 @@ export default function Habits() {
               >
                 Meta: {habit.target} {habit.unit}
               </p>
+              <p
+                className="text-xs"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                {habit.category}
+              </p>
             </div>
           </div>
 
-          <div className="text-right">
-            <div
-              className="text-lg font-bold"
-              style={{ color: state.currentTheme.colors.primary }}
-            >
-              {streak}
+          <div className="flex items-center space-x-2">
+            <div className="text-right">
+              <div
+                className="text-lg font-bold"
+                style={{ color: state.currentTheme.colors.primary }}
+              >
+                {streak}
+              </div>
+              <div
+                className="text-xs"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                dias
+              </div>
             </div>
-            <div
-              className="text-xs"
-              style={{ color: state.currentTheme.colors.textSecondary }}
+
+            <button
+              onClick={() => handleEditHabit(habit)}
+              className="p-1.5 rounded-md transition-colors hover:scale-105"
+              style={{
+                backgroundColor: state.currentTheme.colors.surface,
+                color: state.currentTheme.colors.textSecondary,
+              }}
+              title="Editar hábito"
             >
-              dias
-            </div>
+              <Edit3 className="w-4 h-4" />
+            </button>
           </div>
         </div>
 

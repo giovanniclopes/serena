@@ -96,6 +96,7 @@ export interface Habit {
   unit: string;
   color: string;
   icon?: string;
+  category: string;
   reminders: Reminder[];
   workspaceId: string;
   createdAt: Date;
