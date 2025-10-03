@@ -28,6 +28,15 @@ export interface Reminder {
   unit: "minutes" | "hours" | "days";
 }
 
+export interface Attachment {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+  uploadedAt: Date;
+}
+
 export interface Tag {
   id: string;
   name: string;
@@ -60,6 +69,7 @@ export interface Task {
   reminders: Reminder[];
   recurrence?: Recurrence;
   tags: string[];
+  attachments: Attachment[];
   isCompleted: boolean;
   completedAt?: Date;
   workspaceId: string;

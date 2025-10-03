@@ -1,4 +1,4 @@
-import { Calendar, Edit, Tag } from "lucide-react";
+import { Calendar, Edit, Paperclip, RotateCcw, Tag } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import type { Task } from "../types";
 import {
@@ -161,6 +161,41 @@ export default function TaskCard({
                 </div>
               )}
             </div>
+
+            {(task.attachments.length > 0 || task.recurrence) && (
+              <div className="flex items-center space-x-3 mt-2">
+                {task.attachments.length > 0 && (
+                  <div className="flex items-center space-x-1">
+                    <Paperclip
+                      className="w-3 h-3"
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    />
+                    <span
+                      className="text-xs"
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    >
+                      {task.attachments.length} anexo
+                      {task.attachments.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                )}
+
+                {task.recurrence && (
+                  <div className="flex items-center space-x-1">
+                    <RotateCcw
+                      className="w-3 h-3"
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    />
+                    <span
+                      className="text-xs"
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    >
+                      Repetir
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
 
             <SubtaskManager taskId={task.id} workspaceId={task.workspaceId} />
           </div>

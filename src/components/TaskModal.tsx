@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import { useProjects } from "../features/projects/useProjects";
-import type { Priority, Task } from "../types";
+import type { Attachment, Priority, Recurrence, Task } from "../types";
+import AttachmentManager from "./AttachmentManager";
 import DateTimeInput from "./DateTimeInput";
+import RecurrenceManager from "./RecurrenceManager";
 import ResponsiveModal from "./ResponsiveModal";
 import SubtaskManager from "./SubtaskManager";
 import { Button } from "./ui/button";
@@ -39,7 +41,36 @@ export default function TaskModal({
     dueDate: task?.dueDate ? task.dueDate.toISOString().slice(0, 16) : "",
     priority: task?.priority || ("P3" as Priority),
     tags: task?.tags || [],
+    attachments: task?.attachments || [],
+    recurrence: task?.recurrence,
   });
+
+  // Sincronizar dados do formulário quando a prop task mudar
+  useEffect(() => {
+    if (task) {
+      setFormData({
+        title: task.title || "",
+        description: task.description || "",
+        projectId: task.projectId || "",
+        dueDate: task.dueDate ? task.dueDate.toISOString().slice(0, 16) : "",
+        priority: task.priority || ("P3" as Priority),
+        tags: task.tags || [],
+        attachments: task.attachments || [],
+        recurrence: task.recurrence,
+      });
+    } else {
+      setFormData({
+        title: "",
+        description: "",
+        projectId: "",
+        dueDate: "",
+        priority: "P3" as Priority,
+        tags: [],
+        attachments: [],
+        recurrence: undefined,
+      });
+    }
+  }, [task]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +84,8 @@ export default function TaskModal({
       dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
       priority: formData.priority,
       tags: formData.tags,
+      attachments: formData.attachments,
+      recurrence: formData.recurrence,
       subtasks: task?.subtasks || [],
       reminders: task?.reminders || [],
       isCompleted: task?.isCompleted || false,
@@ -70,6 +103,20 @@ export default function TaskModal({
       tags: prev.tags.includes(tagId)
         ? prev.tags.filter((id) => id !== tagId)
         : [...prev.tags, tagId],
+    }));
+  };
+
+  const handleAttachmentsChange = (attachments: Attachment[]) => {
+    setFormData((prev) => ({
+      ...prev,
+      attachments,
+    }));
+  };
+
+  const handleRecurrenceChange = (recurrence: Recurrence | undefined) => {
+    setFormData((prev) => ({
+      ...prev,
+      recurrence,
     }));
   };
 
@@ -204,6 +251,17 @@ export default function TaskModal({
             </div>
           </div>
         )}
+
+        <RecurrenceManager
+          recurrence={formData.recurrence}
+          onRecurrenceChange={handleRecurrenceChange}
+        />
+
+        <AttachmentManager
+          attachments={formData.attachments}
+          onAttachmentsChange={handleAttachmentsChange}
+          workspaceId={state.activeWorkspaceId}
+        />
 
         {task && (
           <div className="pt-4 border-t">
