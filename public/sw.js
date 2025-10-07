@@ -1,4 +1,4 @@
-const CACHE_VERSION = new Date().getTime();
+const CACHE_VERSION = "2.0.1";
 const CACHE_NAME = `serena-v${CACHE_VERSION}`;
 
 const DYNAMIC_CACHE = "serena-dynamic-v1";
@@ -31,10 +31,8 @@ self.addEventListener("activate", (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-              console.log("Removendo cache antigo:", cacheName);
-              return caches.delete(cacheName);
-            }
+            console.log("Removendo cache antigo:", cacheName);
+            return caches.delete(cacheName);
           })
         );
       })
@@ -57,8 +55,7 @@ self.addEventListener("fetch", (event) => {
         return cache.match(request).then((response) => {
           if (response) {
             const cacheTime = response.headers.get("sw-cache-time");
-            const now = Date.now();
-            if (cacheTime && now - parseInt(cacheTime) < 3600000) {
+            if (cacheTime && (Date.now() - parseInt(cacheTime)) < 3600000) {
               return response;
             }
           }
