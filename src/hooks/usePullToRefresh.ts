@@ -23,25 +23,35 @@ export function usePullToRefresh({
     if (window.scrollY === 0) {
       startY.current = e.touches[0].clientY;
       setIsPulling(true);
+    } else {
+      setIsPulling(false);
     }
   }, []);
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
-      if (!isPulling || window.scrollY > 0) return;
+      if (!isPulling || window.scrollY > 0) {
+        setIsPulling(false);
+        return;
+      }
 
       currentY.current = e.touches[0].clientY;
       const distance = Math.max(0, currentY.current - startY.current);
-      const resistanceDistance = distance / resistance;
 
-      setPullDistance(resistanceDistance);
-      e.preventDefault();
+      if (distance > 0) {
+        const resistanceDistance = distance / resistance;
+        setPullDistance(resistanceDistance);
+        e.preventDefault();
+      }
     },
     [isPulling, resistance]
   );
 
   const handleTouchEnd = useCallback(async () => {
-    if (!isPulling) return;
+    if (!isPulling) {
+      setPullDistance(0);
+      return;
+    }
 
     setIsPulling(false);
 
@@ -61,18 +71,27 @@ export function usePullToRefresh({
     const element = elementRef.current;
     if (!element) return;
 
+    const handleScroll = () => {
+      if (window.scrollY > 0 && isPulling) {
+        setIsPulling(false);
+        setPullDistance(0);
+      }
+    };
+
     element.addEventListener("touchstart", handleTouchStart, {
       passive: false,
     });
     element.addEventListener("touchmove", handleTouchMove, { passive: false });
     element.addEventListener("touchend", handleTouchEnd, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       element.removeEventListener("touchstart", handleTouchStart);
       element.removeEventListener("touchmove", handleTouchMove);
       element.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("scroll", handleScroll);
     };
-  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd, isPulling]);
 
   return {
     elementRef,

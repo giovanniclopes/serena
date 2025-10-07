@@ -8,6 +8,12 @@ html {
   -webkit-overflow-scrolling: touch;
 }
 
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* Better touch targets for mobile */
 @media (max-width: 768px) {
 
