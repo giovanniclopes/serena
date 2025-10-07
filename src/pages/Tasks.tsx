@@ -208,7 +208,11 @@ export default function Tasks() {
         {filteredTasks.some((task) => !task.isCompleted) && (
           <button
             onClick={() => setShowCompleteAllModal(true)}
-            className="px-4 py-2 border border-pink-500 rounded-lg font-medium transition-colors text-pink-500 text-sm"
+            className="px-4 py-2 border rounded-lg font-medium transition-colors text-sm"
+            style={{
+              borderColor: state.currentTheme.colors.primary,
+              color: state.currentTheme.colors.primary,
+            }}
           >
             Concluir todas
           </button>

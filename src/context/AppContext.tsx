@@ -3,6 +3,7 @@ import React, {
   type ReactNode,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -26,6 +27,7 @@ import type {
   Theme,
   Workspace,
 } from "../types";
+import { generateThemeFromWorkspaceColor } from "../utils/colorUtils";
 import { useAuth } from "./AuthContext";
 
 interface LoadDataPayload {
@@ -306,6 +308,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const isInitialMount = useRef(true);
 
+  const workspaceTheme = useMemo(() => {
+    const activeWorkspace = state.workspaces.find(
+      (w) => w.id === state.activeWorkspaceId
+    );
+
+    if (!activeWorkspace || !activeWorkspace.color) {
+      return state.currentTheme;
+    }
+
+    return generateThemeFromWorkspaceColor(
+      activeWorkspace.color,
+      activeWorkspace.name,
+      activeWorkspace.id
+    );
+  }, [state.workspaces, state.activeWorkspaceId, state.currentTheme]);
+
   useEffect(() => {
     if (authLoading) return;
 
@@ -334,7 +352,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setLoading(true);
         setError(null);
 
-        // Carregar dados essenciais primeiro
         const [workspaces, tasks] = await Promise.all([
           getWorkspaces(),
           getTasks(),
@@ -359,7 +376,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           activeWorkspaceId = defaultWorkspace.id;
         }
 
-        // Dispatch com dados essenciais primeiro
         dispatch({
           type: "LOAD_DATA",
           payload: {
@@ -379,7 +395,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           },
         });
 
-        // Carregar dados secundários em background
         const [projects, habits, habitEntries, countdowns] = await Promise.all([
           getProjects(),
           getHabits(),
@@ -387,7 +402,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
           getCountdowns(),
         ]);
 
-        // Atualizar com dados secundários
         dispatch({
           type: "LOAD_SECONDARY_DATA",
           payload: {
@@ -421,18 +435,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setAppData(dataToStore);
   }, [state.activeWorkspaceId, state.currentTheme.id, setAppData]);
 
+  const contextValue = {
+    state: {
+      ...state,
+      currentTheme: workspaceTheme,
+    },
+    dispatch,
+    loading,
+    error,
+    workspaceChanging: state.workspaceChanging,
+  };
+
   return (
-    <AppContext.Provider
-      value={{
-        state,
-        dispatch,
-        loading,
-        error,
-        workspaceChanging: state.workspaceChanging,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
+    <AppContext.Provider value={contextValue}>{children}</AppContext.Provider>
   );
 }
 

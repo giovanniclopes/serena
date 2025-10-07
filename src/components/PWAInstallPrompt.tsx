@@ -1,5 +1,7 @@
 import { Download, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useApp } from "../context/AppContext";
+import { adjustColorBrightness } from "../utils/colorUtils";
 import { Button } from "./ui/button";
 
 interface BeforeInstallPromptEvent extends Event {
@@ -8,6 +10,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function PWAInstallPrompt() {
+  const { state } = useApp();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
@@ -58,7 +61,10 @@ export function PWAInstallPrompt() {
       <div className="flex items-start justify-between">
         <div className="flex items-start space-x-3">
           <div className="flex-shrink-0">
-            <Download className="h-6 w-6 text-pink-500" />
+            <Download
+              className="h-6 w-6"
+              style={{ color: state.currentTheme.colors.primary }}
+            />
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">
@@ -79,7 +85,20 @@ export function PWAInstallPrompt() {
       <div className="mt-4 flex space-x-3">
         <Button
           onClick={handleInstallClick}
-          className="flex-1 bg-pink-500 hover:bg-pink-600 text-white"
+          className="flex-1 text-white"
+          style={{
+            backgroundColor: state.currentTheme.colors.primary,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = adjustColorBrightness(
+              state.currentTheme.colors.primary,
+              0.8
+            );
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor =
+              state.currentTheme.colors.primary;
+          }}
         >
           <Download className="h-4 w-4 mr-2" />
           Instalar App

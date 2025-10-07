@@ -19,6 +19,7 @@ import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import type { Task } from "../types";
 import { getOverdueTasks, getTodayTasks, getUpcomingTasks } from "../utils";
+import { adjustColorBrightness } from "../utils/colorUtils";
 
 export default function Home() {
   const { state, loading, error } = useApp();
@@ -50,7 +51,10 @@ export default function Home() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+            style={{ borderColor: state.currentTheme.colors.primary }}
+          ></div>
           <p className="text-gray-600">Carregando dados...</p>
         </div>
       </div>
@@ -68,7 +72,20 @@ export default function Home() {
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-pink-500 text-white rounded-lg hover:bg-pink-600"
+            className="px-4 py-2 text-white rounded-lg"
+            style={{
+              backgroundColor: state.currentTheme.colors.primary,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = adjustColorBrightness(
+                state.currentTheme.colors.primary,
+                0.8
+              );
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor =
+                state.currentTheme.colors.primary;
+            }}
           >
             Tentar novamente
           </button>

@@ -11,6 +11,7 @@ import {
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { adjustColorBrightness } from "../utils/colorUtils";
 
 export default function Navigation() {
   const { state } = useApp();
@@ -41,19 +42,28 @@ export default function Navigation() {
               to={path}
               className={({ isActive }) => `
                 flex flex-col items-center space-y-1 p-3 rounded-xl transition-all duration-200
-                ${isActive ? "bg-pink-50" : "hover:bg-gray-50"}
+                ${isActive ? "" : "hover:bg-gray-50"}
               `}
               style={({ isActive }) => ({
                 color: isActive ? state.currentTheme.colors.primary : "#6B7280",
+                backgroundColor: isActive
+                  ? adjustColorBrightness(
+                      state.currentTheme.colors.primary,
+                      0.1
+                    )
+                  : undefined,
               })}
             >
               {({ isActive }) => (
                 <>
                   <Icon className={`w-5 h-5 ${isActive ? "scale-110" : ""}`} />
                   <span
-                    className={`text-xs font-medium ${
-                      isActive ? "text-pink-600" : ""
-                    }`}
+                    className="text-xs font-medium"
+                    style={{
+                      color: isActive
+                        ? state.currentTheme.colors.primary
+                        : undefined,
+                    }}
                   >
                     {label}
                   </span>

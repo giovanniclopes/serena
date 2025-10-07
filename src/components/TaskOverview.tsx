@@ -2,6 +2,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { useApp } from "../context/AppContext";
 import { useTasks } from "../features/tasks/useTasks";
 import { getOverdueTasks } from "../utils";
+import { adjustColorBrightness } from "../utils/colorUtils";
 
 interface TaskOverviewProps {
   className?: string;
@@ -24,12 +25,19 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
   const pendingTasks = filteredTasks.filter((task) => !task.isCompleted).length;
 
   const chartData = [
-    { name: "Concluídas", value: completedTasks, color: "#f97316" },
-    { name: "Pendentes", value: pendingTasks, color: "#fb923c" },
+    {
+      name: "Concluídas",
+      value: completedTasks,
+      color: state.currentTheme.colors.primary,
+    },
+    {
+      name: "Pendentes",
+      value: pendingTasks,
+      color: adjustColorBrightness(state.currentTheme.colors.primary, 0.8),
+    },
     { name: "Atrasadas", value: overdueTasks.length, color: "#f3f4f6" },
   ].filter((item) => item.value > 0);
 
-  // Se não há dados, mostrar um estado vazio
   const hasData = chartData.length > 0;
 
   const totalUniqueTasks = totalTasks;
@@ -85,7 +93,10 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
 
         <div className="flex-1 space-y-4">
           <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-orange-500 flex-shrink-0"></div>
+            <div
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: state.currentTheme.colors.primary }}
+            ></div>
             <div className="flex-1 min-w-0">
               <div className="text-sm text-gray-500 mb-1">Total de Tarefas</div>
               <div
@@ -98,7 +109,15 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-orange-300 flex-shrink-0"></div>
+            <div
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{
+                backgroundColor: adjustColorBrightness(
+                  state.currentTheme.colors.primary,
+                  0.8
+                ),
+              }}
+            ></div>
             <div className="flex-1 min-w-0">
               <div className="text-sm text-gray-500 mb-1">Total Devidas</div>
               <div
@@ -111,7 +130,15 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-gray-200 flex-shrink-0"></div>
+            <div
+              className="w-3 h-3 rounded-full flex-shrink-0"
+              style={{
+                backgroundColor: adjustColorBrightness(
+                  state.currentTheme.colors.primary,
+                  0.6
+                ),
+              }}
+            ></div>
             <div className="flex-1 min-w-0">
               <div className="text-sm text-gray-500 mb-1">Concluídas</div>
               <div

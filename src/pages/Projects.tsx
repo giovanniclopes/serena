@@ -130,10 +130,13 @@ export default function Projects() {
                   <div
                     className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg"
                     style={{
-                      backgroundColor: project.color || "#ec4899",
+                      backgroundColor:
+                        project.color || state.currentTheme.colors.primary,
                       background: `linear-gradient(135deg, ${
-                        project.color || "#ec4899"
-                      }, ${project.color || "#ec4899"}dd)`,
+                        project.color || state.currentTheme.colors.primary
+                      }, ${
+                        project.color || state.currentTheme.colors.primary
+                      }dd)`,
                     }}
                   >
                     <Folder size={20} />
@@ -166,12 +169,17 @@ export default function Projects() {
                           className="w-6 h-6 rounded-lg flex items-center justify-center"
                           style={{
                             backgroundColor:
-                              (project.color || "#ec4899") + "20",
+                              (project.color ||
+                                state.currentTheme.colors.primary) + "20",
                           }}
                         >
                           <Target
                             size={12}
-                            style={{ color: project.color || "#ec4899" }}
+                            style={{
+                              color:
+                                project.color ||
+                                state.currentTheme.colors.primary,
+                            }}
                           />
                         </div>
                         <span
@@ -187,8 +195,11 @@ export default function Projects() {
                       <div
                         className="px-3 py-1 rounded-full text-xs font-bold"
                         style={{
-                          backgroundColor: (project.color || "#ec4899") + "20",
-                          color: project.color || "#ec4899",
+                          backgroundColor:
+                            (project.color ||
+                              state.currentTheme.colors.primary) + "20",
+                          color:
+                            project.color || state.currentTheme.colors.primary,
                         }}
                       >
                         {completionPercentage}%
@@ -208,8 +219,10 @@ export default function Projects() {
                           style={{
                             width: `${completionPercentage}%`,
                             background: `linear-gradient(90deg, ${
-                              project.color || "#ec4899"
-                            }, ${project.color || "#ec4899"}cc)`,
+                              project.color || state.currentTheme.colors.primary
+                            }, ${
+                              project.color || state.currentTheme.colors.primary
+                            }cc)`,
                           }}
                         >
                           <div

@@ -5,6 +5,8 @@ import HabitSplash from "../assets/vectors/HabitSplash";
 import ProjectSplash from "../assets/vectors/ProjectSplash";
 import ScheduleSplash from "../assets/vectors/ScheduleSplash";
 import TaskSplash from "../assets/vectors/TasksSplash";
+import { useApp } from "../context/AppContext";
+import { adjustColorBrightness } from "../utils/colorUtils";
 import { Button } from "./ui/button";
 
 interface OnboardingModalProps {
@@ -84,6 +86,7 @@ export default function OnboardingModal({
   isOpen,
   onClose,
 }: OnboardingModalProps) {
+  const { state } = useApp();
   const [currentPage, setCurrentPage] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -144,11 +147,22 @@ export default function OnboardingModal({
                       }}
                       className={`w-3 h-3 rounded-full transition-all duration-300 ${
                         index === currentPage
-                          ? "bg-pink-500 scale-110"
+                          ? "scale-110"
                           : index < currentPage
-                          ? "bg-pink-300 hover:bg-pink-400"
+                          ? "hover:opacity-80"
                           : "bg-gray-300 hover:bg-gray-400"
                       }`}
+                      style={{
+                        backgroundColor:
+                          index === currentPage
+                            ? state.currentTheme.colors.primary
+                            : index < currentPage
+                            ? adjustColorBrightness(
+                                state.currentTheme.colors.primary,
+                                0.7
+                              )
+                            : undefined,
+                      }}
                     >
                       {index < currentPage && (
                         <Check size={12} className="text-white m-0.5" />
@@ -197,7 +211,12 @@ export default function OnboardingModal({
               <div className="space-y-3 mb-8">
                 {currentPageData.features.map((feature, index) => (
                   <div key={index} className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-pink-500 rounded-full flex-shrink-0" />
+                    <div
+                      className="w-2 h-2 rounded-full flex-shrink-0"
+                      style={{
+                        backgroundColor: state.currentTheme.colors.primary,
+                      }}
+                    />
                     <span className="text-gray-700">{feature}</span>
                   </div>
                 ))}
@@ -217,7 +236,20 @@ export default function OnboardingModal({
 
               <Button
                 onClick={handleNext}
-                className="flex items-center space-x-2 bg-pink-500 hover:bg-pink-600"
+                className="flex items-center space-x-2"
+                style={{
+                  backgroundColor: state.currentTheme.colors.primary,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = adjustColorBrightness(
+                    state.currentTheme.colors.primary,
+                    0.8
+                  );
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    state.currentTheme.colors.primary;
+                }}
               >
                 <span>
                   {currentPage === onboardingPages.length - 1
