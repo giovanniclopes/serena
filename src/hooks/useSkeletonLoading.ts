@@ -10,18 +10,14 @@ export function useSkeletonLoading(
   isLoading: boolean,
   options: SkeletonLoadingOptions = {}
 ) {
-  const {
-    minLoadingTime = 300,
-    maxLoadingTime = 2000,
-    showSkeletonAfter = 100,
-  } = options;
+  const { minLoadingTime = 300, showSkeletonAfter = 100 } = options;
 
   const [showSkeleton, setShowSkeleton] = useState(false);
   const [isLoadingComplete, setIsLoadingComplete] = useState(false);
 
   useEffect(() => {
-    let showTimer: NodeJS.Timeout;
-    let hideTimer: NodeJS.Timeout;
+    let showTimer: NodeJS.Timeout | undefined;
+    let hideTimer: NodeJS.Timeout | undefined;
 
     if (isLoading) {
       // Mostrar skeleton após um pequeno delay para evitar flash
@@ -35,8 +31,8 @@ export function useSkeletonLoading(
       }, minLoadingTime);
     } else {
       // Se não está carregando, limpar timers
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
+      if (showTimer) clearTimeout(showTimer);
+      if (hideTimer) clearTimeout(hideTimer);
 
       if (isLoadingComplete) {
         // Delay para esconder skeleton suavemente
@@ -50,8 +46,8 @@ export function useSkeletonLoading(
     }
 
     return () => {
-      clearTimeout(showTimer);
-      clearTimeout(hideTimer);
+      if (showTimer) clearTimeout(showTimer);
+      if (hideTimer) clearTimeout(hideTimer);
     };
   }, [isLoading, minLoadingTime, showSkeletonAfter, isLoadingComplete]);
 
