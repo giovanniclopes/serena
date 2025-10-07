@@ -235,11 +235,11 @@ export default function Calendar() {
                     className={`${
                       isMobile ? "text-base" : "text-lg"
                     } font-bold ${
-                      isSelected ? "text-white" : isToday ? "text-blue-600" : ""
+                      isSelected ? "" : isToday ? "text-blue-600" : ""
                     }`}
                     style={{
                       color: isSelected
-                        ? "white"
+                        ? state.currentTheme.colors.primary
                         : isToday
                         ? state.currentTheme.colors.primary
                         : state.currentTheme.colors.text,
@@ -550,12 +550,10 @@ export default function Calendar() {
               <div
                 className={`font-semibold ${isMobile ? "mb-0.5" : "mb-1"} ${
                   isMobile ? "text-xs" : "text-sm"
-                } ${
-                  isSelected ? "text-white" : isToday ? "text-blue-600" : ""
-                }`}
+                } ${isSelected ? "" : isToday ? "text-blue-600" : ""}`}
                 style={{
                   color: isSelected
-                    ? "white"
+                    ? state.currentTheme.colors.primary
                     : isToday
                     ? state.currentTheme.colors.primary
                     : isCurrentMonth
