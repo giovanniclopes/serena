@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabaseClient";
 import type { Task } from "../types";
+import { sanitizeTaskIdForAPI } from "../utils/taskUtils";
 
 const formatDateForSupabase = (date: Date | undefined): string | undefined => {
   if (!date) return undefined;
@@ -84,7 +85,9 @@ export async function createTask(
       title: task.title,
       description: task.description,
       project_id: task.projectId,
-      parent_task_id: task.parentTaskId,
+      parent_task_id: task.parentTaskId
+        ? sanitizeTaskIdForAPI(task.parentTaskId)
+        : null,
       due_date: formatDateForSupabase(task.dueDate),
       priority: task.priority,
       reminders: task.reminders,
@@ -132,7 +135,9 @@ export async function updateTask(task: Task): Promise<Task> {
       title: task.title,
       description: task.description,
       project_id: task.projectId,
-      parent_task_id: task.parentTaskId,
+      parent_task_id: task.parentTaskId
+        ? sanitizeTaskIdForAPI(task.parentTaskId)
+        : null,
       due_date: formatDateForSupabase(task.dueDate),
       priority: task.priority,
       reminders: task.reminders,

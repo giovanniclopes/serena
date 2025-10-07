@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabaseClient";
 import type { Task } from "../types";
+import { sanitizeTaskIdForAPI } from "../utils/taskUtils";
 
 const formatDateForSupabase = (date?: Date): string | null => {
   if (!date) return null;
@@ -7,10 +8,13 @@ const formatDateForSupabase = (date?: Date): string | null => {
 };
 
 export async function getSubtasks(taskId: string): Promise<Task[]> {
+  // Sanitizar o ID da tarefa para evitar erros com IDs de recorrência
+  const originalTaskId = sanitizeTaskIdForAPI(taskId);
+
   const { data, error } = await supabase
     .from("subtasks")
     .select("*")
-    .eq("task_id", taskId)
+    .eq("task_id", originalTaskId)
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -51,13 +55,18 @@ export async function createSubtask(
     throw new Error("Usuário não autenticado");
   }
 
+  // Sanitizar o ID da tarefa pai para evitar erros com IDs de recorrência
+  const originalParentTaskId = subtask.parentTaskId
+    ? sanitizeTaskIdForAPI(subtask.parentTaskId)
+    : null;
+
   const { data, error } = await supabase
     .from("subtasks")
     .insert({
       title: subtask.title,
       description: subtask.description,
-      task_id: subtask.parentTaskId,
-      parent_task_id: subtask.parentTaskId,
+      task_id: originalParentTaskId,
+      parent_task_id: originalParentTaskId,
       due_date: formatDateForSupabase(subtask.dueDate),
       priority: subtask.priority,
       reminders: subtask.reminders,
@@ -96,13 +105,18 @@ export async function createSubtask(
 }
 
 export async function updateSubtask(subtask: Task): Promise<Task> {
+  // Sanitizar o ID da tarefa pai para evitar erros com IDs de recorrência
+  const originalParentTaskId = subtask.parentTaskId
+    ? sanitizeTaskIdForAPI(subtask.parentTaskId)
+    : null;
+
   const { data, error } = await supabase
     .from("subtasks")
     .update({
       title: subtask.title,
       description: subtask.description,
-      task_id: subtask.parentTaskId,
-      parent_task_id: subtask.parentTaskId,
+      task_id: originalParentTaskId,
+      parent_task_id: originalParentTaskId,
       due_date: formatDateForSupabase(subtask.dueDate),
       priority: subtask.priority,
       reminders: subtask.reminders,
