@@ -168,7 +168,7 @@ export default function WorkspaceSelector({
             {workspaces?.map((workspace) => (
               <div
                 key={workspace.id}
-                className={`w-full px-3 py-3 rounded-lg transition-all duration-200 mb-1 ${
+                className={`w-full px-3 py-3 rounded-lg transition-all duration-200 mb-1 group ${
                   workspace.id === state.activeWorkspaceId
                     ? "ring-2 shadow-md"
                     : "hover:shadow-sm"
@@ -183,7 +183,7 @@ export default function WorkspaceSelector({
                 <div className="flex items-center justify-between">
                   <button
                     onClick={() => handleWorkspaceChange(workspace.id)}
-                    className="flex items-center space-x-3 flex-1 text-left group"
+                    className="flex items-center space-x-3 flex-1 text-left"
                     style={{ color: state.currentTheme.colors.text }}
                   >
                     <div className="flex items-center space-x-3">
@@ -224,7 +224,7 @@ export default function WorkspaceSelector({
                     </div>
                   </button>
 
-                  <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex items-center space-x-1 opacity-60 group-hover:opacity-100 transition-opacity duration-200">
                     <button
                       onClick={() => handleEditWorkspace(workspace)}
                       className="p-1.5 rounded-md hover:scale-110 transition-all duration-200"
