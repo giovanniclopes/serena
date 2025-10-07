@@ -1,5 +1,7 @@
 import { Filter, Grid, List, Search } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import type { Priority } from "../types";
+import { getPriorityColor, getPriorityLabel } from "../utils";
 
 interface FilterControlsProps {
   searchQuery: string;
@@ -8,6 +10,8 @@ interface FilterControlsProps {
   onViewModeChange: (mode: "list" | "grid") => void;
   showCompleted: boolean;
   onShowCompletedChange: (show: boolean) => void;
+  selectedPriorities?: Priority[];
+  onPrioritiesChange?: (priorities: Priority[]) => void;
   searchPlaceholder?: string;
   showCompletedLabel?: string;
   onFilterClick?: () => void;
@@ -20,6 +24,8 @@ export default function FilterControls({
   onViewModeChange,
   showCompleted,
   onShowCompletedChange,
+  selectedPriorities = [],
+  onPrioritiesChange,
   searchPlaceholder = "Buscar...",
   showCompletedLabel = "Mostrar concluídos",
   onFilterClick,
@@ -121,6 +127,50 @@ export default function FilterControls({
           </span>
         </label>
       </div>
+
+      {onPrioritiesChange && (
+        <div className="space-y-2">
+          <span
+            className="text-sm font-medium"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            Filtrar por prioridade:
+          </span>
+          <div className="flex flex-wrap gap-2">
+            {(["P1", "P2", "P3", "P4"] as Priority[]).map((priority) => {
+              const isSelected = selectedPriorities.includes(priority);
+              return (
+                <button
+                  key={priority}
+                  onClick={() => {
+                    if (isSelected) {
+                      onPrioritiesChange(
+                        selectedPriorities.filter((p) => p !== priority)
+                      );
+                    } else {
+                      onPrioritiesChange([...selectedPriorities, priority]);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all sm:py-0 ${
+                    isSelected ? "text-white" : "opacity-70 hover:opacity-100"
+                  }`}
+                  style={{
+                    backgroundColor: isSelected
+                      ? getPriorityColor(priority)
+                      : state.currentTheme.colors.surface,
+                    color: isSelected
+                      ? "white"
+                      : state.currentTheme.colors.text,
+                    border: `1px solid ${getPriorityColor(priority)}`,
+                  }}
+                >
+                  {getPriorityLabel(priority)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -1,5 +1,6 @@
-import { Filter, Grid, List, Search } from "lucide-react";
+import { List } from "lucide-react";
 import { useState } from "react";
+import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
@@ -11,7 +12,7 @@ import {
   useTasks,
   useUpdateTask,
 } from "../features/tasks/useTasks";
-import type { Task } from "../types";
+import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
 
 export default function Tasks() {
@@ -19,6 +20,7 @@ export default function Tasks() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [selectedPriorities, setSelectedPriorities] = useState<Priority[]>([]);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [showCompleteAllModal, setShowCompleteAllModal] = useState(false);
@@ -34,6 +36,7 @@ export default function Tasks() {
     name: "Filtro Padrão",
     workspaceId: state.activeWorkspaceId,
     isCompleted: showCompleted ? undefined : false,
+    priorities: selectedPriorities.length > 0 ? selectedPriorities : undefined,
   });
 
   const handleCompleteTask = (taskId: string) => {
@@ -115,97 +118,21 @@ export default function Tasks() {
         </h1>
       </div>
 
-      <div className="flex items-center space-x-3">
-        <div className="flex-1 relative">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          />
-          <input
-            type="text"
-            placeholder="Buscar tarefas..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border transition-colors text-sm"
-            style={{
-              backgroundColor: state.currentTheme.colors.surface,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
-          />
-        </div>
+      <FilterControls
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        showCompleted={showCompleted}
+        onShowCompletedChange={setShowCompleted}
+        selectedPriorities={selectedPriorities}
+        onPrioritiesChange={setSelectedPriorities}
+        searchPlaceholder="Buscar tarefas..."
+        showCompletedLabel="Mostrar concluídas"
+      />
 
-        <button
-          className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
-          style={{
-            backgroundColor: state.currentTheme.colors.primary + "20",
-            color: state.currentTheme.colors.primary,
-          }}
-        >
-          <Filter className="w-4 h-4" />
-        </button>
-
-        <div
-          className="flex rounded-lg"
-          style={{ backgroundColor: state.currentTheme.colors.surface }}
-        >
-          <button
-            onClick={() => setViewMode("list")}
-            className={`p-2 rounded-l-lg transition-colors ${
-              viewMode === "list" ? "bg-opacity-20" : ""
-            }`}
-            style={{
-              backgroundColor:
-                viewMode === "list"
-                  ? state.currentTheme.colors.primary + "20"
-                  : "transparent",
-              color:
-                viewMode === "list"
-                  ? state.currentTheme.colors.primary
-                  : state.currentTheme.colors.textSecondary,
-            }}
-          >
-            <List className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`p-2 rounded-r-lg transition-colors ${
-              viewMode === "grid" ? "bg-opacity-20" : ""
-            }`}
-            style={{
-              backgroundColor:
-                viewMode === "grid"
-                  ? state.currentTheme.colors.primary + "20"
-                  : "transparent",
-              color:
-                viewMode === "grid"
-                  ? state.currentTheme.colors.primary
-                  : state.currentTheme.colors.textSecondary,
-            }}
-          >
-            <Grid className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={showCompleted}
-            onChange={(e) => setShowCompleted(e.target.checked)}
-            className="w-1.5 h-1.5 sm:w-4 sm:h-4 rounded"
-            style={{ accentColor: state.currentTheme.colors.primary }}
-          />
-          <span
-            className="text-sm"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Mostrar concluídas
-          </span>
-        </label>
-
-        {filteredTasks.some((task) => !task.isCompleted) && (
+      {filteredTasks.some((task) => !task.isCompleted) && (
+        <div className="flex justify-end">
           <button
             onClick={() => setShowCompleteAllModal(true)}
             className="px-4 py-2 border rounded-lg font-medium transition-colors text-sm"
@@ -216,8 +143,8 @@ export default function Tasks() {
           >
             Concluir todas
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {filteredTasks.length > 0 ? (
         <div
