@@ -74,7 +74,7 @@ export default function CentralActionButton({
     <div ref={containerRef} className="relative">
       <motion.button
         onClick={handleMainButtonClick}
-        className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-200"
+        className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center border border-black/20 transition-all duration-200"
         style={{
           backgroundColor: isExpanded
             ? state.currentTheme.colors.primary
