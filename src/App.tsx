@@ -5,6 +5,7 @@ import {
   Routes,
 } from "react-router-dom";
 import "./App.css";
+import AppUpdateNotification from "./components/AppUpdateNotification";
 import AppWithOnboarding from "./components/AppWithOnboarding";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -58,6 +59,7 @@ function App() {
             </Route>
           </Routes>
           <PWAInstallPrompt />
+          <AppUpdateNotification />
         </Router>
       </AppProvider>
     </AuthProvider>
