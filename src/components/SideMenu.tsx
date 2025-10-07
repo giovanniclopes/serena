@@ -16,8 +16,10 @@ import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
+import { useProfile } from "../features/profile/useProfile";
 import { useOfflineMode } from "../hooks/useOfflineMode";
 import LogoutModal from "./LogoutModal";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 interface SideMenuProps {
   isOpen: boolean;
@@ -33,6 +35,7 @@ export default function SideMenu({
   const { state } = useApp();
   const { user } = useAuth();
   const { pendingActions } = useOfflineMode();
+  const { profile } = useProfile();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
@@ -112,14 +115,17 @@ export default function SideMenu({
                     border: `1px solid ${state.currentTheme.colors.primary}20`,
                   }}
                 >
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: state.currentTheme.colors.primary,
-                    }}
-                  >
-                    <User className="w-5 h-5 text-white" />
-                  </div>
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={profile?.avatarUrl} alt="Avatar" />
+                    <AvatarFallback
+                      className="text-white"
+                      style={{
+                        backgroundColor: state.currentTheme.colors.primary,
+                      }}
+                    >
+                      <User className="w-5 h-5" />
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <p
                       className="text-sm font-medium"
