@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import SerenaLogo from "../../public/icons/icon.svg";
+import { useWorkspaceColor } from "../hooks/useWorkspaceColor";
 import { supabase } from "../lib/supabaseClient";
 
 export default function EmailVerification() {
@@ -18,6 +19,7 @@ export default function EmailVerification() {
   const [isVerified, setIsVerified] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const workspaceColor = useWorkspaceColor();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -248,11 +250,21 @@ export default function EmailVerification() {
             <button
               onClick={handleResendEmail}
               disabled={isResending || resendCooldown > 0}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 border border-pink-300 text-pink-600 rounded-xl hover:bg-pink-50 focus:outline-none focus:ring-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 border rounded-xl focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              style={
+                {
+                  borderColor: workspaceColor + "80",
+                  color: workspaceColor,
+                  "--tw-ring-color": workspaceColor,
+                } as React.CSSProperties
+              }
             >
               {isResending ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-600"></div>
+                  <div
+                    className="animate-spin rounded-full h-4 w-4 border-b-2"
+                    style={{ borderColor: workspaceColor }}
+                  ></div>
                   Reenviando...
                 </>
               ) : resendCooldown > 0 ? (

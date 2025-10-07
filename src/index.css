@@ -100,7 +100,7 @@ body {
 
 /* Better focus styles for accessibility */
 *:focus {
-  outline: 2px solid #ec4899;
+  outline: 2px solid var(--workspace-color, #ec4899);
   outline-offset: 2px;
 }
 

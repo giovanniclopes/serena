@@ -81,7 +81,20 @@ export default function WorkspaceSelector({
         updates: workspaceData,
       });
     } else {
-      createWorkspaceMutation.mutate(workspaceData);
+      createWorkspaceMutation.mutate(workspaceData, {
+        onSuccess: (newWorkspace) => {
+          if (newWorkspace) {
+            dispatch({ type: "SET_WORKSPACE_CHANGING", payload: true });
+            setTimeout(() => {
+              dispatch({
+                type: "SET_ACTIVE_WORKSPACE",
+                payload: newWorkspace.id,
+              });
+              dispatch({ type: "SET_WORKSPACE_CHANGING", payload: false });
+            }, 800);
+          }
+        },
+      });
     }
     setIsWorkspaceModalOpen(false);
     setEditingWorkspace(undefined);

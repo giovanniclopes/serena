@@ -16,6 +16,7 @@ import ProjectModal from "./ProjectModal";
 import SideMenu from "./SideMenu";
 import TaskModal from "./TaskModal";
 import TopNavbar from "./TopNavbar";
+import WorkspaceColorProvider from "./WorkspaceColorProvider";
 import WorkspaceLoadingOverlay from "./WorkspaceLoadingOverlay";
 
 const motivationalMessages = [
@@ -170,72 +171,75 @@ export default function Layout() {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{
-        backgroundColor: state.currentTheme.colors.background,
-        color: state.currentTheme.colors.text,
-      }}
-    >
-      <TopNavbar
-        title={getPageTitle() ?? undefined}
-        showCancelDone={location.pathname === "/new-task"}
-        onMenuClick={() => setShowMenu(!showMenu)}
-        onCancel={() => navigate("/tasks")}
-        onDone={() => {}}
-      />
-
-      <main
-        className="flex-1 flex pt-16"
-        style={{ paddingBottom: shouldShowBottomNav ? "80px" : "0" }}
+    <>
+      <WorkspaceColorProvider />
+      <div
+        className="min-h-screen flex flex-col"
+        style={{
+          backgroundColor: state.currentTheme.colors.background,
+          color: state.currentTheme.colors.text,
+        }}
       >
-        <div className="flex-1 p-4 max-w-7xl mx-auto w-full">
-          <PageTransition>
-            <Outlet />
-          </PageTransition>
-        </div>
-      </main>
-
-      {shouldShowBottomNav && (
-        <BottomNavbar
-          onTaskClick={handleTaskClick}
-          onHabitClick={handleHabitClick}
-          onCountdownClick={handleCountdownClick}
-          onProjectClick={handleProjectClick}
+        <TopNavbar
+          title={getPageTitle() ?? undefined}
+          showCancelDone={location.pathname === "/new-task"}
+          onMenuClick={() => setShowMenu(!showMenu)}
+          onCancel={() => navigate("/tasks")}
+          onDone={() => {}}
         />
-      )}
-      <SideMenu isOpen={showMenu} onClose={() => setShowMenu(false)} />
-      <WorkspaceLoadingOverlay />
 
-      <LogoutModal
-        isOpen={showLogoutModal}
-        onClose={() => setShowLogoutModal(false)}
-      />
+        <main
+          className="flex-1 flex pt-16"
+          style={{ paddingBottom: shouldShowBottomNav ? "80px" : "0" }}
+        >
+          <div className="flex-1 p-4 max-w-7xl mx-auto w-full">
+            <PageTransition>
+              <Outlet />
+            </PageTransition>
+          </div>
+        </main>
 
-      <TaskModal
-        isOpen={isTaskModalOpen}
-        onClose={() => setIsTaskModalOpen(false)}
-        onSave={handleSaveTask}
-      />
+        {shouldShowBottomNav && (
+          <BottomNavbar
+            onTaskClick={handleTaskClick}
+            onHabitClick={handleHabitClick}
+            onCountdownClick={handleCountdownClick}
+            onProjectClick={handleProjectClick}
+          />
+        )}
+        <SideMenu isOpen={showMenu} onClose={() => setShowMenu(false)} />
+        <WorkspaceLoadingOverlay />
 
-      <HabitModal
-        isOpen={isHabitModalOpen}
-        onClose={() => setIsHabitModalOpen(false)}
-        onSave={handleSaveHabit}
-      />
+        <LogoutModal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+        />
 
-      <CountdownModal
-        isOpen={isCountdownModalOpen}
-        onClose={() => setIsCountdownModalOpen(false)}
-        onSave={handleSaveCountdown}
-      />
+        <TaskModal
+          isOpen={isTaskModalOpen}
+          onClose={() => setIsTaskModalOpen(false)}
+          onSave={handleSaveTask}
+        />
 
-      <ProjectModal
-        isOpen={isProjectModalOpen}
-        onClose={() => setIsProjectModalOpen(false)}
-        onSave={handleSaveProject}
-        workspaceId={state.activeWorkspaceId}
-      />
-    </div>
+        <HabitModal
+          isOpen={isHabitModalOpen}
+          onClose={() => setIsHabitModalOpen(false)}
+          onSave={handleSaveHabit}
+        />
+
+        <CountdownModal
+          isOpen={isCountdownModalOpen}
+          onClose={() => setIsCountdownModalOpen(false)}
+          onSave={handleSaveCountdown}
+        />
+
+        <ProjectModal
+          isOpen={isProjectModalOpen}
+          onClose={() => setIsProjectModalOpen(false)}
+          onSave={handleSaveProject}
+          workspaceId={state.activeWorkspaceId}
+        />
+      </div>
+    </>
   );
 }

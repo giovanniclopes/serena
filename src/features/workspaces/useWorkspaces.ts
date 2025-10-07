@@ -28,9 +28,10 @@ export function useCreateWorkspace() {
 
   return useMutation({
     mutationFn: createWorkspace,
-    onSuccess: () => {
+    onSuccess: (newWorkspace) => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
       toast.success("Workspace criado com sucesso!");
+      return newWorkspace;
     },
     onError: (error) => {
       console.error("Erro ao criar workspace:", error);
