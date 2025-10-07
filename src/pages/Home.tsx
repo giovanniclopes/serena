@@ -5,6 +5,7 @@ import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import NextEventAlert from "../components/NextEventAlert";
 import PullToRefreshIndicator from "../components/PullToRefreshIndicator";
+import { HomeSkeleton } from "../components/skeletons/HomeSkeleton";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
@@ -17,6 +18,7 @@ import {
 } from "../features/tasks/useTasks";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
+import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Task } from "../types";
 import { getOverdueTasks, getTodayTasks, getUpcomingTasks } from "../utils";
 import { adjustColorBrightness } from "../utils/colorUtils";
@@ -26,6 +28,7 @@ export default function Home() {
   const { triggerHaptic, triggerSuccess } = useHapticFeedback();
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+  const { showSkeleton } = useSkeletonLoading(loading);
 
   const { tasks } = useTasks();
   const { profile } = useProfile();
@@ -47,18 +50,8 @@ export default function Home() {
     (task) => task.workspaceId === state.activeWorkspaceId
   );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div
-            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
-            style={{ borderColor: state.currentTheme.colors.primary }}
-          ></div>
-          <p className="text-gray-600">Carregando dados...</p>
-        </div>
-      </div>
-    );
+  if (showSkeleton) {
+    return <HomeSkeleton />;
   }
 
   if (error) {

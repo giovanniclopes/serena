@@ -2,6 +2,10 @@ import { List } from "lucide-react";
 import { useState } from "react";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
+import {
+  TaskGridSkeleton,
+  TaskListSkeleton,
+} from "../components/skeletons/TaskSkeleton";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
@@ -13,6 +17,7 @@ import {
   useUncompleteTask,
   useUpdateTask,
 } from "../features/tasks/useTasks";
+import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
 
@@ -27,6 +32,7 @@ export default function Tasks() {
   const [showCompleteAllModal, setShowCompleteAllModal] = useState(false);
 
   const { tasks, isLoading, error } = useTasks();
+  const { showSkeleton } = useSkeletonLoading(isLoading);
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
@@ -81,15 +87,18 @@ export default function Tasks() {
     setShowCompleteAllModal(false);
   };
 
-  if (isLoading) {
+  if (showSkeleton) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div
-          className="text-center"
-          style={{ color: state.currentTheme.colors.textSecondary }}
-        >
-          Carregando tarefas...
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
         </div>
+        <div className="h-12 bg-gray-200 rounded-lg animate-pulse" />
+        {viewMode === "grid" ? (
+          <TaskGridSkeleton count={6} />
+        ) : (
+          <TaskListSkeleton count={5} />
+        )}
       </div>
     );
   }

@@ -10,6 +10,10 @@ import { useState } from "react";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import HabitModal from "../components/HabitModal";
+import {
+  HabitGridSkeleton,
+  HabitListSkeleton,
+} from "../components/skeletons/HabitSkeleton";
 import StandardCard from "../components/StandardCard";
 import { useApp } from "../context/AppContext";
 import {
@@ -21,6 +25,7 @@ import {
   useUpdateHabitEntry,
 } from "../features/habits/useHabits";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
+import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Habit } from "../types";
 import {
   filterHabits,
@@ -46,6 +51,7 @@ export default function Habits() {
     isLoading: entriesLoading,
     error: entriesError,
   } = useHabitEntries();
+  const { showSkeleton } = useSkeletonLoading(habitsLoading || entriesLoading);
 
   const workspaceHabits = habits.filter(
     (habit) => habit.workspaceId === state.activeWorkspaceId
@@ -337,6 +343,22 @@ export default function Habits() {
         >
           Tente recarregar a página
         </div>
+      </div>
+    );
+  }
+
+  if (showSkeleton) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="h-12 bg-gray-200 rounded-lg animate-pulse" />
+        {viewMode === "grid" ? (
+          <HabitGridSkeleton count={4} />
+        ) : (
+          <HabitListSkeleton count={3} />
+        )}
       </div>
     );
   }

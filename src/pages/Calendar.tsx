@@ -25,10 +25,12 @@ import {
   Search,
 } from "lucide-react";
 import { useState } from "react";
+import { CalendarSkeleton } from "../components/skeletons/CalendarSkeleton";
 import TaskCard from "../components/TaskCard";
 import { useApp } from "../context/AppContext";
 import { useTasks, useUncompleteTask } from "../features/tasks/useTasks";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import {
   filterTasks,
   getPriorityColor,
@@ -41,6 +43,7 @@ type ViewMode = "month" | "week" | "day";
 export default function Calendar() {
   const { state, dispatch } = useApp();
   const { tasks, isLoading } = useTasks();
+  const { showSkeleton } = useSkeletonLoading(isLoading);
   const uncompleteTaskMutation = useUncompleteTask();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
@@ -667,17 +670,8 @@ export default function Calendar() {
     </div>
   );
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div
-          className="text-lg"
-          style={{ color: state.currentTheme.colors.textSecondary }}
-        >
-          Carregando calendário...
-        </div>
-      </div>
-    );
+  if (showSkeleton) {
+    return <CalendarSkeleton />;
   }
 
   return (

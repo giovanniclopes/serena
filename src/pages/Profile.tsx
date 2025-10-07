@@ -2,10 +2,12 @@ import { Bell, BookOpen, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import OnboardingModal from "../components/OnboardingModal";
 import ProfileCard from "../components/ProfileCard";
+import { ProfileSkeleton } from "../components/skeletons/ProfileSkeleton";
 import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
 import { useAutoProfile } from "../hooks/useAutoProfile";
 import { useOnboarding } from "../hooks/useOnboarding";
+import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 
 export default function Profile() {
   const { state } = useApp();
@@ -13,20 +15,10 @@ export default function Profile() {
   const { isChecking } = useAutoProfile();
   const { showOnboarding, showOnboardingAgain, hideOnboarding } =
     useOnboarding();
+  const { showSkeleton } = useSkeletonLoading(isLoading || isChecking);
 
-  if (isLoading || isChecking) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div
-            className="text-lg"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            {isChecking ? "Configurando perfil..." : "Carregando perfil..."}
-          </div>
-        </div>
-      </div>
-    );
+  if (showSkeleton) {
+    return <ProfileSkeleton />;
   }
 
   if (error) {

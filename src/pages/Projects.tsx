@@ -3,6 +3,10 @@ import { useState } from "react";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProjectModal from "../components/ProjectModal";
+import {
+  ProjectGridSkeleton,
+  ProjectListSkeleton,
+} from "../components/skeletons/ProjectSkeleton";
 import StandardCard from "../components/StandardCard";
 import { useApp } from "../context/AppContext";
 import {
@@ -11,12 +15,14 @@ import {
   useProjects,
   useUpdateProject,
 } from "../features/projects/useProjects";
+import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Project } from "../types";
 import { filterProjects, searchProjects } from "../utils";
 
 export default function Projects() {
   const { state } = useApp();
   const { projects, isLoading: isLoadingProjects } = useProjects();
+  const { showSkeleton } = useSkeletonLoading(isLoadingProjects);
   const createProjectMutation = useCreateProject();
   const updateProjectMutation = useUpdateProject();
   const deleteProjectMutation = useDeleteProject();
@@ -81,8 +87,20 @@ export default function Projects() {
     showCompleted
   );
 
-  if (isLoadingProjects) {
-    return <div className="text-center p-4">A carregar projetos...</div>;
+  if (showSkeleton) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="h-12 bg-gray-200 rounded-lg animate-pulse" />
+        {viewMode === "grid" ? (
+          <ProjectGridSkeleton count={6} />
+        ) : (
+          <ProjectListSkeleton count={4} />
+        )}
+      </div>
+    );
   }
 
   return (
