@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Habit } from "../types";
 import ResponsiveModal from "./ResponsiveModal";
@@ -134,6 +134,37 @@ export default function HabitModal({
   const [showTemplates, setShowTemplates] = useState(false);
   const [customTarget, setCustomTarget] = useState(false);
   const [customUnit, setCustomUnit] = useState(false);
+
+  useEffect(() => {
+    if (habit) {
+      setFormData({
+        name: habit.name || "",
+        description: habit.description || "",
+        target: habit.target || 1,
+        unit: habit.unit || "vez",
+        color: habit.color || colors[0],
+        category: habit.category || "outro",
+      });
+
+      const isCustomTarget = !commonTargets.some(
+        (t) => t.value === habit.target
+      );
+      const isCustomUnit = !commonUnits.some((u) => u.value === habit.unit);
+      setCustomTarget(isCustomTarget);
+      setCustomUnit(isCustomUnit);
+    } else {
+      setFormData({
+        name: "",
+        description: "",
+        target: 1,
+        unit: "vez",
+        color: colors[0],
+        category: "outro",
+      });
+      setCustomTarget(false);
+      setCustomUnit(false);
+    }
+  }, [habit]);
 
   const handleTemplateSelect = (template: (typeof habitTemplates)[0]) => {
     setFormData({
