@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import CentralActionButton from "./CentralActionButton";
+import { useMobileSpacing } from "./ui/mobile-spacing";
 
 interface BottomNavbarProps {
   onTaskClick: () => void;
@@ -20,6 +21,7 @@ export default function BottomNavbar({
 }: BottomNavbarProps) {
   const { state } = useApp();
   const { triggerHaptic } = useHapticFeedback();
+  const { spacing, touchTarget, isMobile } = useMobileSpacing();
 
   const navItems = [
     { path: "/", icon: Home, label: "Início" },
@@ -30,10 +32,13 @@ export default function BottomNavbar({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 px-4 py-3 z-40"
+      className="fixed bottom-0 left-0 right-0 z-40"
       style={{
         backgroundColor: state.currentTheme.colors.background,
         borderTop: `1px solid ${state.currentTheme.colors.border}`,
+        padding: spacing.md,
+        paddingTop: spacing.sm,
+        paddingBottom: spacing.sm,
       }}
     >
       <div className="flex justify-around items-center">

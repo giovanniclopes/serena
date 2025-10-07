@@ -1,37 +1,52 @@
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-import { type ReactNode } from "react";
-import { useApp } from "../context/AppContext";
+"use client";
 
-interface StandardCardProps {
+import { useApp } from "@/context/AppContext";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { cn } from "@/lib/utils";
+import { type ReactNode } from "react";
+
+interface MobileCardProps {
   children: ReactNode;
   className?: string;
   color?: string;
   onClick?: () => void;
   hover?: boolean;
+  padding?: "sm" | "md" | "lg";
 }
 
-export default function StandardCard({
+export function MobileCard({
   children,
   className = "",
   color,
   onClick,
   hover = true,
-}: StandardCardProps) {
+  padding = "md",
+}: MobileCardProps) {
   const { state } = useApp();
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+  const paddingClasses = {
+    sm: isMobile ? "p-4" : "p-3",
+    md: isMobile ? "p-5" : "p-4",
+    lg: isMobile ? "p-6" : "p-5",
+  };
+
+  const minHeight = isMobile ? "min-h-[60px]" : "min-h-[48px]";
+
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl shadow-sm transition-all duration-300 border ${
-        hover ? "hover:shadow-lg" : ""
-      } ${onClick ? "cursor-pointer active:scale-[0.98]" : ""} ${
-        isMobile ? "touch-manipulation" : ""
-      } ${className}`}
+      className={cn(
+        "relative overflow-hidden rounded-2xl shadow-sm transition-all duration-300 border",
+        minHeight,
+        paddingClasses[padding],
+        hover && "hover:shadow-lg",
+        onClick && "cursor-pointer active:scale-[0.98]",
+        isMobile && "touch-manipulation",
+        className
+      )}
       style={{
         backgroundColor: state.currentTheme.colors.surface,
         borderColor: state.currentTheme.colors.border,
-        minHeight: isMobile ? "60px" : "48px",
-        padding: isMobile ? "1.25rem" : "1rem",
       }}
       onClick={onClick}
     >

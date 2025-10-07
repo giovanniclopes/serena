@@ -283,7 +283,14 @@ export default function Layout() {
           className="flex-1 flex pt-16"
           style={{ paddingBottom: shouldShowBottomNav ? "80px" : "0" }}
         >
-          <div className="flex-1 p-4 max-w-7xl mx-auto w-full">
+          <div
+            className="flex-1 max-w-7xl mx-auto w-full"
+            style={{
+              padding: "1rem",
+              paddingTop: "1rem",
+              paddingBottom: "1rem",
+            }}
+          >
             <PageTransition>
               <Outlet />
             </PageTransition>
