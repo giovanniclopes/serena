@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CheckSquare, Clock, Folder, Plus, Target, X } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
+import { useClickOutside } from "../hooks/useClickOutside";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
 
 interface CentralActionButtonProps {
@@ -20,6 +21,12 @@ export default function CentralActionButton({
   const { state } = useApp();
   const { triggerHaptic } = useHapticFeedback();
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const containerRef = useClickOutside<HTMLDivElement>(() => {
+    if (isExpanded) {
+      setIsExpanded(false);
+    }
+  });
 
   const subButtons = [
     {
@@ -64,7 +71,7 @@ export default function CentralActionButton({
   };
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <motion.button
         onClick={handleMainButtonClick}
         className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-200"
