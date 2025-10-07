@@ -55,7 +55,7 @@ self.addEventListener("fetch", (event) => {
         return cache.match(request).then((response) => {
           if (response) {
             const cacheTime = response.headers.get("sw-cache-time");
-            if (cacheTime && (Date.now() - parseInt(cacheTime)) < 3600000) {
+            if (cacheTime && Date.now() - parseInt(cacheTime) < 3600000) {
               return response;
             }
           }
