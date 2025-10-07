@@ -52,12 +52,12 @@ export function useAccessibilityColors() {
     colors: accessibilityColors,
     isMobile,
     // Função para calcular contraste
-    getContrastRatio: (color1: string, color2: string) => {
+    getContrastRatio: (_color1: string, _color2: string) => {
       // Implementação simplificada - em produção, use uma biblioteca como color-contrast
       return 4.5; // Valor mínimo recomendado pela WCAG
     },
     // Função para verificar se uma cor atende aos padrões de acessibilidade
-    isAccessible: (foreground: string, background: string) => {
+    isAccessible: (_foreground: string, _background: string) => {
       // Implementação simplificada
       return true;
     },

@@ -21,7 +21,7 @@ export default function BottomNavbar({
 }: BottomNavbarProps) {
   const { state } = useApp();
   const { triggerHaptic } = useHapticFeedback();
-  const { spacing, touchTarget, isMobile } = useMobileSpacing();
+  const { spacing } = useMobileSpacing();
 
   const navItems = [
     { path: "/", icon: Home, label: "Início" },

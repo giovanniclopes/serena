@@ -11,6 +11,7 @@ interface ResponsiveTextProps {
   as?: "h1" | "h2" | "h3" | "h4" | "p" | "span" | "div";
   weight?: "light" | "normal" | "medium" | "semibold" | "bold";
   color?: "primary" | "secondary" | "muted" | "accent";
+  style?: React.CSSProperties;
 }
 
 export function ResponsiveText({
@@ -20,6 +21,7 @@ export function ResponsiveText({
   as: Component = "p",
   weight = "normal",
   color = "primary",
+  style,
 }: ResponsiveTextProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -56,6 +58,7 @@ export function ResponsiveText({
         colorClasses[color],
         className
       )}
+      style={style}
     >
       {children}
     </Component>
