@@ -26,18 +26,21 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   console.log("Service Worker ativando...");
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
-            console.log("Removendo cache antigo:", cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      return self.clients.claim();
-    })
+    caches
+      .keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
+              console.log("Removendo cache antigo:", cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => {
+        return self.clients.claim();
+      })
   );
 });
 
@@ -45,23 +48,29 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  if (url.pathname.includes("/assets/") && 
-      (url.pathname.endsWith(".js") || url.pathname.endsWith(".css"))) {
+  if (
+    url.pathname.includes("/assets/") &&
+    (url.pathname.endsWith(".js") || url.pathname.endsWith(".css"))
+  ) {
     event.respondWith(
       caches.open(DYNAMIC_CACHE).then((cache) => {
         return cache.match(request).then((response) => {
           if (response) {
             const cacheTime = response.headers.get("sw-cache-time");
             const now = Date.now();
-            if (cacheTime && (now - parseInt(cacheTime)) < 3600000) {
+            if (cacheTime && now - parseInt(cacheTime) < 3600000) {
               return response;
             }
           }
-          
+
           return fetch(request).then((fetchResponse) => {
             if (fetchResponse.ok) {
               const responseToCache = fetchResponse.clone();
-              responseToCache.headers.set("sw-cache-time", now.toString());
+              const currentTime = Date.now();
+              responseToCache.headers.set(
+                "sw-cache-time",
+                currentTime.toString()
+              );
               cache.put(request, responseToCache);
             }
             return fetchResponse;
@@ -72,7 +81,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (staticAssets.some(asset => url.pathname === asset)) {
+  if (staticAssets.some((asset) => url.pathname === asset)) {
     event.respondWith(
       caches.match(request).then((response) => {
         return response || fetch(request);
@@ -83,14 +92,16 @@ self.addEventListener("fetch", (event) => {
 
   if (request.destination === "document") {
     event.respondWith(
-      fetch(request).then((response) => {
-        if (!response.ok) {
+      fetch(request)
+        .then((response) => {
+          if (!response.ok) {
+            return caches.match("/");
+          }
+          return response;
+        })
+        .catch(() => {
           return caches.match("/");
-        }
-        return response;
-      }).catch(() => {
-        return caches.match("/");
-      })
+        })
     );
     return;
   }
