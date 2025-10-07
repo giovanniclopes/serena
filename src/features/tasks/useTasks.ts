@@ -6,6 +6,7 @@ import {
   createTask,
   deleteTask,
   getTasks,
+  uncompleteTask,
   updateTask,
 } from "../../services/apiTasks";
 
@@ -114,6 +115,22 @@ export function useCompleteTask() {
       } else {
         toast.error("Erro ao concluir tarefa. Tente novamente.");
       }
+    },
+  });
+}
+
+export function useUncompleteTask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: uncompleteTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Tarefa marcada como não concluída!");
+    },
+    onError: (error: any) => {
+      console.error("Erro ao desmarcar tarefa como concluída:", error);
+      toast.error("Erro ao desmarcar tarefa. Tente novamente.");
     },
   });
 }

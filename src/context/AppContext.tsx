@@ -73,6 +73,7 @@ type AppAction =
   | { type: "UPDATE_TASK"; payload: Task }
   | { type: "DELETE_TASK"; payload: string }
   | { type: "COMPLETE_TASK"; payload: string }
+  | { type: "UNCOMPLETE_TASK"; payload: string }
   | { type: "ADD_HABIT"; payload: Habit }
   | { type: "UPDATE_HABIT"; payload: Habit }
   | { type: "DELETE_HABIT"; payload: string }
@@ -193,6 +194,16 @@ function appReducer(state: AppState, action: AppAction): AppState {
         tasks: state.tasks.map((t) =>
           t.id === action.payload
             ? { ...t, isCompleted: true, completedAt: new Date() }
+            : t
+        ),
+      };
+
+    case "UNCOMPLETE_TASK":
+      return {
+        ...state,
+        tasks: state.tasks.map((t) =>
+          t.id === action.payload
+            ? { ...t, isCompleted: false, completedAt: undefined }
             : t
         ),
       };

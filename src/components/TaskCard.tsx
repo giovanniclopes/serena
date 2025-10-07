@@ -16,6 +16,7 @@ import { Checkbox } from "./ui/checkbox";
 interface TaskCardProps {
   task: Task;
   onComplete?: (taskId: string) => void;
+  onUncomplete?: (taskId: string) => void;
   onEdit?: (task: Task) => void;
   showProject?: boolean;
   showDate?: boolean;
@@ -24,6 +25,7 @@ interface TaskCardProps {
 export default function TaskCard({
   task,
   onComplete,
+  onUncomplete,
   onEdit,
   showProject = true,
   showDate = true,
@@ -33,9 +35,15 @@ export default function TaskCard({
   const project = state.projects.find((p) => p.id === task.projectId);
   const taskTags = state.tags.filter((tag) => task.tags.includes(tag.id));
 
-  const handleComplete = () => {
-    if (onComplete) {
-      onComplete(task.id);
+  const handleToggleComplete = () => {
+    if (task.isCompleted) {
+      if (onUncomplete) {
+        onUncomplete(task.id);
+      }
+    } else {
+      if (onComplete) {
+        onComplete(task.id);
+      }
     }
   };
 
@@ -55,7 +63,7 @@ export default function TaskCard({
         <div className="flex items-start space-x-2">
           <Checkbox
             checked={task.isCompleted}
-            onCheckedChange={handleComplete}
+            onCheckedChange={handleToggleComplete}
             className="flex-shrink-0"
           />
 

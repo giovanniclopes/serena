@@ -27,7 +27,7 @@ import {
 import { useState } from "react";
 import TaskCard from "../components/TaskCard";
 import { useApp } from "../context/AppContext";
-import { useTasks } from "../features/tasks/useTasks";
+import { useTasks, useUncompleteTask } from "../features/tasks/useTasks";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import {
   filterTasks,
@@ -41,6 +41,7 @@ type ViewMode = "month" | "week" | "day";
 export default function Calendar() {
   const { state, dispatch } = useApp();
   const { tasks, isLoading } = useTasks();
+  const uncompleteTaskMutation = useUncompleteTask();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -83,6 +84,14 @@ export default function Calendar() {
 
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
+  };
+
+  const handleUncompleteTask = (taskId: string) => {
+    uncompleteTaskMutation.mutate(taskId, {
+      onSuccess: () => {
+        dispatch({ type: "UNCOMPLETE_TASK", payload: taskId });
+      },
+    });
   };
 
   const getTasksForSelectedDate = () => {
@@ -408,6 +417,7 @@ export default function Calendar() {
                   onComplete={(taskId) =>
                     dispatch({ type: "COMPLETE_TASK", payload: taskId })
                   }
+                  onUncomplete={handleUncompleteTask}
                   showProject={true}
                   showDate={false}
                 />
@@ -796,6 +806,7 @@ export default function Calendar() {
                   onComplete={(taskId) =>
                     dispatch({ type: "COMPLETE_TASK", payload: taskId })
                   }
+                  onUncomplete={handleUncompleteTask}
                   showProject={true}
                   showDate={true}
                 />

@@ -10,6 +10,7 @@ import {
   useCompleteTask,
   useCreateTask,
   useTasks,
+  useUncompleteTask,
   useUpdateTask,
 } from "../features/tasks/useTasks";
 import type { Priority, Task } from "../types";
@@ -29,6 +30,7 @@ export default function Tasks() {
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
+  const uncompleteTaskMutation = useUncompleteTask();
   const completeAllTasksMutation = useCompleteAllTasks();
 
   const filteredTasks = filterTasks(searchTasks(tasks, searchQuery), {
@@ -41,6 +43,10 @@ export default function Tasks() {
 
   const handleCompleteTask = (taskId: string) => {
     completeTaskMutation.mutate(taskId);
+  };
+
+  const handleUncompleteTask = (taskId: string) => {
+    uncompleteTaskMutation.mutate(taskId);
   };
 
   const handleEditTask = (task: Task) => {
@@ -159,6 +165,7 @@ export default function Tasks() {
               key={task.id}
               task={task}
               onComplete={handleCompleteTask}
+              onUncomplete={handleUncompleteTask}
               onEdit={handleEditTask}
               showProject={true}
               showDate={true}

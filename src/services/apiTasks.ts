@@ -221,6 +221,44 @@ export async function completeTask(taskId: string): Promise<Task> {
   };
 }
 
+export async function uncompleteTask(taskId: string): Promise<Task> {
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({
+      is_completed: false,
+      completed_at: null,
+      updated_at: formatDateForSupabase(new Date()),
+    })
+    .eq("id", taskId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Erro ao desmarcar tarefa como concluída:", error);
+    throw error;
+  }
+
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    projectId: data.project_id,
+    parentTaskId: data.parent_task_id,
+    subtasks: [],
+    dueDate: data.due_date ? new Date(data.due_date) : undefined,
+    priority: data.priority,
+    reminders: data.reminders || [],
+    recurrence: data.recurrence || undefined,
+    tags: data.tags || [],
+    attachments: data.attachments || [],
+    isCompleted: data.is_completed,
+    completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
+    workspaceId: data.workspace_id,
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
+  };
+}
+
 export async function completeAllTasks(taskIds: string[]): Promise<void> {
   const { error } = await supabase
     .from("tasks")
