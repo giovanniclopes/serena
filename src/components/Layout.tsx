@@ -6,11 +6,14 @@ import { useCreateHabit } from "../features/habits/useHabits";
 import { useCreateProject } from "../features/projects/useProjects";
 import { useCreateTask } from "../features/tasks/useTasks";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
+import { useOfflineOperations } from "../hooks/useOfflineOperations";
 import type { Countdown, Habit, Project, Task } from "../types";
 import BottomNavbar from "./BottomNavbar";
 import CountdownModal from "./CountdownModal";
 import HabitModal from "./HabitModal";
 import LogoutModal from "./LogoutModal";
+import OfflineIndicator from "./OfflineIndicator";
+import OfflineStatusModal from "./OfflineStatusModal";
 import PageTitle from "./PageTitle";
 import PageTransition from "./PageTransition";
 import ProjectModal from "./ProjectModal";
@@ -76,8 +79,15 @@ const motivationalMessages = [
 export default function Layout() {
   const { state } = useApp();
   const { triggerHaptic } = useHapticFeedback();
+  const {
+    createTaskOffline,
+    createHabitOffline,
+    createCountdownOffline,
+    createProjectOffline,
+  } = useOfflineOperations();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showOfflineStatus, setShowOfflineStatus] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
@@ -150,72 +160,109 @@ export default function Layout() {
   const handleSaveTask = (
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
   ) => {
-    createTaskMutation.mutate(
-      {
-        ...taskData,
-        workspaceId: state.activeWorkspaceId,
-      },
-      {
-        onSuccess: () => {
-          setIsTaskModalOpen(false);
+    const offlineResult = createTaskOffline({
+      ...taskData,
+      workspaceId: state.activeWorkspaceId,
+    });
+
+    if (offlineResult.shouldExecute) {
+      createTaskMutation.mutate(
+        {
+          ...taskData,
+          workspaceId: state.activeWorkspaceId,
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            setIsTaskModalOpen(false);
+          },
+        }
+      );
+    } else {
+      setIsTaskModalOpen(false);
+    }
   };
 
   const handleSaveHabit = (
     habitData: Omit<Habit, "id" | "createdAt" | "updatedAt">
   ) => {
-    createHabitMutation.mutate(
-      {
-        ...habitData,
-        workspaceId: state.activeWorkspaceId,
-      },
-      {
-        onSuccess: () => {
-          setIsHabitModalOpen(false);
+    const offlineResult = createHabitOffline({
+      ...habitData,
+      workspaceId: state.activeWorkspaceId,
+    });
+
+    if (offlineResult.shouldExecute) {
+      createHabitMutation.mutate(
+        {
+          ...habitData,
+          workspaceId: state.activeWorkspaceId,
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            setIsHabitModalOpen(false);
+          },
+        }
+      );
+    } else {
+      setIsHabitModalOpen(false);
+    }
   };
 
   const handleSaveCountdown = (
     countdownData: Omit<Countdown, "id" | "createdAt" | "updatedAt">
   ) => {
-    createCountdownMutation.mutate(
-      {
-        ...countdownData,
-        workspaceId: state.activeWorkspaceId,
-      },
-      {
-        onSuccess: () => {
-          setIsCountdownModalOpen(false);
+    const offlineResult = createCountdownOffline({
+      ...countdownData,
+      workspaceId: state.activeWorkspaceId,
+    });
+
+    if (offlineResult.shouldExecute) {
+      createCountdownMutation.mutate(
+        {
+          ...countdownData,
+          workspaceId: state.activeWorkspaceId,
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            setIsCountdownModalOpen(false);
+          },
+        }
+      );
+    } else {
+      setIsCountdownModalOpen(false);
+    }
   };
 
   const handleSaveProject = (
     projectData: Omit<Project, "id" | "createdAt" | "updatedAt">
   ) => {
-    createProjectMutation.mutate(
-      {
-        project: {
-          ...projectData,
-          workspaceId: state.activeWorkspaceId,
+    const offlineResult = createProjectOffline({
+      ...projectData,
+      workspaceId: state.activeWorkspaceId,
+    });
+
+    if (offlineResult.shouldExecute) {
+      createProjectMutation.mutate(
+        {
+          project: {
+            ...projectData,
+            workspaceId: state.activeWorkspaceId,
+          },
         },
-      },
-      {
-        onSuccess: () => {
-          setIsProjectModalOpen(false);
-        },
-      }
-    );
+        {
+          onSuccess: () => {
+            setIsProjectModalOpen(false);
+          },
+        }
+      );
+    } else {
+      setIsProjectModalOpen(false);
+    }
   };
 
   return (
     <>
       <PageTitle />
+      <OfflineIndicator />
       <WorkspaceColorProvider />
       <div
         className="min-h-screen flex flex-col"
@@ -251,7 +298,11 @@ export default function Layout() {
             onProjectClick={handleProjectClick}
           />
         )}
-        <SideMenu isOpen={showMenu} onClose={() => setShowMenu(false)} />
+        <SideMenu
+          isOpen={showMenu}
+          onClose={() => setShowMenu(false)}
+          onShowOfflineStatus={() => setShowOfflineStatus(true)}
+        />
         <WorkspaceLoadingOverlay />
 
         <LogoutModal
@@ -282,6 +333,11 @@ export default function Layout() {
           onClose={() => setIsProjectModalOpen(false)}
           onSave={handleSaveProject}
           workspaceId={state.activeWorkspaceId}
+        />
+
+        <OfflineStatusModal
+          isOpen={showOfflineStatus}
+          onClose={() => setShowOfflineStatus(false)}
         />
       </div>
     </>

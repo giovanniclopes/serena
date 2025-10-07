@@ -9,22 +9,30 @@ import {
   Settings,
   Target,
   User,
+  Wifi,
   X,
 } from "lucide-react";
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
+import { useOfflineMode } from "../hooks/useOfflineMode";
 import LogoutModal from "./LogoutModal";
 
 interface SideMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  onShowOfflineStatus?: () => void;
 }
 
-export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
+export default function SideMenu({
+  isOpen,
+  onClose,
+  onShowOfflineStatus,
+}: SideMenuProps) {
   const { state } = useApp();
   const { user } = useAuth();
+  const { pendingActions } = useOfflineMode();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const menuItems = [
@@ -94,8 +102,7 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1, duration: 0.3 }}
-              >
-              </motion.div>
+              ></motion.div>
 
               <div className="mb-8">
                 <div
@@ -168,9 +175,39 @@ export default function SideMenu({ isOpen, onClose }: SideMenuProps) {
               </nav>
 
               <div
-                className="mt-8 pt-6 border-t"
+                className="mt-8 pt-6 border-t space-y-2"
                 style={{ borderColor: state.currentTheme.colors.border }}
               >
+                {onShowOfflineStatus && (
+                  <button
+                    onClick={() => {
+                      onShowOfflineStatus();
+                      onClose();
+                    }}
+                    className="flex items-center justify-between p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 w-full"
+                    style={{ color: state.currentTheme.colors.text }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <Wifi className="w-5 h-5" />
+                      <span className="text-sm font-medium">
+                        Status Offline
+                      </span>
+                    </div>
+                    {pendingActions.length > 0 && (
+                      <span
+                        className="px-2 py-1 text-xs rounded-full font-semibold"
+                        style={{
+                          backgroundColor:
+                            state.currentTheme.colors.warning + "20",
+                          color: state.currentTheme.colors.warning,
+                        }}
+                      >
+                        {pendingActions.length}
+                      </span>
+                    )}
+                  </button>
+                )}
+
                 <button
                   onClick={() => setShowLogoutModal(true)}
                   className="flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
