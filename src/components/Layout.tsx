@@ -11,6 +11,7 @@ import BottomNavbar from "./BottomNavbar";
 import CountdownModal from "./CountdownModal";
 import HabitModal from "./HabitModal";
 import LogoutModal from "./LogoutModal";
+import PageTitle from "./PageTitle";
 import PageTransition from "./PageTransition";
 import ProjectModal from "./ProjectModal";
 import SideMenu from "./SideMenu";
@@ -214,6 +215,7 @@ export default function Layout() {
 
   return (
     <>
+      <PageTitle />
       <WorkspaceColorProvider />
       <div
         className="min-h-screen flex flex-col"

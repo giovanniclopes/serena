@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import SerenaLogo from "../../public/icons/icon.svg";
+import PageTitle from "../components/PageTitle";
 import { useWorkspaceColor } from "../hooks/useWorkspaceColor";
 import { supabase } from "../lib/supabaseClient";
 
@@ -118,7 +119,47 @@ export default function EmailVerification() {
 
   if (isVerified) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+      <>
+        <PageTitle />
+        <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-md w-full">
+            <div className="text-center mb-8">
+              <div className="flex justify-center mb-4">
+                <div className="shadow-lg">
+                  <img src={SerenaLogo} alt="Serena" className="h-16 w-16" />
+                </div>
+              </div>
+              <h1 className="text-3xl font-bold bg-green-500 bg-clip-text text-transparent">
+                Serena
+              </h1>
+            </div>
+
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 text-center">
+              <div className="mb-6">
+                <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Email verificado!
+                </h2>
+                <p className="text-gray-600">
+                  Sua conta foi ativada com sucesso. Você será redirecionado em
+                  alguns segundos...
+                </p>
+              </div>
+
+              <div className="flex justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <PageTitle />
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
@@ -126,187 +167,153 @@ export default function EmailVerification() {
                 <img src={SerenaLogo} alt="Serena" className="h-16 w-16" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold bg-green-500 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-pink-500 bg-clip-text text-transparent">
               Serena
             </h1>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8 text-center">
-            <div className="mb-6">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
+            <div className="text-center mb-6">
+              <Mail className="h-16 w-16 text-pink-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Email verificado!
+                Verifique seu email
               </h2>
               <p className="text-gray-600">
-                Sua conta foi ativada com sucesso. Você será redirecionado em
-                alguns segundos...
+                Enviamos um link de verificação para:
               </p>
+              <p className="text-pink-600 font-medium mt-1">{email}</p>
             </div>
 
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="shadow-lg">
-              <img src={SerenaLogo} alt="Serena" className="h-16 w-16" />
-            </div>
-          </div>
-          <h1 className="text-3xl font-bold bg-pink-500 bg-clip-text text-transparent">
-            Serena
-          </h1>
-        </div>
-
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
-          <div className="text-center mb-6">
-            <Mail className="h-16 w-16 text-pink-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Verifique seu email
-            </h2>
-            <p className="text-gray-600">
-              Enviamos um link de verificação para:
-            </p>
-            <p className="text-pink-600 font-medium mt-1">{email}</p>
-          </div>
-
-          <div className="space-y-4 mb-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0">
-                  <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
-                </div>
-                <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-1">Próximos passos:</p>
-                  <ol className="list-decimal list-inside space-y-1 text-blue-700">
-                    <li>Abra seu email</li>
-                    <li>Clique no link de verificação</li>
-                    <li>Volte aqui para continuar</li>
-                  </ol>
+            <div className="space-y-4 mb-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0">
+                    <Clock className="h-5 w-5 text-blue-600 mt-0.5" />
+                  </div>
+                  <div className="text-sm text-blue-800">
+                    <p className="font-medium mb-1">Próximos passos:</p>
+                    <ol className="list-decimal list-inside space-y-1 text-blue-700">
+                      <li>Abra seu email</li>
+                      <li>Clique no link de verificação</li>
+                      <li>Volte aqui para continuar</li>
+                    </ol>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {detectedProvider && (
+              {detectedProvider && (
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <p className="text-sm text-gray-600 mb-3">
+                    Abrir seu provedor de email:
+                  </p>
+                  <div className="flex gap-2">
+                    {detectedProvider === "gmail" && (
+                      <button
+                        onClick={() => openEmailProvider("gmail")}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Gmail
+                      </button>
+                    )}
+                    {detectedProvider === "outlook" && (
+                      <button
+                        onClick={() => openEmailProvider("outlook")}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Outlook
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                 <p className="text-sm text-gray-600 mb-3">
-                  Abrir seu provedor de email:
+                  Ou abrir manualmente:
                 </p>
-                <div className="flex gap-2">
-                  {detectedProvider === "gmail" && (
-                    <button
-                      onClick={() => openEmailProvider("gmail")}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Gmail
-                    </button>
-                  )}
-                  {detectedProvider === "outlook" && (
-                    <button
-                      onClick={() => openEmailProvider("outlook")}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      Outlook
-                    </button>
-                  )}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => openEmailProvider("gmail")}
+                    className="flex items-center justify-center gap-2 py-2 px-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Gmail
+                  </button>
+                  <button
+                    onClick={() => openEmailProvider("outlook")}
+                    className="flex items-center justify-center gap-2 py-2 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Outlook
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
 
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p className="text-sm text-gray-600 mb-3">
-                Ou abrir manualmente:
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => openEmailProvider("gmail")}
-                  className="flex items-center justify-center gap-2 py-2 px-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Gmail
-                </button>
-                <button
-                  onClick={() => openEmailProvider("outlook")}
-                  className="flex items-center justify-center gap-2 py-2 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Outlook
-                </button>
+            <div className="space-y-4">
+              <button
+                onClick={handleResendEmail}
+                disabled={isResending || resendCooldown > 0}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 border rounded-xl focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                style={
+                  {
+                    borderColor: workspaceColor + "80",
+                    color: workspaceColor,
+                    "--tw-ring-color": workspaceColor,
+                  } as React.CSSProperties
+                }
+              >
+                {isResending ? (
+                  <>
+                    <div
+                      className="animate-spin rounded-full h-4 w-4 border-b-2"
+                      style={{ borderColor: workspaceColor }}
+                    ></div>
+                    Reenviando...
+                  </>
+                ) : resendCooldown > 0 ? (
+                  <>
+                    <Clock className="h-4 w-4" />
+                    Reenviar em {resendCooldown}s
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4" />
+                    Reenviar email
+                  </>
+                )}
+              </button>
+
+              <div className="text-center">
+                <p className="text-sm text-gray-600">
+                  Não recebeu o email? Verifique sua caixa de spam ou{" "}
+                  <button
+                    onClick={handleResendEmail}
+                    disabled={isResending || resendCooldown > 0}
+                    className="text-pink-600 hover:text-pink-500 font-medium disabled:opacity-50"
+                  >
+                    reenvie aqui
+                  </button>
+                </p>
               </div>
-            </div>
-          </div>
 
-          <div className="space-y-4">
-            <button
-              onClick={handleResendEmail}
-              disabled={isResending || resendCooldown > 0}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 border rounded-xl focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-              style={
-                {
-                  borderColor: workspaceColor + "80",
-                  color: workspaceColor,
-                  "--tw-ring-color": workspaceColor,
-                } as React.CSSProperties
-              }
-            >
-              {isResending ? (
-                <>
-                  <div
-                    className="animate-spin rounded-full h-4 w-4 border-b-2"
-                    style={{ borderColor: workspaceColor }}
-                  ></div>
-                  Reenviando...
-                </>
-              ) : resendCooldown > 0 ? (
-                <>
-                  <Clock className="h-4 w-4" />
-                  Reenviar em {resendCooldown}s
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="h-4 w-4" />
-                  Reenviar email
-                </>
-              )}
-            </button>
-
-            <div className="text-center">
-              <p className="text-sm text-gray-600">
-                Não recebeu o email? Verifique sua caixa de spam ou{" "}
-                <button
-                  onClick={handleResendEmail}
-                  disabled={isResending || resendCooldown > 0}
-                  className="text-pink-600 hover:text-pink-500 font-medium disabled:opacity-50"
-                >
-                  reenvie aqui
-                </button>
-              </p>
-            </div>
-
-            <div className="text-center pt-4 border-t border-gray-200">
-              <p className="text-sm text-gray-600">
-                Problemas com a verificação?{" "}
-                <Link
-                  to="/register"
-                  className="text-pink-600 hover:text-pink-500 font-medium"
-                >
-                  Voltar ao cadastro
-                </Link>
-              </p>
+              <div className="text-center pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-600">
+                  Problemas com a verificação?{" "}
+                  <Link
+                    to="/register"
+                    className="text-pink-600 hover:text-pink-500 font-medium"
+                  >
+                    Voltar ao cadastro
+                  </Link>
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
