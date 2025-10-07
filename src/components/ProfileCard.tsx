@@ -2,7 +2,6 @@ import { Calendar, Edit, User } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
-import { useAutoProfile } from "../hooks/useAutoProfile";
 import ProfileModal from "./ProfileModal";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
@@ -20,17 +19,16 @@ export default function ProfileCard({
 }: ProfileCardProps) {
   const { state } = useApp();
   const { profile, isLoading } = useProfile();
-  const { isChecking } = useAutoProfile();
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  if (isLoading || isChecking) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center p-4">
         <div
           className="text-sm"
           style={{ color: state.currentTheme.colors.textSecondary }}
         >
-          {isChecking ? "Configurando perfil..." : "Carregando perfil..."}
+          Carregando perfil...
         </div>
       </div>
     );

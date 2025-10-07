@@ -22,10 +22,15 @@ export async function getCurrentProfile(): Promise<UserProfile | null> {
 
   if (error) {
     if (error.code === "PGRST116") {
+      // Perfil não existe - retorna null sem erro
       return null;
     }
     console.error("Erro ao buscar perfil:", error);
     throw new Error("Falha ao carregar perfil");
+  }
+
+  if (!data) {
+    return null;
   }
 
   return {

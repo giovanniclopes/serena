@@ -18,6 +18,14 @@ export function useProfile() {
     queryFn: getCurrentProfile,
     staleTime: 1000 * 60 * 15, // 15 minutos (perfil muda pouco)
     gcTime: 1000 * 60 * 30, // 30 minutos
+    retry: (failureCount, error) => {
+      if (error?.message?.includes("PGRST116")) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
   return { profile, isLoading, error };

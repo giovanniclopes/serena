@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useOnboarding } from "../hooks/useOnboarding";
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<unknown | null>(null);
   const [loading, setLoading] = useState(true);
   const { markAsNewUser } = useOnboarding();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const {
@@ -62,9 +64,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             status: "active",
           });
           console.log("✅ Perfil criado automaticamente");
+          queryClient.invalidateQueries({ queryKey: ["profile"] });
+          // Limpar o cache para forçar um novo fetch
+          queryClient.removeQueries({ queryKey: ["profile"] });
           markAsNewUser();
         } catch (profileError) {
           console.log("⚠️ Erro ao criar perfil automaticamente:", profileError);
+          if (!(profileError as Error)?.message?.includes("duplicate key")) {
+            console.error("Erro inesperado ao criar perfil:", profileError);
+          }
         }
       }
 

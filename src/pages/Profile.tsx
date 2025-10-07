@@ -4,15 +4,17 @@ import OnboardingModal from "../components/OnboardingModal";
 import ProfileCard from "../components/ProfileCard";
 import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
+import { useAutoProfile } from "../hooks/useAutoProfile";
 import { useOnboarding } from "../hooks/useOnboarding";
 
 export default function Profile() {
   const { state } = useApp();
   const { profile, isLoading, error } = useProfile();
+  const { isChecking } = useAutoProfile();
   const { showOnboarding, showOnboardingAgain, hideOnboarding } =
     useOnboarding();
 
-  if (isLoading) {
+  if (isLoading || isChecking) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -20,7 +22,7 @@ export default function Profile() {
             className="text-lg"
             style={{ color: state.currentTheme.colors.textSecondary }}
           >
-            Carregando perfil...
+            {isChecking ? "Configurando perfil..." : "Carregando perfil..."}
           </div>
         </div>
       </div>
