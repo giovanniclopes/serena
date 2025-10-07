@@ -187,13 +187,16 @@ export default function Calendar() {
               selectedDate && isSameDay(dayData.date, selectedDate);
 
             return (
-              <div
+              <button
                 key={dayData.date.toISOString()}
+                onClick={() => handleDateClick(dayData.date)}
                 className={`${
                   isMobile ? "p-2" : "p-3"
-                } rounded-lg border-2 transition-all duration-200 ${
-                  isToday ? "ring-2 ring-blue-400" : ""
-                } ${isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""}`}
+                } rounded-lg border-2 transition-all duration-200 cursor-pointer ${
+                  isMobile ? "" : "hover:scale-105"
+                } ${isToday ? "ring-2 ring-blue-400" : ""} ${
+                  isSelected ? "ring-2 ring-blue-500 shadow-lg" : ""
+                }`}
                 style={{
                   backgroundColor: isSelected
                     ? state.currentTheme.colors.primary + "30"
@@ -327,7 +330,7 @@ export default function Calendar() {
                     </>
                   )}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -757,7 +760,7 @@ export default function Calendar() {
       {viewMode === "week" && renderWeekView()}
       {viewMode === "day" && renderDayView()}
 
-      {viewMode === "month" && selectedDate ? (
+      {selectedDate && (viewMode === "month" || viewMode === "week") ? (
         <div
           className="mt-6 p-4 rounded-lg border"
           style={{
@@ -810,6 +813,20 @@ export default function Calendar() {
           )}
         </div>
       ) : viewMode === "month" ? (
+        <div
+          className="mt-6 p-4 rounded-lg text-center"
+          style={{
+            backgroundColor: state.currentTheme.colors.surface + "50",
+          }}
+        >
+          <p
+            className="text-base"
+            style={{ color: state.currentTheme.colors.textSecondary }}
+          >
+            Clique em um dia para ver as tarefas
+          </p>
+        </div>
+      ) : viewMode === "week" ? (
         <div
           className="mt-6 p-4 rounded-lg text-center"
           style={{
