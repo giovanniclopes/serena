@@ -1,9 +1,9 @@
-const CACHE_VERSION = "2.0.1";
+const CACHE_VERSION = "2.0.2";
 const CACHE_NAME = `serena-v${CACHE_VERSION}`;
 
-const DYNAMIC_CACHE = "serena-dynamic-v1";
+const DYNAMIC_CACHE = "serena-dynamic-v2";
 
-const STATIC_CACHE = "serena-static-v1";
+const STATIC_CACHE = "serena-static-v2";
 
 const staticAssets = [
   "/manifest.json",
@@ -54,23 +54,16 @@ self.addEventListener("fetch", (event) => {
       caches.open(DYNAMIC_CACHE).then((cache) => {
         return cache.match(request).then((response) => {
           if (response) {
-            const cacheTime = response.headers.get("sw-cache-time");
-            if (cacheTime && Date.now() - parseInt(cacheTime) < 3600000) {
-              return response;
-            }
+            return response;
           }
 
           return fetch(request).then((fetchResponse) => {
             if (fetchResponse.ok) {
-              const responseToCache = fetchResponse.clone();
-              const currentTime = Date.now();
-              responseToCache.headers.set(
-                "sw-cache-time",
-                currentTime.toString()
-              );
-              cache.put(request, responseToCache);
+              cache.put(request, fetchResponse.clone());
             }
             return fetchResponse;
+          }).catch(() => {
+            return caches.match(request);
           });
         });
       })
