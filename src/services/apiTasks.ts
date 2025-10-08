@@ -16,6 +16,7 @@ export async function getTasks(): Promise<Task[]> {
       subtasks:subtasks!task_id(*)
     `
     )
+    .order("priority", { ascending: true })
     .order("created_at", { ascending: false });
 
   if (error) {

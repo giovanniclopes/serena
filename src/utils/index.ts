@@ -75,7 +75,7 @@ export function getTasksForDate(tasks: Task[], date: Date): Task[] {
     }
   });
 
-  return allTasks;
+  return sortTasksByPriority(allTasks);
 }
 
 /**
@@ -253,19 +253,21 @@ function createRecurringInstance(originalTask: Task, instanceDate: Date): Task {
 
 export function getTasksForWeek(tasks: Task[], startDate: Date): Task[] {
   const endDate = addDays(startDate, 6);
-  return tasks.filter((task) => {
+  const weekTasks = tasks.filter((task) => {
     if (!task.dueDate) return false;
     return isWithinInterval(task.dueDate, { start: startDate, end: endDate });
   });
+  return sortTasksByPriority(weekTasks);
 }
 
 export function getTasksForMonth(tasks: Task[], date: Date): Task[] {
   const start = startOfMonth(date);
   const end = endOfMonth(date);
-  return tasks.filter((task) => {
+  const monthTasks = tasks.filter((task) => {
     if (!task.dueDate) return false;
     return isWithinInterval(task.dueDate, { start, end });
   });
+  return sortTasksByPriority(monthTasks);
 }
 
 export function getTodayTasks(tasks: Task[]): Task[] {
@@ -274,18 +276,37 @@ export function getTodayTasks(tasks: Task[]): Task[] {
 
 export function getOverdueTasks(tasks: Task[]): Task[] {
   const today = startOfDay(new Date());
-  return tasks.filter((task) => {
+  const overdueTasks = tasks.filter((task) => {
     if (!task.dueDate || task.isCompleted) return false;
     return task.dueDate < today;
   });
+  return sortTasksByPriority(overdueTasks);
 }
 
 export function getUpcomingTasks(tasks: Task[], days: number = 7): Task[] {
   const today = startOfDay(new Date());
   const future = addDays(today, days);
-  return tasks.filter((task) => {
+  const upcomingTasks = tasks.filter((task) => {
     if (!task.dueDate || task.isCompleted) return false;
     return isWithinInterval(task.dueDate, { start: today, end: future });
+  });
+  return sortTasksByPriority(upcomingTasks);
+}
+
+export function sortTasksByPriority(tasks: Task[]): Task[] {
+  const priorityOrder = { P1: 1, P2: 2, P3: 3, P4: 4 };
+
+  return tasks.sort((a, b) => {
+    const priorityA =
+      priorityOrder[a.priority as keyof typeof priorityOrder] || 5;
+    const priorityB =
+      priorityOrder[b.priority as keyof typeof priorityOrder] || 5;
+
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 }
 
@@ -329,18 +350,19 @@ export function filterTasks(tasks: Task[], filter: Filter): Task[] {
     );
   }
 
-  return filtered;
+  return sortTasksByPriority(filtered);
 }
 
 export function searchTasks(tasks: Task[], query: string): Task[] {
   if (!query.trim()) return tasks;
 
   const searchTerm = query.toLowerCase();
-  return tasks.filter(
+  const searchResults = tasks.filter(
     (task) =>
       task.title.toLowerCase().includes(searchTerm) ||
       (task.description && task.description.toLowerCase().includes(searchTerm))
   );
+  return sortTasksByPriority(searchResults);
 }
 
 export function getHabitEntriesForDate(
