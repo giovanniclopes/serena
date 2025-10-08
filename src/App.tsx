@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import {
   Navigate,
   Route,
@@ -7,22 +8,26 @@ import {
 import "./App.css";
 import AppUpdateNotification from "./components/AppUpdateNotification";
 import AppWithOnboarding from "./components/AppWithOnboarding";
+import LoadingSpinner from "./components/LoadingSpinner";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AppProvider } from "./context/AppContext";
 import { AuthProvider } from "./context/AuthContext";
-import Calendar from "./pages/Calendar";
-import Countdowns from "./pages/Countdowns";
+
+const Home = lazy(() => import("./pages/Home"));
+const Calendar = lazy(() => import("./pages/Calendar"));
+const Tasks = lazy(() => import("./pages/Tasks"));
+const NewTask = lazy(() => import("./pages/NewTask"));
+const Projects = lazy(() => import("./pages/Projects"));
+const Habits = lazy(() => import("./pages/Habits"));
+const Countdowns = lazy(() => import("./pages/Countdowns"));
+const Profile = lazy(() => import("./pages/Profile"));
+const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
+
+// Páginas de autenticação (carregadas imediatamente)
 import EmailVerification from "./pages/EmailVerification";
-import Habits from "./pages/Habits";
-import Home from "./pages/Home";
 import Login from "./pages/Login";
-import NewTask from "./pages/NewTask";
-import NotificationSettings from "./pages/NotificationSettings";
-import Profile from "./pages/Profile";
-import Projects from "./pages/Projects";
 import Register from "./pages/Register";
-import Tasks from "./pages/Tasks";
 
 function App() {
   return (
@@ -46,15 +51,78 @@ function App() {
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Home />} />
-              <Route path="calendar" element={<Calendar />} />
-              <Route path="tasks" element={<Tasks />} />
-              <Route path="new-task" element={<NewTask />} />
-              <Route path="projects" element={<Projects />} />
-              <Route path="habits" element={<Habits />} />
-              <Route path="countdowns" element={<Countdowns />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="notifications" element={<NotificationSettings />} />
+              <Route
+                index
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Home />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="calendar"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Calendar />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="tasks"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Tasks />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="new-task"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <NewTask />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="projects"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Projects />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="habits"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Habits />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="countdowns"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Countdowns />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="profile"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <Profile />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="notifications"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <NotificationSettings />
+                  </Suspense>
+                }
+              />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>

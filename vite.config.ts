@@ -16,8 +16,28 @@ export default defineConfig({
         entryFileNames: `assets/[name]-[hash].js`,
         chunkFileNames: `assets/[name]-[hash].js`,
         assetFileNames: `assets/[name]-[hash].[ext]`,
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "ui-vendor": [
+            "@radix-ui/react-avatar",
+            "@radix-ui/react-checkbox",
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-label",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-progress",
+            "@radix-ui/react-select",
+            "@radix-ui/react-separator",
+            "@radix-ui/react-slot",
+            "@radix-ui/react-switch",
+          ],
+          "query-vendor": ["@tanstack/react-query"],
+          "date-vendor": ["dayjs"],
+          "supabase-vendor": ["@supabase/supabase-js"],
+          "utils-vendor": ["clsx", "tailwind-merge", "sonner"],
+        },
       },
     },
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     headers: {
