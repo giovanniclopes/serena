@@ -91,6 +91,7 @@ export default function TaskModal({
       isCompleted: task?.isCompleted || false,
       completedAt: task?.completedAt,
       workspaceId: state.activeWorkspaceId,
+      order: task?.order || 0,
     };
 
     onSave(taskData);

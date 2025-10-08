@@ -50,6 +50,7 @@ export async function getTasks(): Promise<Task[]> {
             ? new Date(subtask.completed_at)
             : undefined,
           workspaceId: subtask.workspace_id,
+          order: subtask.order || 0,
           createdAt: new Date(subtask.created_at),
           updatedAt: new Date(subtask.updated_at),
         })) || [],
@@ -62,6 +63,7 @@ export async function getTasks(): Promise<Task[]> {
       isCompleted: task.is_completed,
       completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
       workspaceId: task.workspace_id,
+      order: task.order || 0,
       createdAt: new Date(task.created_at),
       updatedAt: new Date(task.updated_at),
     })) || []
@@ -97,6 +99,7 @@ export async function createTask(
       is_completed: task.isCompleted,
       completed_at: formatDateForSupabase(task.completedAt),
       workspace_id: task.workspaceId,
+      order: task.order || 0,
       user_id: user.id,
     })
     .select()
@@ -123,6 +126,7 @@ export async function createTask(
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
+    order: data.order || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -147,6 +151,7 @@ export async function updateTask(task: Task): Promise<Task> {
       is_completed: task.isCompleted,
       completed_at: formatDateForSupabase(task.completedAt),
       workspace_id: task.workspaceId,
+      order: task.order || 0,
       updated_at: formatDateForSupabase(new Date()),
     })
     .eq("id", task.id)
@@ -174,6 +179,7 @@ export async function updateTask(task: Task): Promise<Task> {
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
+    order: data.order || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -221,6 +227,7 @@ export async function completeTask(taskId: string): Promise<Task> {
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
+    order: data.order || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -259,6 +266,7 @@ export async function uncompleteTask(taskId: string): Promise<Task> {
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
+    order: data.order || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };

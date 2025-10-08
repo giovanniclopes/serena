@@ -39,6 +39,7 @@ export async function getSubtasks(taskId: string): Promise<Task[]> {
       ? new Date(subtask.completed_at)
       : undefined,
     workspaceId: subtask.workspace_id,
+    order: subtask.order || 0,
     createdAt: new Date(subtask.created_at),
     updatedAt: new Date(subtask.updated_at),
   }));
@@ -74,6 +75,7 @@ export async function createSubtask(
       is_completed: subtask.isCompleted,
       completed_at: formatDateForSupabase(subtask.completedAt),
       workspace_id: subtask.workspaceId,
+      order: subtask.order || 0,
       user_id: user.id,
     })
     .select()
@@ -99,6 +101,7 @@ export async function createSubtask(
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
+    order: data.order || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -124,6 +127,7 @@ export async function updateSubtask(subtask: Task): Promise<Task> {
       is_completed: subtask.isCompleted,
       completed_at: formatDateForSupabase(subtask.completedAt),
       workspace_id: subtask.workspaceId,
+      order: subtask.order || 0,
       updated_at: formatDateForSupabase(new Date()),
     })
     .eq("id", subtask.id)
@@ -150,6 +154,7 @@ export async function updateSubtask(subtask: Task): Promise<Task> {
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
+    order: data.order || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -199,7 +204,32 @@ export async function completeSubtask(subtaskId: string): Promise<Task> {
     isCompleted: data.is_completed,
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
+    order: data.order || 0,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
+}
+
+export async function reorderSubtasks({
+  subtasks,
+}: {
+  taskId: string;
+  subtasks: Task[];
+}): Promise<void> {
+  const updates = subtasks.map((subtask, index) => ({
+    id: subtask.id,
+    order: index,
+  }));
+
+  for (const update of updates) {
+    const { error } = await supabase
+      .from("subtasks")
+      .update({ order: update.order })
+      .eq("id", update.id);
+
+    if (error) {
+      console.error("Erro ao reordenar subtarefa:", error);
+      throw new Error("Falha ao reordenar subtarefas");
+    }
+  }
 }

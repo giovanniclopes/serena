@@ -73,6 +73,7 @@ export interface Task {
   isCompleted: boolean;
   completedAt?: Date;
   workspaceId: string;
+  order: number;
   createdAt: Date;
   updatedAt: Date;
 }

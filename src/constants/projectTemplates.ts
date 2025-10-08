@@ -202,7 +202,7 @@ export function createProjectFromTemplate(
   };
 
   const tasks: Omit<Task, "id" | "createdAt" | "updatedAt">[] =
-    template.defaultTasks.map((task) => ({
+    template.defaultTasks.map((task, index) => ({
       title: task.title,
       description: task.description,
       projectId: "",
@@ -216,6 +216,7 @@ export function createProjectFromTemplate(
       isCompleted: false,
       completedAt: undefined,
       workspaceId,
+      order: index,
     }));
 
   return { project, tasks };

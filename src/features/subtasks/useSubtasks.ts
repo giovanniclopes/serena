@@ -5,6 +5,7 @@ import {
   createSubtask,
   deleteSubtask,
   getSubtasks,
+  reorderSubtasks,
   updateSubtask,
 } from "../../services/apiSubtasks";
 
@@ -90,6 +91,25 @@ export function useCompleteSubtask() {
     onError: (error) => {
       console.error("Erro ao completar subtarefa:", error);
       toast.error("Erro ao completar subtarefa. Tente novamente.");
+    },
+  });
+}
+
+export function useReorderSubtasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: reorderSubtasks,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["subtasks", variables.taskId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Ordem das subtarefas atualizada!");
+    },
+    onError: (error) => {
+      console.error("Erro ao reordenar subtarefas:", error);
+      toast.error("Erro ao reordenar subtarefas. Tente novamente.");
     },
   });
 }

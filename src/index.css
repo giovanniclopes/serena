@@ -17,6 +17,30 @@ body {
 /* Better touch targets for mobile */
 @media (max-width: 768px) {
 
+  /* Drag and drop optimizations for mobile */
+  [data-rbd-draggable-id] {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  [data-rbd-drag-handle-draggable-id] {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* @dnd-kit specific optimizations */
+  [data-sortable-id] {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  [data-sortable-id]:active {
+    touch-action: none;
+  }
+
   button,
   [role="button"],
   input[type="button"],

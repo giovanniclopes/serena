@@ -90,31 +90,33 @@ export default function TaskCard({
       } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
       padding="md"
     >
-      <div className="flex items-start" style={{ gap: spacing.sm }}>
-        {isBulkDeleteMode ? (
-          <Checkbox
-            checked={isSelected}
-            onCheckedChange={handleSelectionChange}
-            className="flex-shrink-0"
-            style={{
-              minWidth: touchTarget,
-              minHeight: touchTarget,
-            }}
-          />
-        ) : (
-          <Checkbox
-            checked={task.isCompleted}
-            onCheckedChange={handleToggleComplete}
-            className="flex-shrink-0"
-            style={{
-              minWidth: touchTarget,
-              minHeight: touchTarget,
-            }}
-          />
-        )}
-
+      <div
+        className="flex flex-col md:items-start md:flex-row"
+        style={{ gap: spacing.sm }}
+      >
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
+          <div className="flex items-start md:gap-3 justify-between">
+            {isBulkDeleteMode ? (
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={handleSelectionChange}
+                className="flex-shrink-0"
+                style={{
+                  minWidth: touchTarget,
+                  minHeight: touchTarget,
+                }}
+              />
+            ) : (
+              <Checkbox
+                checked={task.isCompleted}
+                onCheckedChange={handleToggleComplete}
+                className="flex-shrink-0"
+                style={{
+                  minWidth: touchTarget,
+                  minHeight: touchTarget,
+                }}
+              />
+            )}
             <ResponsiveText
               variant="h4"
               weight="medium"
@@ -128,18 +130,20 @@ export default function TaskCard({
               className="flex items-center"
               style={{ gap: spacing.xs, marginLeft: spacing.sm }}
             >
-              <Badge
-                variant="outline"
-                style={{
-                  backgroundColor: getPriorityColor(task.priority) + "20",
-                  color: getPriorityColor(task.priority),
-                  borderColor: getPriorityColor(task.priority),
-                  fontSize: isMobile ? "0.75rem" : "0.6875rem",
-                  padding: isMobile ? "0.25rem 0.5rem" : "0.125rem 0.375rem",
-                }}
-              >
-                {getPriorityLabel(task.priority)}
-              </Badge>
+              <div className="hidden md:block">
+                <Badge
+                  variant="outline"
+                  style={{
+                    backgroundColor: getPriorityColor(task.priority) + "20",
+                    color: getPriorityColor(task.priority),
+                    borderColor: getPriorityColor(task.priority),
+                    fontSize: isMobile ? "0.75rem" : "0.6875rem",
+                    padding: isMobile ? "0.25rem 0.5rem" : "0.125rem 0.375rem",
+                  }}
+                >
+                  {getPriorityLabel(task.priority)}
+                </Badge>
+              </div>
               {!isBulkDeleteMode && onEdit && (
                 <MobileButton
                   variant="ghost"
@@ -206,6 +210,21 @@ export default function TaskCard({
                 </ResponsiveText>
               </div>
             )}
+
+            <div className="block md:hidden">
+              <Badge
+                variant="outline"
+                style={{
+                  backgroundColor: getPriorityColor(task.priority) + "20",
+                  color: getPriorityColor(task.priority),
+                  borderColor: getPriorityColor(task.priority),
+                  fontSize: isMobile ? "0.75rem" : "0.6875rem",
+                  padding: isMobile ? "0.25rem 0.5rem" : "0.125rem 0.375rem",
+                }}
+              >
+                {getPriorityLabel(task.priority)}
+              </Badge>
+            </div>
 
             {showDate && task.dueDate && (
               <div className="flex items-center" style={{ gap: spacing.xs }}>
