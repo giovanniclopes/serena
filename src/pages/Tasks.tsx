@@ -10,9 +10,11 @@ import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
 import {
+  useBulkDeleteTasks,
   useCompleteAllTasks,
   useCompleteTask,
   useCreateTask,
+  useDeleteTask,
   useTasks,
   useUncompleteTask,
   useUpdateTask,
@@ -30,6 +32,11 @@ export default function Tasks() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [showCompleteAllModal, setShowCompleteAllModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
+  const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
   const { tasks, isLoading, error } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
@@ -37,6 +44,8 @@ export default function Tasks() {
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
   const uncompleteTaskMutation = useUncompleteTask();
+  const deleteTaskMutation = useDeleteTask();
+  const bulkDeleteTasksMutation = useBulkDeleteTasks();
   const completeAllTasksMutation = useCompleteAllTasks();
 
   const filteredTasks = filterTasks(searchTasks(tasks, searchQuery), {
@@ -58,6 +67,52 @@ export default function Tasks() {
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
     setIsTaskModalOpen(true);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    setTaskToDelete(taskId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteTask = () => {
+    if (taskToDelete) {
+      deleteTaskMutation.mutate(taskToDelete);
+      setShowDeleteModal(false);
+      setTaskToDelete(null);
+    }
+  };
+
+  const handleBulkDeleteToggle = () => {
+    setIsBulkDeleteMode(!isBulkDeleteMode);
+    if (isBulkDeleteMode) {
+      setSelectedTasks(new Set());
+    }
+  };
+
+  const handleTaskSelection = (taskId: string, selected: boolean) => {
+    setSelectedTasks((prev) => {
+      const newSet = new Set(prev);
+      if (selected) {
+        newSet.add(taskId);
+      } else {
+        newSet.delete(taskId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedTasks.size > 0) {
+      setShowBulkDeleteModal(true);
+    }
+  };
+
+  const confirmBulkDelete = () => {
+    const taskIds = Array.from(selectedTasks);
+    bulkDeleteTasksMutation.mutate(taskIds);
+    setShowBulkDeleteModal(false);
+    setSelectedTasks(new Set());
+    setIsBulkDeleteMode(false);
   };
 
   const handleSaveTask = (
@@ -144,9 +199,12 @@ export default function Tasks() {
         onPrioritiesChange={setSelectedPriorities}
         searchPlaceholder="Buscar tarefas..."
         showCompletedLabel="Mostrar concluídas"
+        isBulkDeleteMode={isBulkDeleteMode}
+        onBulkDeleteToggle={handleBulkDeleteToggle}
+        selectedTasksCount={selectedTasks.size}
       />
 
-      {filteredTasks.some((task) => !task.isCompleted) && (
+      {!isBulkDeleteMode && filteredTasks.some((task) => !task.isCompleted) && (
         <div className="flex justify-end">
           <button
             onClick={() => setShowCompleteAllModal(true)}
@@ -157,6 +215,22 @@ export default function Tasks() {
             }}
           >
             Concluir todas
+          </button>
+        </div>
+      )}
+
+      {isBulkDeleteMode && selectedTasks.size > 0 && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleBulkDelete}
+            className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+            style={{
+              backgroundColor: state.currentTheme.colors.error,
+              color: "white",
+            }}
+          >
+            Excluir {selectedTasks.size} tarefa
+            {selectedTasks.size !== 1 ? "s" : ""}
           </button>
         </div>
       )}
@@ -176,8 +250,12 @@ export default function Tasks() {
               onComplete={handleCompleteTask}
               onUncomplete={handleUncompleteTask}
               onEdit={handleEditTask}
+              onDelete={handleDeleteTask}
               showProject={true}
               showDate={true}
+              isBulkDeleteMode={isBulkDeleteMode}
+              isSelected={selectedTasks.has(task.id)}
+              onSelectionChange={handleTaskSelection}
             />
           ))}
         </div>
@@ -264,6 +342,106 @@ export default function Tasks() {
                 {completeAllTasksMutation.isPending
                   ? "Concluindo..."
                   : "Concluir todas"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+            style={{ backgroundColor: state.currentTheme.colors.surface }}
+          >
+            <h3
+              className="text-lg font-semibold mb-4"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Excluir tarefa
+            </h3>
+            <p
+              className="text-sm mb-6"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser
+              desfeita.
+            </p>
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setTaskToDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                style={{
+                  backgroundColor: state.currentTheme.colors.surface,
+                  color: state.currentTheme.colors.textSecondary,
+                  border: `1px solid ${state.currentTheme.colors.border}`,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteTask}
+                disabled={deleteTaskMutation.isPending}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                style={{
+                  backgroundColor: state.currentTheme.colors.error,
+                  color: "white",
+                }}
+              >
+                {deleteTaskMutation.isPending ? "Excluindo..." : "Excluir"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showBulkDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+            style={{ backgroundColor: state.currentTheme.colors.surface }}
+          >
+            <h3
+              className="text-lg font-semibold mb-4"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Excluir tarefas
+            </h3>
+            <p
+              className="text-sm mb-6"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              Tem certeza que deseja excluir {selectedTasks.size} tarefa
+              {selectedTasks.size !== 1 ? "s" : ""}? Esta ação não pode ser
+              desfeita.
+            </p>
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={() => setShowBulkDeleteModal(false)}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                style={{
+                  backgroundColor: state.currentTheme.colors.surface,
+                  color: state.currentTheme.colors.textSecondary,
+                  border: `1px solid ${state.currentTheme.colors.border}`,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmBulkDelete}
+                disabled={bulkDeleteTasksMutation.isPending}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                style={{
+                  backgroundColor: state.currentTheme.colors.error,
+                  color: "white",
+                }}
+              >
+                {bulkDeleteTasksMutation.isPending
+                  ? "Excluindo..."
+                  : "Excluir todas"}
               </button>
             </div>
           </div>

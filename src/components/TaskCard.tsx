@@ -1,4 +1,11 @@
-import { Calendar, Edit, Paperclip, RotateCcw, Tag } from "lucide-react";
+import {
+  Calendar,
+  Edit,
+  Paperclip,
+  RotateCcw,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import { useApp } from "../context/AppContext";
 import type { Task } from "../types";
 import {
@@ -20,8 +27,12 @@ interface TaskCardProps {
   onComplete?: (taskId: string) => void;
   onUncomplete?: (taskId: string) => void;
   onEdit?: (task: Task) => void;
+  onDelete?: (taskId: string) => void;
   showProject?: boolean;
   showDate?: boolean;
+  isBulkDeleteMode?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (taskId: string, selected: boolean) => void;
 }
 
 export default function TaskCard({
@@ -29,8 +40,12 @@ export default function TaskCard({
   onComplete,
   onUncomplete,
   onEdit,
+  onDelete,
   showProject = true,
   showDate = true,
+  isBulkDeleteMode = false,
+  isSelected = false,
+  onSelectionChange,
 }: TaskCardProps) {
   const { state } = useApp();
   const { spacing, touchTarget, isMobile } = useMobileSpacing();
@@ -56,23 +71,47 @@ export default function TaskCard({
     }
   };
 
+  const handleDelete = () => {
+    if (onDelete) {
+      onDelete(task.id);
+    }
+  };
+
+  const handleSelectionChange = (checked: boolean) => {
+    if (onSelectionChange) {
+      onSelectionChange(task.id, checked);
+    }
+  };
+
   return (
     <MobileCard
       className={`transition-all duration-200 ${
         task.isCompleted ? "opacity-60" : "hover:shadow-md"
-      }`}
+      } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
       padding="md"
     >
       <div className="flex items-start" style={{ gap: spacing.sm }}>
-        <Checkbox
-          checked={task.isCompleted}
-          onCheckedChange={handleToggleComplete}
-          className="flex-shrink-0"
-          style={{
-            minWidth: touchTarget,
-            minHeight: touchTarget,
-          }}
-        />
+        {isBulkDeleteMode ? (
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={handleSelectionChange}
+            className="flex-shrink-0"
+            style={{
+              minWidth: touchTarget,
+              minHeight: touchTarget,
+            }}
+          />
+        ) : (
+          <Checkbox
+            checked={task.isCompleted}
+            onCheckedChange={handleToggleComplete}
+            className="flex-shrink-0"
+            style={{
+              minWidth: touchTarget,
+              minHeight: touchTarget,
+            }}
+          />
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
@@ -101,7 +140,7 @@ export default function TaskCard({
               >
                 {getPriorityLabel(task.priority)}
               </Badge>
-              {onEdit && (
+              {!isBulkDeleteMode && onEdit && (
                 <MobileButton
                   variant="ghost"
                   size="sm"
@@ -113,6 +152,21 @@ export default function TaskCard({
                   }}
                 >
                   <Edit className={isMobile ? "w-4 h-4" : "w-3 h-3"} />
+                </MobileButton>
+              )}
+              {!isBulkDeleteMode && onDelete && (
+                <MobileButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDelete}
+                  style={{
+                    minWidth: touchTarget,
+                    minHeight: touchTarget,
+                    padding: 0,
+                    color: state.currentTheme.colors.error,
+                  }}
+                >
+                  <Trash2 className={isMobile ? "w-4 h-4" : "w-3 h-3"} />
                 </MobileButton>
               )}
             </div>

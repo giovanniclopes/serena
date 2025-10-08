@@ -1,4 +1,4 @@
-import { Filter, Grid, List, Search } from "lucide-react";
+import { Filter, Grid, List, Search, Trash2 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import type { Priority } from "../types";
 import { getPriorityColor, getPriorityLabel } from "../utils";
@@ -15,6 +15,9 @@ interface FilterControlsProps {
   searchPlaceholder?: string;
   showCompletedLabel?: string;
   onFilterClick?: () => void;
+  isBulkDeleteMode?: boolean;
+  onBulkDeleteToggle?: () => void;
+  selectedTasksCount?: number;
 }
 
 export default function FilterControls({
@@ -29,6 +32,9 @@ export default function FilterControls({
   searchPlaceholder = "Buscar...",
   showCompletedLabel = "Mostrar concluídos",
   onFilterClick,
+  isBulkDeleteMode = false,
+  onBulkDeleteToggle,
+  selectedTasksCount = 0,
 }: FilterControlsProps) {
   const { state } = useApp();
 
@@ -110,22 +116,64 @@ export default function FilterControls({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <label className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={showCompleted}
-            onChange={(e) => onShowCompletedChange(e.target.checked)}
-            className="w-1.5 h-1.5 sm:w-4 sm:h-4 rounded"
-            style={{ accentColor: state.currentTheme.colors.primary }}
-          />
-          <span
-            className="text-sm"
-            style={{ color: state.currentTheme.colors.text }}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => onShowCompletedChange(!showCompleted)}
+            className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+              showCompleted ? "text-white" : ""
+            }`}
+            style={{
+              backgroundColor: showCompleted
+                ? state.currentTheme.colors.primary
+                : state.currentTheme.colors.surface,
+              color: showCompleted ? "white" : state.currentTheme.colors.text,
+              border: `1px solid ${state.currentTheme.colors.primary}`,
+            }}
           >
-            {showCompletedLabel}
-          </span>
-        </label>
+            <input
+              type="checkbox"
+              checked={showCompleted}
+              onChange={(e) => onShowCompletedChange(e.target.checked)}
+              className="w-3 h-3 sm:w-4 sm:h-4 rounded"
+              style={{
+                accentColor: showCompleted
+                  ? "white"
+                  : state.currentTheme.colors.primary,
+              }}
+            />
+            <span className="hidden sm:inline">{showCompletedLabel}</span>
+            <span className="sm:hidden">Concluídas</span>
+          </button>
+
+          {onBulkDeleteToggle && (
+            <button
+              onClick={onBulkDeleteToggle}
+              className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-colors ${
+                isBulkDeleteMode ? "text-white" : ""
+              }`}
+              style={{
+                backgroundColor: isBulkDeleteMode
+                  ? state.currentTheme.colors.error
+                  : state.currentTheme.colors.surface,
+                color: isBulkDeleteMode
+                  ? "white"
+                  : state.currentTheme.colors.text,
+                border: `1px solid ${state.currentTheme.colors.error}`,
+              }}
+            >
+              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">
+                {isBulkDeleteMode
+                  ? `Excluir (${selectedTasksCount})`
+                  : "Excluir em lote"}
+              </span>
+              <span className="sm:hidden">
+                {isBulkDeleteMode ? `(${selectedTasksCount})` : "Excluir"}
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       {onPrioritiesChange && (

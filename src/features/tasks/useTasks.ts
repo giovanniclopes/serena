@@ -88,6 +88,30 @@ export function useDeleteTask() {
   });
 }
 
+export function useBulkDeleteTasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (taskIds: string[]) => {
+      const deletePromises = taskIds.map((taskId) => deleteTask(taskId));
+      await Promise.all(deletePromises);
+      return taskIds.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success(
+        `${count} tarefa${count !== 1 ? "s" : ""} excluída${
+          count !== 1 ? "s" : ""
+        } com sucesso!`
+      );
+    },
+    onError: (error) => {
+      console.error("Erro ao excluir tarefas:", error);
+      toast.error("Erro ao excluir tarefas. Tente novamente.");
+    },
+  });
+}
+
 export function useCompleteTask() {
   const queryClient = useQueryClient();
 
