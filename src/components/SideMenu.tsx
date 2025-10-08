@@ -84,7 +84,7 @@ export default function SideMenu({
                 duration: 0.3,
               }}
             >
-              <div className="flex items-center justify-between mb-2 md:mb-6 p-6 py-2 pb-0">
+              <div className="flex items-center justify-between mb-2 p-6 py-2 pb-0">
                 <h2
                   className="text-xl font-bold"
                   style={{ color: state.currentTheme.colors.primary }}
