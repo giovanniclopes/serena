@@ -261,7 +261,7 @@ export default function OnboardingModal({
             </div>
           </div>
 
-          <div className="lg:w-1/2 bg-gradient-to-br from-pink-50 to-purple-50 flex items-center justify-center p-8">
+          <div className="hidden md:flex lg:w-1/2 bg-gradient-to-br from-pink-50 to-purple-50 items-center justify-center p-8">
             <div
               className={`w-full max-w-md transition-transform duration-300 ${
                 isAnimating ? "scale-95" : "scale-100"
