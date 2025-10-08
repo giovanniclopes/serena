@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import { useClickOutside } from "../hooks/useClickOutside";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
+import { useWorkspaceColors } from "../hooks/useWorkspaceColors";
 
 interface CentralActionButtonProps {
   onTaskClick: () => void;
@@ -20,6 +21,7 @@ export default function CentralActionButton({
 }: CentralActionButtonProps) {
   const { state } = useApp();
   const { triggerHaptic } = useHapticFeedback();
+  const colors = useWorkspaceColors();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const containerRef = useClickOutside<HTMLDivElement>(() => {
@@ -33,28 +35,32 @@ export default function CentralActionButton({
       id: "task",
       icon: CheckSquare,
       label: "Tarefa",
-      color: "#3b82f6",
+      color: colors.accent.blue + "20",
+      textColor: colors.accent.blue,
       onClick: onTaskClick,
     },
     {
       id: "habit",
       icon: Target,
       label: "Hábito",
-      color: "#10b981",
+      color: colors.accent.green + "20",
+      textColor: colors.accent.green,
       onClick: onHabitClick,
     },
     {
       id: "countdown",
       icon: Clock,
       label: "Contagem",
-      color: "#f59e0b",
+      color: colors.accent.orange + "20",
+      textColor: colors.accent.orange,
       onClick: onCountdownClick,
     },
     {
       id: "project",
       icon: Folder,
       label: "Projeto",
-      color: "#8b5cf6",
+      color: colors.accent.purple + "20",
+      textColor: colors.accent.purple,
       onClick: onProjectClick,
     },
   ];
@@ -74,12 +80,13 @@ export default function CentralActionButton({
     <div ref={containerRef} className="relative">
       <motion.button
         onClick={handleMainButtonClick}
-        className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center border border-black/20 transition-all duration-200"
+        className="w-12 h-12 rounded-full shadow-lg flex items-center justify-center border transition-all duration-200"
         style={{
           backgroundColor: isExpanded
             ? state.currentTheme.colors.primary
-            : "#f3e8ff",
-          color: isExpanded ? "white" : "#000000",
+            : colors.primary + "15",
+          color: isExpanded ? "white" : colors.primary,
+          borderColor: colors.primary + "30",
         }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -88,7 +95,7 @@ export default function CentralActionButton({
         }}
         transition={{ duration: 0.2 }}
       >
-        {isExpanded ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+        {isExpanded ? <X className="w-5 h-5" /> : <Plus className="w-6 h-6" />}
       </motion.button>
 
       <AnimatePresence>
@@ -105,10 +112,11 @@ export default function CentralActionButton({
                 <motion.button
                   key={button.id}
                   onClick={() => handleSubButtonClick(button.onClick)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
+                  className="flex items-center gap-2 px-3 py-2 rounded-full shadow-lg border transition-all duration-200 hover:scale-105"
                   style={{
                     backgroundColor: button.color,
-                    color: "white",
+                    color: button.textColor,
+                    borderColor: button.textColor + "40",
                   }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
