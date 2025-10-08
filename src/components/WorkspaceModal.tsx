@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Workspace } from "../types";
 import ResponsiveModal from "./ResponsiveModal";
@@ -33,10 +33,26 @@ export default function WorkspaceModal({
 }: WorkspaceModalProps) {
   const { state } = useApp();
   const [formData, setFormData] = useState({
-    name: workspace?.name || "",
-    description: workspace?.description || "",
-    color: workspace?.color || colors[0],
+    name: "",
+    description: "",
+    color: colors[0],
   });
+
+  useEffect(() => {
+    if (workspace) {
+      setFormData({
+        name: workspace.name || "",
+        description: workspace.description || "",
+        color: workspace.color || colors[0],
+      });
+    } else {
+      setFormData({
+        name: "",
+        description: "",
+        color: colors[0],
+      });
+    }
+  }, [workspace]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
