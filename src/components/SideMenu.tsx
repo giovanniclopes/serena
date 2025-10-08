@@ -6,7 +6,7 @@ import {
   Home,
   List,
   LogOut,
-  Settings,
+  // Settings,
   Target,
   User,
   Wifi,
@@ -46,7 +46,7 @@ export default function SideMenu({
     { path: "/calendar", icon: Calendar, label: "Calendário" },
     { path: "/countdowns", icon: Clock, label: "Contagem" },
     { path: "/profile", icon: User, label: "Perfil" },
-    { path: "/notifications", icon: Settings, label: "Notificações" },
+    // { path: "/notifications", icon: Settings, label: "Notificações" },
   ];
 
   return (
@@ -69,7 +69,7 @@ export default function SideMenu({
             />
 
             <motion.div
-              className="absolute left-0 top-0 bottom-0 w-80 p-6 shadow-2xl"
+              className="absolute left-0 top-0 bottom-0 w-80 shadow-2xl flex flex-col"
               style={{
                 backgroundColor: state.currentTheme.colors.background,
               }}
@@ -84,7 +84,7 @@ export default function SideMenu({
                 duration: 0.3,
               }}
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-2 md:mb-6 p-6 py-2 pb-0">
                 <h2
                   className="text-xl font-bold"
                   style={{ color: state.currentTheme.colors.primary }}
@@ -100,88 +100,92 @@ export default function SideMenu({
                 </button>
               </div>
 
-              <motion.div
-                className="mb-6"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.3 }}
-              ></motion.div>
+              <div className="flex-1 px-6">
+                <motion.div
+                  className="mb-1 md:mb-6"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.3 }}
+                ></motion.div>
 
-              <div className="mb-8">
-                <div
-                  className="flex items-center space-x-3 p-3 rounded-xl"
-                  style={{
-                    backgroundColor: state.currentTheme.colors.primary + "10",
-                    border: `1px solid ${state.currentTheme.colors.primary}20`,
-                  }}
-                >
-                  <Avatar className="w-10 h-10">
-                    <AvatarImage src={profile?.avatarUrl} alt="Avatar" />
-                    <AvatarFallback
-                      className="text-white"
-                      style={{
-                        backgroundColor: state.currentTheme.colors.primary,
-                      }}
-                    >
-                      <User className="w-5 h-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p
-                      className="text-sm font-medium"
-                      style={{ color: state.currentTheme.colors.text }}
-                    >
-                      {(user as unknown as { email: string })?.email?.split(
-                        "@"
-                      )[0] || "Usuário"}
-                    </p>
-                    <p
-                      className="text-xs"
-                      style={{ color: state.currentTheme.colors.textSecondary }}
-                    >
-                      {(user as unknown as { email: string })?.email || ""}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <nav className="space-y-2">
-                {menuItems.map(({ path, icon: Icon, label }, index) => (
-                  <motion.div
-                    key={path}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{
-                      delay: index * 0.05,
-                      duration: 0.3,
+                <div className="mb-8">
+                  <div
+                    className="flex items-center space-x-3 p-3 rounded-xl"
+                    style={{
+                      backgroundColor: state.currentTheme.colors.primary + "10",
+                      border: `1px solid ${state.currentTheme.colors.primary}20`,
                     }}
                   >
-                    <NavLink
-                      to={path}
-                      onClick={onClose}
-                      className={({ isActive }) => `
-                    flex items-center space-x-3 p-3 rounded-xl transition-all duration-200
-                    ${
-                      isActive
-                        ? "bg-gray-100 dark:bg-gray-700"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-800"
-                    }
-                  `}
-                      style={({ isActive }) => ({
-                        color: isActive
-                          ? state.currentTheme.colors.primary
-                          : state.currentTheme.colors.text,
-                      })}
+                    <Avatar className="w-10 h-10">
+                      <AvatarImage src={profile?.avatarUrl} alt="Avatar" />
+                      <AvatarFallback
+                        className="text-white"
+                        style={{
+                          backgroundColor: state.currentTheme.colors.primary,
+                        }}
+                      >
+                        <User className="w-5 h-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p
+                        className="text-sm font-medium"
+                        style={{ color: state.currentTheme.colors.text }}
+                      >
+                        {(user as unknown as { email: string })?.email?.split(
+                          "@"
+                        )[0] || "Usuário"}
+                      </p>
+                      <p
+                        className="text-xs"
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                      >
+                        {(user as unknown as { email: string })?.email || ""}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <nav className="space-y-2">
+                  {menuItems.map(({ path, icon: Icon, label }, index) => (
+                    <motion.div
+                      key={path}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{
+                        delay: index * 0.05,
+                        duration: 0.3,
+                      }}
                     >
-                      <Icon className="w-5 h-5" />
-                      <span className="text-sm font-medium">{label}</span>
-                    </NavLink>
-                  </motion.div>
-                ))}
-              </nav>
+                      <NavLink
+                        to={path}
+                        onClick={onClose}
+                        className={({ isActive }) => `
+                      flex items-center space-x-3 p-3 rounded-xl transition-all duration-200
+                      ${
+                        isActive
+                          ? "bg-gray-100 dark:bg-gray-700"
+                          : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                      }
+                    `}
+                        style={({ isActive }) => ({
+                          color: isActive
+                            ? state.currentTheme.colors.primary
+                            : state.currentTheme.colors.text,
+                        })}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span className="text-sm font-medium">{label}</span>
+                      </NavLink>
+                    </motion.div>
+                  ))}
+                </nav>
+              </div>
 
               <div
-                className="mt-8 pt-6 border-t space-y-2"
+                className="px-6 py-2 md:pb-6 pt-4 border-t space-y-2"
                 style={{ borderColor: state.currentTheme.colors.border }}
               >
                 {onShowOfflineStatus && (
