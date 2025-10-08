@@ -54,6 +54,16 @@ export default function WorkspaceModal({
     }
   }, [workspace]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        name: "",
+        description: "",
+        color: colors[0],
+      });
+    }
+  }, [isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 

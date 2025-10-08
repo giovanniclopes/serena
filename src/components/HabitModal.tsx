@@ -166,6 +166,22 @@ export default function HabitModal({
     }
   }, [habit]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        name: "",
+        description: "",
+        target: 1,
+        unit: "vez",
+        color: colors[0],
+        category: "outro",
+      });
+      setCustomTarget(false);
+      setCustomUnit(false);
+      setShowTemplates(false);
+    }
+  }, [isOpen]);
+
   const handleTemplateSelect = (template: (typeof habitTemplates)[0]) => {
     setFormData({
       name: template.name,

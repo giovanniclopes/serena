@@ -72,6 +72,21 @@ export default function TaskModal({
     }
   }, [task]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        title: "",
+        description: "",
+        projectId: "",
+        dueDate: "",
+        priority: "P3" as Priority,
+        tags: [],
+        attachments: [],
+        recurrence: undefined,
+      });
+    }
+  }, [isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { Countdown } from "../types";
 import DateTimeInput from "./DateTimeInput";
@@ -45,6 +45,37 @@ export default function CountdownModal({
       : "",
     color: countdown?.color || colors[0],
   });
+
+  useEffect(() => {
+    if (countdown) {
+      setFormData({
+        title: countdown.title || "",
+        description: countdown.description || "",
+        targetDate: countdown.targetDate
+          ? countdown.targetDate.toISOString().slice(0, 16)
+          : "",
+        color: countdown.color || colors[0],
+      });
+    } else {
+      setFormData({
+        title: "",
+        description: "",
+        targetDate: "",
+        color: colors[0],
+      });
+    }
+  }, [countdown]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        title: "",
+        description: "",
+        targetDate: "",
+        color: colors[0],
+      });
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

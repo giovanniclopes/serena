@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   projectTemplates,
   type ProjectTemplate,
@@ -46,6 +46,36 @@ export default function ProjectModal({
   });
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [showTemplates, setShowTemplates] = useState(!project);
+
+  useEffect(() => {
+    if (project) {
+      setFormData({
+        name: project.name || "",
+        description: project.description || "",
+        color: project.color || colors[0],
+      });
+      setShowTemplates(false);
+    } else {
+      setFormData({
+        name: "",
+        description: "",
+        color: colors[0],
+      });
+      setShowTemplates(true);
+    }
+  }, [project]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData({
+        name: "",
+        description: "",
+        color: colors[0],
+      });
+      setSelectedTemplate("");
+      setShowTemplates(true);
+    }
+  }, [isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
