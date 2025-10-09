@@ -24,7 +24,6 @@ const Countdowns = lazy(() => import("./pages/Countdowns"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 
-// Páginas de autenticação (carregadas imediatamente)
 import EmailVerification from "./pages/EmailVerification";
 import Login from "./pages/Login";
 import Register from "./pages/Register";

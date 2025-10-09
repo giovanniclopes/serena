@@ -18,7 +18,6 @@ export function useWorkspaceColors() {
       tertiary,
       light,
       lighter,
-      // Cores neutras que sempre funcionam bem
       neutral: {
         white: "#ffffff",
         lightGray: "#f8fafc",
@@ -27,7 +26,6 @@ export function useWorkspaceColors() {
         black: "#1f2937",
         dark: "#090814",
       },
-      // Cores de destaque que complementam a cor primária
       accent: {
         pink: "#ec4899",
         purple: "#8b5cf6",

@@ -65,7 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
           console.log("✅ Perfil criado automaticamente");
           queryClient.invalidateQueries({ queryKey: ["profile"] });
-          // Limpar o cache para forçar um novo fetch
           queryClient.removeQueries({ queryKey: ["profile"] });
           markAsNewUser();
         } catch (profileError) {

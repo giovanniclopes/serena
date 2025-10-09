@@ -39,7 +39,6 @@ export default function Home() {
   const { elementRef, isRefreshing, pullDistance, progress } = usePullToRefresh(
     {
       onRefresh: async () => {
-        // Simular refresh - em uma implementação real, você chamaria as APIs
         await new Promise((resolve) => setTimeout(resolve, 1000));
         triggerSuccess();
       },

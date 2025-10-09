@@ -20,22 +20,18 @@ export function useSkeletonLoading(
     let hideTimer: NodeJS.Timeout | undefined;
 
     if (isLoading) {
-      // Mostrar skeleton após um pequeno delay para evitar flash
       showTimer = setTimeout(() => {
         setShowSkeleton(true);
       }, showSkeletonAfter);
 
-      // Garantir tempo mínimo de loading
       hideTimer = setTimeout(() => {
         setIsLoadingComplete(true);
       }, minLoadingTime);
     } else {
-      // Se não está carregando, limpar timers
       if (showTimer) clearTimeout(showTimer);
       if (hideTimer) clearTimeout(hideTimer);
 
       if (isLoadingComplete) {
-        // Delay para esconder skeleton suavemente
         const hideDelay = setTimeout(() => {
           setShowSkeleton(false);
           setIsLoadingComplete(false);
@@ -57,7 +53,6 @@ export function useSkeletonLoading(
   };
 }
 
-// Hook para loading com delay inteligente
 export function useDelayedLoading(isLoading: boolean, delay: number = 200) {
   const [delayedLoading, setDelayedLoading] = useState(false);
 
@@ -78,7 +73,6 @@ export function useDelayedLoading(isLoading: boolean, delay: number = 200) {
   return delayedLoading;
 }
 
-// Hook para loading com retry
 export function useRetryLoading(
   isLoading: boolean,
   retryCount: number = 0,
@@ -90,7 +84,6 @@ export function useRetryLoading(
     if (isLoading && retryCount < maxRetries) {
       setShouldShowSkeleton(true);
     } else if (!isLoading) {
-      // Delay para esconder skeleton após sucesso
       const timer = setTimeout(() => {
         setShouldShowSkeleton(false);
       }, 200);

@@ -61,7 +61,6 @@ export default function OfflineIndicator() {
   const statusInfo = getStatusInfo();
   const IconComponent = statusInfo.icon;
 
-  // Não mostrar se estiver online e sem ações pendentes
   if (isOnline && pendingActions.length === 0 && !syncInProgress) {
     return null;
   }

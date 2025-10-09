@@ -6,7 +6,6 @@ import {
   Home,
   List,
   LogOut,
-  // Settings,
   Target,
   User,
   Wifi,
@@ -46,7 +45,6 @@ export default function SideMenu({
     { path: "/calendar", icon: Calendar, label: "Calendário" },
     { path: "/countdowns", icon: Clock, label: "Contagem" },
     { path: "/profile", icon: User, label: "Perfil" },
-    // { path: "/notifications", icon: Settings, label: "Notificações" },
   ];
 
   return (

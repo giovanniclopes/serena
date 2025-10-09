@@ -25,11 +25,11 @@ export function MobileSpacing({
 
   const spacingValues = {
     none: "0",
-    xs: isMobile ? "0.5rem" : "0.25rem", // 8px mobile, 4px desktop
-    sm: isMobile ? "0.75rem" : "0.5rem", // 12px mobile, 8px desktop
-    md: isMobile ? "1rem" : "0.75rem", // 16px mobile, 12px desktop
-    lg: isMobile ? "1.5rem" : "1rem", // 24px mobile, 16px desktop
-    xl: isMobile ? "2rem" : "1.5rem", // 32px mobile, 24px desktop
+    xs: isMobile ? "0.5rem" : "0.25rem",
+    sm: isMobile ? "0.75rem" : "0.5rem",
+    md: isMobile ? "1rem" : "0.75rem",
+    lg: isMobile ? "1.5rem" : "1rem",
+    xl: isMobile ? "2rem" : "1.5rem",
   };
 
   const getPaddingClasses = () => {
@@ -81,7 +81,6 @@ export function MobileSpacing({
   );
 }
 
-// Hook para usar espaçamentos mobile-optimized
 export function useMobileSpacing() {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -93,7 +92,7 @@ export function useMobileSpacing() {
       lg: isMobile ? "1.5rem" : "1rem",
       xl: isMobile ? "2rem" : "1.5rem",
     },
-    touchTarget: isMobile ? "44px" : "32px", // Área mínima de toque
+    touchTarget: isMobile ? "44px" : "32px",
     isMobile,
   };
 }

@@ -1,23 +1,20 @@
 export function adjustColorBrightness(color: string, factor: number): string {
-  // Validar entrada
   if (!color || typeof color !== "string") {
-    return "#ec4899"; // cor padrão
+    return "#ec4899";
   }
 
   const hex = color.replace("#", "");
 
-  // Validar se é um hex válido
   if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
-    return "#ec4899"; // cor padrão
+    return "#ec4899";
   }
 
   const r = parseInt(hex.substring(0, 2), 16);
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
 
-  // Validar se os valores são válidos
   if (isNaN(r) || isNaN(g) || isNaN(b)) {
-    return "#ec4899"; // cor padrão
+    return "#ec4899";
   }
 
   const newR = Math.max(0, Math.min(255, Math.round(r * factor)));
@@ -34,7 +31,6 @@ export function generateThemeFromWorkspaceColor(
   workspaceName: string,
   workspaceId: string
 ) {
-  // Validar entrada
   if (!primaryColor || !workspaceName || !workspaceId) {
     return {
       id: "default-theme",

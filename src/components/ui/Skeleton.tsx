@@ -16,7 +16,6 @@ export function Skeleton({ className, ...props }: SkeletonProps) {
   );
 }
 
-// Skeleton específico para texto
 export function SkeletonText({
   lines = 1,
   className = "",
@@ -40,7 +39,6 @@ export function SkeletonText({
   );
 }
 
-// Skeleton para avatar/círculo
 export function SkeletonAvatar({
   size = "w-10 h-10",
   className = "",
@@ -51,7 +49,6 @@ export function SkeletonAvatar({
   return <Skeleton className={`${size} rounded-full ${className}`} />;
 }
 
-// Skeleton para botão
 export function SkeletonButton({
   width = "w-20",
   height = "h-8",
@@ -64,7 +61,6 @@ export function SkeletonButton({
   return <Skeleton className={`${width} ${height} rounded-lg ${className}`} />;
 }
 
-// Skeleton para card
 export function SkeletonCard({
   className = "",
   showAvatar = false,

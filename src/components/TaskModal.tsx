@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import { useProjects } from "../features/projects/useProjects";
-import type { Attachment, Priority, Recurrence, Task } from "../types";
+import type { Attachment, Priority, Project, Recurrence, Task } from "../types";
 import AttachmentManager from "./AttachmentManager";
 import DateTimeInput from "./DateTimeInput";
 import RecurrenceManager from "./RecurrenceManager";
@@ -45,7 +45,6 @@ export default function TaskModal({
     recurrence: task?.recurrence,
   });
 
-  // Sincronizar dados do formulário quando a prop task mudar
   useEffect(() => {
     if (task) {
       setFormData({
@@ -137,8 +136,8 @@ export default function TaskModal({
   };
 
   const availableProjects =
-    (projects as any[])?.filter(
-      (p: any) => p.workspaceId === state.activeWorkspaceId
+    (projects as Project[])?.filter(
+      (p: Project) => p.workspaceId === state.activeWorkspaceId
     ) || [];
   const availableTags = state.tags.filter(
     (t) => t.workspaceId === state.activeWorkspaceId
@@ -197,7 +196,7 @@ export default function TaskModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">Sem projeto</SelectItem>
-                {availableProjects.map((project: any) => (
+                {availableProjects.map((project: Project) => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.name}
                   </SelectItem>

@@ -5,7 +5,7 @@ interface OfflineAction {
   id: string;
   type: "CREATE" | "UPDATE" | "DELETE";
   entity: "task" | "project" | "habit" | "countdown";
-  data: any;
+  data: unknown;
   timestamp: number;
   retryCount: number;
 }
@@ -31,7 +31,6 @@ export function useOfflineMode() {
     syncInProgress: false,
   });
 
-  // Detectar mudanças de conectividade
   useEffect(() => {
     const handleOnline = () => {
       setState((prev) => ({ ...prev, isOnline: true, isOfflineMode: false }));
@@ -54,7 +53,6 @@ export function useOfflineMode() {
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Carregar estado inicial
     loadOfflineState();
 
     return () => {
@@ -112,7 +110,6 @@ export function useOfflineMode() {
         return { ...prev, pendingActions: newPendingActions };
       });
 
-      // Se estiver online, tentar sincronizar imediatamente
       if (state.isOnline) {
         syncPendingActions();
       }
@@ -143,13 +140,11 @@ export function useOfflineMode() {
         } catch (error) {
           console.error(`Erro ao sincronizar ação ${action.id}:`, error);
 
-          // Incrementar contador de tentativas
           const updatedAction = {
             ...action,
             retryCount: action.retryCount + 1,
           };
 
-          // Se excedeu 3 tentativas, remover da fila
           if (updatedAction.retryCount >= 3) {
             console.warn(
               `Ação ${action.id} removida após 3 tentativas falhadas`
@@ -160,7 +155,6 @@ export function useOfflineMode() {
         }
       }
 
-      // Atualizar estado com ações restantes
       const remainingActions = failedActions;
       setState((prev) => ({
         ...prev,
@@ -203,12 +197,7 @@ export function useOfflineMode() {
   ]);
 
   const executeOfflineAction = async (action: OfflineAction) => {
-    // Esta função será implementada com as chamadas reais da API
-    // Por enquanto, simulamos uma operação assíncrona
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Aqui você integraria com os hooks de mutação existentes
-    // Por exemplo: createTaskMutation.mutate(action.data)
 
     console.log("Executando ação offline:", action);
   };
@@ -237,7 +226,7 @@ export function useOfflineMode() {
     }
   }, []);
 
-  const setOfflineData = useCallback((key: string, data: any) => {
+  const setOfflineData = useCallback((key: string, data: unknown) => {
     try {
       localStorage.setItem(
         `${OFFLINE_STORAGE_KEY}_${key}`,

@@ -19,20 +19,17 @@ export function useAppUpdate(): AppUpdateInfo {
       setHasUpdate(true);
     };
 
-    // Verifica se há uma nova versão do service worker
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data && event.data.type === "UPDATE_AVAILABLE") {
         handleServiceWorkerUpdate();
       }
     });
 
-    // Verifica se o service worker está esperando para ativar
     navigator.serviceWorker.ready.then((registration) => {
       if (registration.waiting) {
         handleServiceWorkerUpdate();
       }
 
-      // Escuta por novos service workers
       registration.addEventListener("updatefound", () => {
         const newWorker = registration.installing;
         if (newWorker) {
@@ -48,7 +45,6 @@ export function useAppUpdate(): AppUpdateInfo {
       });
     });
 
-    // Verifica por atualizações periodicamente
     const checkForUpdates = () => {
       if (navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
@@ -57,7 +53,6 @@ export function useAppUpdate(): AppUpdateInfo {
       }
     };
 
-    // Verifica a cada 5 minutos
     const interval = setInterval(checkForUpdates, 5 * 60 * 1000);
 
     return () => {
@@ -69,15 +64,12 @@ export function useAppUpdate(): AppUpdateInfo {
     setIsUpdating(true);
 
     if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
-      // Envia mensagem para o service worker pular a espera
       navigator.serviceWorker.controller.postMessage({ type: "SKIP_WAITING" });
 
-      // Recarrega a página após um pequeno delay
       setTimeout(() => {
         window.location.reload();
       }, 1000);
     } else {
-      // Fallback: recarrega a página
       window.location.reload();
     }
   };

@@ -10,11 +10,9 @@ export function useOfflineOperations() {
   const createTaskOffline = useCallback(
     (taskData: Omit<Task, "id" | "createdAt" | "updatedAt">) => {
       if (isOnline) {
-        // Se estiver online, executar normalmente
         return { shouldExecute: true, data: taskData };
       }
 
-      // Se estiver offline, adicionar à fila
       addPendingAction({
         type: "CREATE",
         entity: "task",
@@ -297,7 +295,6 @@ export function useOfflineOperations() {
     [isOnline, addPendingAction]
   );
 
-  // Funções para cache local
   const cacheData = useCallback(
     (key: string, data: unknown) => {
       setOfflineData(key, {
@@ -315,7 +312,7 @@ export function useOfflineOperations() {
 
       const age = Date.now() - cached.timestamp;
       if (age > maxAge) {
-        return null; // Cache expirado
+        return null;
       }
 
       return cached.data;
@@ -324,27 +321,22 @@ export function useOfflineOperations() {
   );
 
   return {
-    // Tarefas
     createTaskOffline,
     updateTaskOffline,
     deleteTaskOffline,
 
-    // Projetos
     createProjectOffline,
     updateProjectOffline,
     deleteProjectOffline,
 
-    // Hábitos
     createHabitOffline,
     updateHabitOffline,
     deleteHabitOffline,
 
-    // Contadores
     createCountdownOffline,
     updateCountdownOffline,
     deleteCountdownOffline,
 
-    // Cache
     cacheData,
     getCachedData,
   };

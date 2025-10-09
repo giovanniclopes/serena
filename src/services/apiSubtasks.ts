@@ -8,7 +8,6 @@ const formatDateForSupabase = (date?: Date): string | null => {
 };
 
 export async function getSubtasks(taskId: string): Promise<Task[]> {
-  // Sanitizar o ID da tarefa para evitar erros com IDs de recorrência
   const originalTaskId = sanitizeTaskIdForAPI(taskId);
 
   const { data, error } = await supabase
@@ -56,7 +55,6 @@ export async function createSubtask(
     throw new Error("Usuário não autenticado");
   }
 
-  // Sanitizar o ID da tarefa pai para evitar erros com IDs de recorrência
   const originalParentTaskId = subtask.parentTaskId
     ? sanitizeTaskIdForAPI(subtask.parentTaskId)
     : null;
@@ -108,7 +106,6 @@ export async function createSubtask(
 }
 
 export async function updateSubtask(subtask: Task): Promise<Task> {
-  // Sanitizar o ID da tarefa pai para evitar erros com IDs de recorrência
   const originalParentTaskId = subtask.parentTaskId
     ? sanitizeTaskIdForAPI(subtask.parentTaskId)
     : null;

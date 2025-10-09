@@ -2,69 +2,59 @@
 
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
-// Cores com melhor contraste para acessibilidade
 export const accessibilityColors = {
-  // Cores de texto com contraste melhorado
   text: {
-    primary: "hsl(0 0% 9%)", // Preto mais escuro
-    secondary: "hsl(0 0% 25%)", // Cinza escuro
-    muted: "hsl(0 0% 45%)", // Cinza médio
-    accent: "hsl(0 0% 15%)", // Cinza muito escuro
+    primary: "hsl(0 0% 9%)",
+    secondary: "hsl(0 0% 25%)",
+    muted: "hsl(0 0% 45%)",
+    accent: "hsl(0 0% 15%)",
   },
 
-  // Cores de fundo com contraste melhorado
   background: {
-    primary: "hsl(0 0% 100%)", // Branco puro
-    secondary: "hsl(0 0% 98%)", // Branco quase puro
-    muted: "hsl(0 0% 96%)", // Cinza muito claro
-    accent: "hsl(0 0% 94%)", // Cinza claro
+    primary: "hsl(0 0% 100%)",
+    secondary: "hsl(0 0% 98%)",
+    muted: "hsl(0 0% 96%)",
+    accent: "hsl(0 0% 94%)",
   },
 
-  // Cores de borda com contraste melhorado
   border: {
-    primary: "hsl(0 0% 20%)", // Cinza escuro
-    secondary: "hsl(0 0% 30%)", // Cinza médio
-    muted: "hsl(0 0% 40%)", // Cinza médio-claro
+    primary: "hsl(0 0% 20%)",
+    secondary: "hsl(0 0% 30%)",
+    muted: "hsl(0 0% 40%)",
   },
 
-  // Cores de prioridade com contraste melhorado
   priority: {
-    P1: "hsl(0 84% 60%)", // Vermelho mais escuro
-    P2: "hsl(25 95% 53%)", // Laranja mais escuro
-    P3: "hsl(45 93% 47%)", // Amarelo mais escuro
-    P4: "hsl(142 76% 36%)", // Verde mais escuro
+    P1: "hsl(0 84% 60%)",
+    P2: "hsl(25 95% 53%)",
+    P3: "hsl(45 93% 47%)",
+    P4: "hsl(142 76% 36%)",
   },
 
-  // Cores de estado com contraste melhorado
   state: {
-    success: "hsl(142 76% 36%)", // Verde escuro
-    warning: "hsl(45 93% 47%)", // Amarelo escuro
-    error: "hsl(0 84% 60%)", // Vermelho escuro
-    info: "hsl(199 89% 48%)", // Azul escuro
+    success: "hsl(142 76% 36%)",
+    warning: "hsl(45 93% 47%)",
+    error: "hsl(0 84% 60%)",
+    info: "hsl(199 89% 48%)",
   },
 };
 
-// Hook para usar cores de acessibilidade
 export function useAccessibilityColors() {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   return {
     colors: accessibilityColors,
     isMobile,
-    // Função para calcular contraste
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getContrastRatio: (_color1: string, _color2: string) => {
-      // Implementação simplificada - em produção, use uma biblioteca como color-contrast
-      return 4.5; // Valor mínimo recomendado pela WCAG
+      return 4.5;
     },
-    // Função para verificar se uma cor atende aos padrões de acessibilidade
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     isAccessible: (_foreground: string, _background: string) => {
-      // Implementação simplificada
       return true;
     },
   };
 }
 
-// Componente para aplicar cores de acessibilidade
 export function AccessibilityProvider({
   children,
 }: {

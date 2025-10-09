@@ -63,7 +63,6 @@ export default function RecurrenceManager({
     endCount: recurrence?.endCount || 1,
   });
 
-  // Sincronizar estado quando a prop recurrence mudar
   useEffect(() => {
     if (recurrence) {
       setFormData({
@@ -99,7 +98,7 @@ export default function RecurrenceManager({
     }
   };
 
-  const handleChange = (field: keyof Recurrence, value: any) => {
+  const handleChange = (field: keyof Recurrence, value: unknown) => {
     const newFormData = { ...formData, [field]: value };
     setFormData(newFormData);
     onRecurrenceChange(newFormData);
@@ -112,7 +111,6 @@ export default function RecurrenceManager({
     handleChange("daysOfWeek", newDays);
   };
 
-  // Função auxiliar para garantir que endDate seja um Date válido
   const getEndDateValue = () => {
     if (!formData.endDate) return "";
     if (formData.endDate instanceof Date) {

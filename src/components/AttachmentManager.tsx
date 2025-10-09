@@ -9,6 +9,7 @@ import {
 import type { Attachment } from "../types";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
+import { toast } from "sonner";
 
 interface AttachmentManagerProps {
   attachments: Attachment[];
@@ -40,14 +41,12 @@ export default function AttachmentManager({
       const errors: string[] = [];
 
       for (const file of Array.from(files)) {
-        // Validar arquivo
         const validation = validateFile(file);
         if (!validation.valid) {
           errors.push(`${file.name}: ${validation.error}`);
           continue;
         }
 
-        // Fazer upload do arquivo
         const uploadPromise = uploadAttachment({
           file,
           workspaceId,
@@ -62,7 +61,6 @@ export default function AttachmentManager({
         uploadPromises.push(uploadPromise);
       }
 
-      // Aguardar todos os uploads
       await Promise.all(uploadPromises);
 
       if (newAttachments.length > 0) {
@@ -88,18 +86,18 @@ export default function AttachmentManager({
     if (!attachment) return;
 
     try {
-      // Remover do Supabase Storage
       const success = await deleteAttachment(attachment);
       if (success) {
-        // Remover da lista local
         onAttachmentsChange(
           attachments.filter((att) => att.id !== attachmentId)
         );
       } else {
         console.error("Erro ao remover arquivo do storage");
+        toast.error("Erro ao remover arquivo");
       }
     } catch (error) {
       console.error("Erro ao remover arquivo:", error);
+      toast.error("Erro ao remover arquivo");
     }
   };
 

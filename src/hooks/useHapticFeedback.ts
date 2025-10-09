@@ -13,7 +13,6 @@ export function useHapticFeedback() {
         try {
           navigator.vibrate(patterns[type]);
         } catch (error) {
-          // Silently fail if vibration is not supported
           console.debug("Vibration not supported:", error);
         }
       }

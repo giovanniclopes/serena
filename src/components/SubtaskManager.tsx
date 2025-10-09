@@ -26,7 +26,7 @@ import {
   useSubtasks,
   useUpdateSubtask,
 } from "../features/subtasks/useSubtasks";
-import type { Task } from "../types";
+import type { Task, Theme } from "../types";
 
 interface SubtaskManagerProps {
   taskId: string;
@@ -46,7 +46,7 @@ interface SortableSubtaskItemProps {
   isUpdating: boolean;
   isDeleting: boolean;
   isCompleting: boolean;
-  theme: any;
+  theme: Theme;
 }
 
 function SortableSubtaskItem({
@@ -93,8 +93,8 @@ function SortableSubtaskItem({
         className="p-2 sm:p-1 cursor-grab hover:bg-gray-100 rounded transition-colors touch-none select-none min-h-[44px] min-w-[44px] flex items-center justify-center"
         style={{
           color: theme.colors.textSecondary,
-          touchAction: "none", // Previne scroll durante drag
-          userSelect: "none", // Previne seleção de texto
+          touchAction: "none",
+          userSelect: "none",
         }}
       >
         <GripVertical size={16} className="sm:w-3.5 sm:h-3.5" />
@@ -192,7 +192,7 @@ export default function SubtaskManager({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Requer 8px de movimento antes de ativar o drag
+        distance: 8,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -359,7 +359,7 @@ export default function SubtaskManager({
           >
             <div
               className="space-y-2 sm:space-y-1"
-              style={{ touchAction: "pan-y" }} // Permite scroll vertical mas previne horizontal
+              style={{ touchAction: "pan-y" }}
             >
               {subtasks
                 .sort((a, b) => (a.order || 0) - (b.order || 0))

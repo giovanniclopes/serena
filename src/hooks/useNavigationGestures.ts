@@ -16,7 +16,6 @@ export function useNavigationGestures({
     if (!enableSwipeNavigation) return;
 
     triggerHaptic("light");
-    // Navegar para próxima página (ex: Home -> Calendar -> Tasks)
     const currentPath = window.location.pathname;
     const navigationOrder = [
       "/",
@@ -37,7 +36,6 @@ export function useNavigationGestures({
     if (!enableSwipeNavigation) return;
 
     triggerHaptic("light");
-    // Navegar para página anterior
     const currentPath = window.location.pathname;
     const navigationOrder = [
       "/",

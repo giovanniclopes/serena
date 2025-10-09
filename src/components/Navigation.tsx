@@ -17,7 +17,6 @@ export default function Navigation() {
   const { state } = useApp();
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
-  // Itens principais - sempre visíveis
   const mainNavItems = [
     { path: "/", icon: Home, label: "Início" },
     { path: "/calendar", icon: Calendar, label: "Calendário" },
@@ -25,7 +24,6 @@ export default function Navigation() {
     { path: "/habits", icon: Target, label: "Hábitos" },
   ];
 
-  // Itens secundários - no menu "Mais"
   const moreNavItems = [
     { path: "/projects", icon: Folder, label: "Projetos" },
     { path: "/countdowns", icon: Clock, label: "Contagem" },

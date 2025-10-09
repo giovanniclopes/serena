@@ -24,14 +24,12 @@ export const uploadAttachment = async ({
   taskId,
 }: UploadAttachmentParams): Promise<UploadAttachmentResult> => {
   try {
-    // Gerar nome único para o arquivo
     const fileExt = file.name.split(".").pop();
     const fileName = `${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}.${fileExt}`;
     const filePath = `${workspaceId}/${taskId || "temp"}/${fileName}`;
 
-    // Fazer upload do arquivo
     const { error: uploadError } = await supabase.storage
       .from(BUCKET_NAME)
       .upload(filePath, file, {
@@ -47,7 +45,6 @@ export const uploadAttachment = async ({
       };
     }
 
-    // Obter URL pública do arquivo
     const { data: urlData } = supabase.storage
       .from(BUCKET_NAME)
       .getPublicUrl(filePath);
@@ -59,7 +56,6 @@ export const uploadAttachment = async ({
       };
     }
 
-    // Criar objeto Attachment
     const attachment: Attachment = {
       id: `attachment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       name: file.name,
@@ -91,7 +87,6 @@ export const deleteAttachment = async (
   attachment: Attachment
 ): Promise<boolean> => {
   try {
-    // Extrair o caminho do arquivo da URL
     const url = new URL(attachment.url);
     const pathParts = url.pathname.split("/");
     const filePath = pathParts
@@ -142,8 +137,7 @@ export const uploadMultipleAttachments = async (
 export const validateFile = (
   file: File
 ): { valid: boolean; error?: string } => {
-  // Tamanho máximo: 10MB
-  const maxSize = 10 * 1024 * 1024; // 10MB em bytes
+  const maxSize = 10 * 1024 * 1024;
   if (file.size > maxSize) {
     return {
       valid: false,
@@ -151,7 +145,6 @@ export const validateFile = (
     };
   }
 
-  // Tipos permitidos
   const allowedTypes = [
     "image/jpeg",
     "image/png",

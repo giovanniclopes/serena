@@ -585,7 +585,6 @@ export default function Calendar() {
               {dayTasks.length > 0 && (
                 <div className={`${isMobile ? "space-y-0" : "space-y-0.5"}`}>
                   {isMobile ? (
-                    // Mobile: Mostrar apenas ícones
                     <>
                       {dayTasks.slice(0, 1).map((task) => (
                         <div
@@ -626,7 +625,6 @@ export default function Calendar() {
                       )}
                     </>
                   ) : (
-                    // Desktop: Mostrar texto completo
                     <>
                       {dayTasks.slice(0, 2).map((task) => (
                         <div

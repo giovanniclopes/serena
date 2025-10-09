@@ -382,9 +382,7 @@ export function filterHabits(habits: Habit[], showCompleted: boolean): Habit[] {
   if (showCompleted) return habits;
 
   return habits.filter(() => {
-    // Para hábitos, consideramos "concluído" se atingiu a meta hoje
-    // Esta lógica pode ser refinada baseada na implementação específica
-    return true; // Por enquanto, mostramos todos os hábitos
+    return true;
   });
 }
 
@@ -411,6 +409,6 @@ export function filterCountdowns(
 
   return countdowns.filter((countdown) => {
     const now = new Date();
-    return countdown.targetDate > now; // Mostrar apenas countdowns futuros
+    return countdown.targetDate > now;
   });
 }

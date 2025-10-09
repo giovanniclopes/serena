@@ -48,9 +48,7 @@ export function useSwipeGestures({
       const absDeltaX = Math.abs(deltaX);
       const absDeltaY = Math.abs(deltaY);
 
-      // Determine if it's a horizontal or vertical swipe
       if (absDeltaX > absDeltaY) {
-        // Horizontal swipe
         if (absDeltaX > threshold) {
           if (deltaX > 0) {
             onSwipeRight?.();
@@ -59,7 +57,6 @@ export function useSwipeGestures({
           }
         }
       } else {
-        // Vertical swipe
         if (absDeltaY > threshold) {
           if (deltaY > 0) {
             onSwipeDown?.();

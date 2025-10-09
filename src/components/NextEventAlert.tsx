@@ -33,7 +33,7 @@ export default function NextEventAlert() {
       audio.volume = 0.3;
       audio.play().catch(() => {});
     } catch {
-      // Ignore audio errors
+      console.error("Erro ao reproduzir som de notificação");
     }
   }, []);
 
@@ -77,14 +77,12 @@ export default function NextEventAlert() {
             timeRemaining,
           };
 
-          // Reset flags for new countdowns
           if (lastCountdownIdRef.current !== nextCountdown.id) {
             hasPlayedSoundRef.current = false;
             hasVibratedRef.current = false;
             lastCountdownIdRef.current = nextCountdown.id;
           }
 
-          // Play sound and vibrate for new alerts or when time changes significantly
           setCurrentAlert((prevAlert) => {
             if (
               !prevAlert ||
@@ -107,7 +105,6 @@ export default function NextEventAlert() {
           setCurrentAlert(null);
         }
       } else {
-        // Auto-dismiss when event has passed
         setCurrentAlert((prevAlert) => {
           if (prevAlert && minutesUntil < 0) {
             hasPlayedSoundRef.current = false;
