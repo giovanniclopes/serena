@@ -2,7 +2,6 @@ import {
   addDays,
   endOfMonth,
   format,
-  isAfter,
   isSameDay,
   isWithinInterval,
   startOfDay,
@@ -18,9 +17,10 @@ import type {
   HabitEntry,
   Priority,
   Project,
-  Recurrence,
   Task,
 } from "../types";
+import { getRecurringTaskInstancesForDate } from "./recurrenceUtils";
+export { isRecurringInstance } from "./taskUtils";
 
 export function formatDate(
   date: Date,
@@ -61,194 +61,17 @@ export function getTasksForDate(tasks: Task[], date: Date): Task[] {
   const allTasks: Task[] = [];
 
   tasks.forEach((task) => {
-    if (!task.dueDate) return;
+    if (!task.dueDate || task.recurrence) return;
 
-    // Tarefa original
     if (isSameDay(task.dueDate, date)) {
       allTasks.push(task);
     }
-
-    // Tarefas recorrentes
-    if (task.recurrence) {
-      const recurringInstances = generateRecurringInstances(task, date);
-      allTasks.push(...recurringInstances);
-    }
   });
 
+  const recurringInstances = getRecurringTaskInstancesForDate(tasks, date);
+  allTasks.push(...recurringInstances);
+
   return sortTasksByPriority(allTasks);
-}
-
-/**
- * Gera instâncias de uma tarefa recorrente para uma data específica
- */
-function generateRecurringInstances(task: Task, targetDate: Date): Task[] {
-  if (!task.recurrence || !task.dueDate) {
-    return [];
-  }
-
-  const instances: Task[] = [];
-  const recurrence = task.recurrence;
-  const originalDate = task.dueDate;
-
-  // Converter endDate para Date se necessário
-  if (recurrence.endDate && !(recurrence.endDate instanceof Date)) {
-    recurrence.endDate = new Date(recurrence.endDate);
-  }
-
-  // Verificar se a data alvo está dentro do período de recorrência
-  if (
-    recurrence.endType === "date" &&
-    recurrence.endDate &&
-    recurrence.endDate instanceof Date &&
-    isAfter(targetDate, recurrence.endDate)
-  ) {
-    return instances;
-  }
-
-  // Gerar instâncias baseadas no tipo de recorrência
-  switch (recurrence.type) {
-    case "daily":
-      instances.push(
-        ...generateDailyInstances(task, originalDate, targetDate, recurrence)
-      );
-      break;
-    case "weekly":
-      instances.push(
-        ...generateWeeklyInstances(task, originalDate, targetDate, recurrence)
-      );
-      break;
-    case "monthly":
-      instances.push(
-        ...generateMonthlyInstances(task, originalDate, targetDate, recurrence)
-      );
-      break;
-    case "yearly":
-      instances.push(
-        ...generateYearlyInstances(task, originalDate, targetDate, recurrence)
-      );
-      break;
-  }
-
-  return instances;
-}
-
-function generateDailyInstances(
-  task: Task,
-  originalDate: Date,
-  targetDate: Date,
-  recurrence: Recurrence
-): Task[] {
-  const instances: Task[] = [];
-  const interval = recurrence.interval || 1;
-
-  // Calcular quantos dias se passaram desde a data original
-  const daysDiff = Math.floor(
-    (targetDate.getTime() - originalDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-
-  // Verificar se a data alvo corresponde ao padrão de recorrência
-  if (daysDiff >= 0 && daysDiff % interval === 0) {
-    const instanceDate = addDays(originalDate, daysDiff);
-    if (isSameDay(instanceDate, targetDate)) {
-      instances.push(createRecurringInstance(task, instanceDate));
-    }
-  }
-
-  return instances;
-}
-
-function generateWeeklyInstances(
-  task: Task,
-  originalDate: Date,
-  targetDate: Date,
-  recurrence: Recurrence
-): Task[] {
-  const instances: Task[] = [];
-  const interval = recurrence.interval || 1;
-  const daysOfWeek = recurrence.daysOfWeek || [];
-
-  // Se não há dias específicos, usar o dia da semana original
-  if (daysOfWeek.length === 0) {
-    daysOfWeek.push(originalDate.getDay());
-  }
-
-  // Verificar se o dia da semana da data alvo está nos dias permitidos
-  if (daysOfWeek.includes(targetDate.getDay())) {
-    // Calcular quantas semanas se passaram desde a data original
-    const weeksDiff = Math.floor(
-      (targetDate.getTime() - originalDate.getTime()) /
-        (1000 * 60 * 60 * 24 * 7)
-    );
-
-    if (weeksDiff >= 0 && weeksDiff % interval === 0) {
-      const instanceDate = addDays(originalDate, weeksDiff * 7);
-      if (isSameDay(instanceDate, targetDate)) {
-        instances.push(createRecurringInstance(task, instanceDate));
-      }
-    }
-  }
-
-  return instances;
-}
-
-function generateMonthlyInstances(
-  task: Task,
-  originalDate: Date,
-  targetDate: Date,
-  recurrence: Recurrence
-): Task[] {
-  const instances: Task[] = [];
-  const interval = recurrence.interval || 1;
-  const dayOfMonth = recurrence.dayOfMonth || originalDate.getDate();
-
-  // Verificar se o dia do mês corresponde
-  if (targetDate.getDate() === dayOfMonth) {
-    // Calcular quantos meses se passaram desde a data original
-    const monthsDiff =
-      (targetDate.getFullYear() - originalDate.getFullYear()) * 12 +
-      (targetDate.getMonth() - originalDate.getMonth());
-
-    if (monthsDiff >= 0 && monthsDiff % interval === 0) {
-      instances.push(createRecurringInstance(task, targetDate));
-    }
-  }
-
-  return instances;
-}
-
-function generateYearlyInstances(
-  task: Task,
-  originalDate: Date,
-  targetDate: Date,
-  recurrence: Recurrence
-): Task[] {
-  const instances: Task[] = [];
-  const interval = recurrence.interval || 1;
-
-  // Verificar se o dia e mês correspondem
-  if (
-    targetDate.getDate() === originalDate.getDate() &&
-    targetDate.getMonth() === originalDate.getMonth()
-  ) {
-    // Calcular quantos anos se passaram desde a data original
-    const yearsDiff = targetDate.getFullYear() - originalDate.getFullYear();
-
-    if (yearsDiff >= 0 && yearsDiff % interval === 0) {
-      instances.push(createRecurringInstance(task, targetDate));
-    }
-  }
-
-  return instances;
-}
-
-function createRecurringInstance(originalTask: Task, instanceDate: Date): Task {
-  return {
-    ...originalTask,
-    id: `${originalTask.id}_recurring_${instanceDate.getTime()}`,
-    dueDate: instanceDate,
-    // Marcar como instância recorrente para identificação
-    isRecurringInstance: true,
-  } as Task & { isRecurringInstance: boolean };
 }
 
 export function getTasksForWeek(tasks: Task[], startDate: Date): Task[] {

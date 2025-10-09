@@ -78,6 +78,20 @@ export interface Task {
   updatedAt: Date;
 }
 
+export interface RecurringTaskInstance {
+  taskId: string;
+  date: Date;
+  isCompleted: boolean;
+  completedAt?: Date;
+}
+
+export interface RecurringTaskCompletion {
+  taskId: string;
+  date: string;
+  isCompleted: boolean;
+  completedAt?: Date;
+}
+
 export interface Workspace {
   id: string;
   name: string;

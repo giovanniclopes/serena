@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import { createBrazilDateTime } from "../lib/dayjs";
 import type { Recurrence, RecurrenceEndType, RecurrenceType } from "../types";
+import { getRecurrenceDescription } from "../utils/recurrenceUtils";
 import DateTimeInput from "./DateTimeInput";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
@@ -125,62 +126,9 @@ export default function RecurrenceManager({
     }
   };
 
-  const getRecurrenceDescription = () => {
+  const getDescription = () => {
     if (!isEnabled) return "Não repetir";
-
-    const {
-      type,
-      interval,
-      daysOfWeek,
-      dayOfMonth,
-      endType,
-      endCount,
-      endDate,
-    } = formData;
-
-    let description = "";
-
-    if (interval > 1) {
-      description += `A cada ${interval} `;
-    } else {
-      description += "A cada ";
-    }
-
-    switch (type) {
-      case "daily":
-        description += interval === 1 ? "dia" : "dias";
-        break;
-      case "weekly":
-        description += interval === 1 ? "semana" : "semanas";
-        if (daysOfWeek && daysOfWeek.length > 0) {
-          const selectedDays = daysOfWeek
-            .map((day) => weekDays.find((d) => d.value === day)?.label)
-            .filter(Boolean)
-            .join(", ");
-          description += ` (${selectedDays})`;
-        }
-        break;
-      case "monthly":
-        description += interval === 1 ? "mês" : "meses";
-        if (dayOfMonth) {
-          description += ` (dia ${dayOfMonth})`;
-        }
-        break;
-      case "yearly":
-        description += interval === 1 ? "ano" : "anos";
-        break;
-      case "custom":
-        description += "período personalizado";
-        break;
-    }
-
-    if (endType === "date" && endDate) {
-      description += ` até ${endDate.toLocaleDateString("pt-BR")}`;
-    } else if (endType === "count") {
-      description += ` (${endCount} ocorrências)`;
-    }
-
-    return description;
+    return getRecurrenceDescription(formData);
   };
 
   return (
@@ -380,7 +328,7 @@ export default function RecurrenceManager({
                   className="text-sm font-medium"
                   style={{ color: state.currentTheme.colors.text }}
                 >
-                  {getRecurrenceDescription()}
+                  {getDescription()}
                 </span>
               </div>
             </div>

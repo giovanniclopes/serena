@@ -30,11 +30,13 @@ import TaskCard from "../components/TaskCard";
 import { useApp } from "../context/AppContext";
 import { useTasks, useUncompleteTask } from "../features/tasks/useTasks";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import {
   filterTasks,
   getPriorityColor,
   getTasksForDate,
+  isRecurringInstance,
   searchTasks,
 } from "../utils";
 
@@ -45,6 +47,7 @@ export default function Calendar() {
   const { tasks, isLoading } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
   const uncompleteTaskMutation = useUncompleteTask();
+  const { markInstanceComplete } = useRecurringTasks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -95,6 +98,14 @@ export default function Calendar() {
         dispatch({ type: "UNCOMPLETE_TASK", payload: taskId });
       },
     });
+  };
+
+  const handleRecurringTaskToggle = (
+    taskId: string,
+    date: Date,
+    isCompleted: boolean
+  ) => {
+    markInstanceComplete(taskId, date, isCompleted);
   };
 
   const getTasksForSelectedDate = () => {
@@ -413,18 +424,25 @@ export default function Calendar() {
         >
           {dayTasks.length > 0 ? (
             <div className="space-y-2">
-              {dayTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onComplete={(taskId) =>
-                    dispatch({ type: "COMPLETE_TASK", payload: taskId })
-                  }
-                  onUncomplete={handleUncompleteTask}
-                  showProject={true}
-                  showDate={false}
-                />
-              ))}
+              {dayTasks.map((task) => {
+                const isRecurring = isRecurringInstance(task.id);
+
+                return (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onComplete={(taskId) =>
+                      dispatch({ type: "COMPLETE_TASK", payload: taskId })
+                    }
+                    onUncomplete={handleUncompleteTask}
+                    onRecurringToggle={
+                      isRecurring ? handleRecurringTaskToggle : undefined
+                    }
+                    showProject={true}
+                    showDate={false}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-6">
@@ -791,18 +809,25 @@ export default function Calendar() {
 
           {getTasksForSelectedDate().length > 0 ? (
             <div className="space-y-2">
-              {getTasksForSelectedDate().map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onComplete={(taskId) =>
-                    dispatch({ type: "COMPLETE_TASK", payload: taskId })
-                  }
-                  onUncomplete={handleUncompleteTask}
-                  showProject={true}
-                  showDate={true}
-                />
-              ))}
+              {getTasksForSelectedDate().map((task) => {
+                const isRecurring = isRecurringInstance(task.id);
+
+                return (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onComplete={(taskId) =>
+                      dispatch({ type: "COMPLETE_TASK", payload: taskId })
+                    }
+                    onUncomplete={handleUncompleteTask}
+                    onRecurringToggle={
+                      isRecurring ? handleRecurringTaskToggle : undefined
+                    }
+                    showProject={true}
+                    showDate={true}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-6">

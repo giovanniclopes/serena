@@ -13,6 +13,7 @@ import {
   formatTime,
   getPriorityColor,
   getPriorityLabel,
+  isRecurringInstance as isRecurringTaskInstance,
 } from "../utils";
 import SubtaskManager from "./SubtaskManager";
 import { Badge } from "./ui/badge";
@@ -33,6 +34,11 @@ interface TaskCardProps {
   isBulkDeleteMode?: boolean;
   isSelected?: boolean;
   onSelectionChange?: (taskId: string, selected: boolean) => void;
+  onRecurringToggle?: (
+    taskId: string,
+    date: Date,
+    isCompleted: boolean
+  ) => void;
 }
 
 export default function TaskCard({
@@ -46,6 +52,7 @@ export default function TaskCard({
   isBulkDeleteMode = false,
   isSelected = false,
   onSelectionChange,
+  onRecurringToggle,
 }: TaskCardProps) {
   const { state } = useApp();
   const { spacing, touchTarget, isMobile } = useMobileSpacing();
@@ -54,7 +61,11 @@ export default function TaskCard({
   const taskTags = state.tags.filter((tag) => task.tags.includes(tag.id));
 
   const handleToggleComplete = () => {
-    if (task.isCompleted) {
+    const isRecurring = isRecurringTaskInstance(task.id);
+
+    if (isRecurring && onRecurringToggle && task.dueDate) {
+      onRecurringToggle(task.id, task.dueDate, !task.isCompleted);
+    } else if (task.isCompleted) {
       if (onUncomplete) {
         onUncomplete(task.id);
       }
@@ -314,7 +325,53 @@ export default function TaskCard({
           )}
 
           <div style={{ marginTop: spacing.sm }}>
-            <SubtaskManager taskId={task.id} workspaceId={task.workspaceId} />
+            {isRecurringTaskInstance(task.id) ? (
+              <div className="space-y-2">
+                {task.subtasks && task.subtasks.length > 0 && (
+                  <div>
+                    <h4
+                      className="text-sm font-medium mb-2"
+                      style={{ color: state.currentTheme.colors.text }}
+                    >
+                      Subtarefas:
+                    </h4>
+                    <div className="space-y-1">
+                      {task.subtasks.map((subtask) => (
+                        <div
+                          key={subtask.id}
+                          className="flex items-center space-x-2 p-2 rounded"
+                          style={{
+                            backgroundColor:
+                              state.currentTheme.colors.surface + "50",
+                            border: `1px solid ${state.currentTheme.colors.border}`,
+                          }}
+                        >
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              subtask.isCompleted
+                                ? "bg-green-500"
+                                : "bg-gray-400"
+                            }`}
+                          />
+                          <span
+                            className={`text-sm ${
+                              subtask.isCompleted
+                                ? "line-through opacity-70"
+                                : ""
+                            }`}
+                            style={{ color: state.currentTheme.colors.text }}
+                          >
+                            {subtask.title}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <SubtaskManager taskId={task.id} workspaceId={task.workspaceId} />
+            )}
           </div>
         </div>
       </div>
