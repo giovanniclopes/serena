@@ -189,14 +189,23 @@ export function getRecurringTaskInstancesForDate(
 
   for (const task of recurringTasks) {
     if (shouldTaskAppearOnDate(task, targetDate)) {
-      const isCompleted = isRecurringTaskInstanceCompleted(task.id, targetDate);
+      const instanceCompleted = isRecurringTaskInstanceCompleted(
+        task.id,
+        targetDate
+      );
+
+      const isCompleted = instanceCompleted || task.isCompleted;
 
       const instance: Task = {
         ...task,
         id: `${task.id}_${format(targetDate, "yyyy-MM-dd")}`,
         dueDate: targetDate,
         isCompleted,
-        completedAt: isCompleted ? new Date() : undefined,
+        completedAt: isCompleted
+          ? instanceCompleted
+            ? new Date()
+            : task.completedAt
+          : undefined,
         subtasks: task.subtasks || [],
       };
 

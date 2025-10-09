@@ -106,6 +106,7 @@ export default function Calendar() {
     isCompleted: boolean
   ) => {
     markInstanceComplete(taskId, date, isCompleted);
+    setCurrentDate(new Date(currentDate));
   };
 
   const getTasksForSelectedDate = () => {
