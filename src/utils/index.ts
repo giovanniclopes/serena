@@ -310,7 +310,11 @@ export function sortTasksByPriority(tasks: Task[]): Task[] {
   });
 }
 
-export function filterTasks(tasks: Task[], filter: Filter): Task[] {
+export function filterTasks(
+  tasks: Task[],
+  filter: Filter,
+  applySorting: boolean = true
+): Task[] {
   let filtered = tasks;
 
   if (filter.workspaceId) {
@@ -350,7 +354,7 @@ export function filterTasks(tasks: Task[], filter: Filter): Task[] {
     );
   }
 
-  return sortTasksByPriority(filtered);
+  return applySorting ? sortTasksByPriority(filtered) : filtered;
 }
 
 export function searchTasks(tasks: Task[], query: string): Task[] {

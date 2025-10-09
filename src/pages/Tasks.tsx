@@ -37,6 +37,9 @@ export default function Tasks() {
   const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
+  const [sortBy, setSortBy] = useState<"priority" | "recent" | "dueDate">(
+    "priority"
+  );
 
   const { tasks, isLoading, error } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
@@ -48,13 +51,42 @@ export default function Tasks() {
   const bulkDeleteTasksMutation = useBulkDeleteTasks();
   const completeAllTasksMutation = useCompleteAllTasks();
 
-  const filteredTasks = filterTasks(searchTasks(tasks, searchQuery), {
-    id: "default",
-    name: "Filtro Padrão",
-    workspaceId: state.activeWorkspaceId,
-    isCompleted: showCompleted ? undefined : false,
-    priorities: selectedPriorities.length > 0 ? selectedPriorities : undefined,
-  });
+  const sortTasks = (tasks: Task[]) => {
+    return [...tasks].sort((a, b) => {
+      switch (sortBy) {
+        case "priority": {
+          const priorityOrder = { P1: 1, P2: 2, P3: 3, P4: 4 };
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        }
+        case "recent":
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+        case "dueDate":
+          if (!a.dueDate && !b.dueDate) return 0;
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+        default:
+          return 0;
+      }
+    });
+  };
+
+  const filteredTasks = sortTasks(
+    filterTasks(
+      searchTasks(tasks, searchQuery),
+      {
+        id: "default",
+        name: "Filtro Padrão",
+        workspaceId: state.activeWorkspaceId,
+        isCompleted: showCompleted ? undefined : false,
+        priorities:
+          selectedPriorities.length > 0 ? selectedPriorities : undefined,
+      },
+      false
+    )
+  );
 
   const handleCompleteTask = (taskId: string) => {
     completeTaskMutation.mutate(taskId);
@@ -202,6 +234,8 @@ export default function Tasks() {
         isBulkDeleteMode={isBulkDeleteMode}
         onBulkDeleteToggle={handleBulkDeleteToggle}
         selectedTasksCount={selectedTasks.size}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
       />
 
       {!isBulkDeleteMode && filteredTasks.some((task) => !task.isCompleted) && (

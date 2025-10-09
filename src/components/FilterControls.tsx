@@ -1,4 +1,4 @@
-import { Filter, Grid, List, Search, Trash2 } from "lucide-react";
+import { ArrowUpDown, Filter, Grid, List, Search, Trash2 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import type { Priority } from "../types";
 import { getPriorityColor, getPriorityLabel } from "../utils";
@@ -18,6 +18,8 @@ interface FilterControlsProps {
   isBulkDeleteMode?: boolean;
   onBulkDeleteToggle?: () => void;
   selectedTasksCount?: number;
+  sortBy?: "priority" | "recent" | "dueDate";
+  onSortChange?: (sort: "priority" | "recent" | "dueDate") => void;
 }
 
 export default function FilterControls({
@@ -35,6 +37,8 @@ export default function FilterControls({
   isBulkDeleteMode = false,
   onBulkDeleteToggle,
   selectedTasksCount = 0,
+  sortBy = "priority",
+  onSortChange,
 }: FilterControlsProps) {
   const { state } = useApp();
 
@@ -71,6 +75,37 @@ export default function FilterControls({
           >
             <Filter className="w-4 h-4" />
           </button>
+        )}
+
+        {onSortChange && (
+          <div className="relative">
+            <button
+              onClick={() => {
+                const sortOptions: ("priority" | "recent" | "dueDate")[] = [
+                  "priority",
+                  "recent",
+                  "dueDate",
+                ];
+                const currentIndex = sortOptions.indexOf(sortBy);
+                const nextIndex = (currentIndex + 1) % sortOptions.length;
+                onSortChange(sortOptions[nextIndex]);
+              }}
+              className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
+              style={{
+                backgroundColor: state.currentTheme.colors.primary + "20",
+                color: state.currentTheme.colors.primary,
+              }}
+              title={`Ordenar por: ${
+                sortBy === "priority"
+                  ? "Prioridade"
+                  : sortBy === "recent"
+                  ? "Mais recentes"
+                  : "Data de vencimento"
+              }`}
+            >
+              <ArrowUpDown className="w-4 h-4" />
+            </button>
+          </div>
         )}
 
         <div
