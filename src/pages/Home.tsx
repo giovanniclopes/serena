@@ -14,6 +14,7 @@ import {
   useCompleteTask,
   useCreateTask,
   useTasks,
+  useUncompleteTask,
   useUpdateTask,
 } from "../features/tasks/useTasks";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
@@ -35,6 +36,7 @@ export default function Home() {
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
+  const uncompleteTaskMutation = useUncompleteTask();
 
   const { elementRef, isRefreshing, pullDistance, progress } = usePullToRefresh(
     {
@@ -93,6 +95,11 @@ export default function Home() {
   const handleCompleteTask = (taskId: string) => {
     triggerHaptic("light");
     completeTaskMutation.mutate(taskId);
+  };
+
+  const handleUncompleteTask = (taskId: string) => {
+    triggerHaptic("light");
+    uncompleteTaskMutation.mutate(taskId);
   };
 
   const handleEditTask = (task: Task) => {
@@ -238,6 +245,7 @@ export default function Home() {
                   key={task.id}
                   task={task}
                   onComplete={handleCompleteTask}
+                  onUncomplete={handleUncompleteTask}
                   onEdit={handleEditTask}
                   showProject={true}
                   showDate={true}
@@ -264,6 +272,7 @@ export default function Home() {
                   key={task.id}
                   task={task}
                   onComplete={handleCompleteTask}
+                  onUncomplete={handleUncompleteTask}
                   onEdit={handleEditTask}
                   showProject={true}
                   showDate={false}
@@ -306,6 +315,7 @@ export default function Home() {
                   key={task.id}
                   task={task}
                   onComplete={handleCompleteTask}
+                  onUncomplete={handleUncompleteTask}
                   onEdit={handleEditTask}
                   showProject={true}
                   showDate={true}
