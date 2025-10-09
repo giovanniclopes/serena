@@ -28,7 +28,11 @@ import { useState } from "react";
 import { CalendarSkeleton } from "../components/skeletons/CalendarSkeleton";
 import TaskCard from "../components/TaskCard";
 import { useApp } from "../context/AppContext";
-import { useTasks, useUncompleteTask } from "../features/tasks/useTasks";
+import {
+  useCompleteTask,
+  useTasks,
+  useUncompleteTask,
+} from "../features/tasks/useTasks";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
@@ -46,6 +50,7 @@ export default function Calendar() {
   const { state, dispatch } = useApp();
   const { tasks, isLoading } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
+  const completeTaskMutation = useCompleteTask();
   const uncompleteTaskMutation = useUncompleteTask();
   const { markInstanceComplete } = useRecurringTasks();
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -90,6 +95,14 @@ export default function Calendar() {
 
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
+  };
+
+  const handleCompleteTask = (taskId: string) => {
+    completeTaskMutation.mutate(taskId, {
+      onSuccess: () => {
+        dispatch({ type: "COMPLETE_TASK", payload: taskId });
+      },
+    });
   };
 
   const handleUncompleteTask = (taskId: string) => {
@@ -432,9 +445,7 @@ export default function Calendar() {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onComplete={(taskId) =>
-                      dispatch({ type: "COMPLETE_TASK", payload: taskId })
-                    }
+                    onComplete={handleCompleteTask}
                     onUncomplete={handleUncompleteTask}
                     onRecurringToggle={
                       isRecurring ? handleRecurringTaskToggle : undefined
@@ -815,9 +826,7 @@ export default function Calendar() {
                   <TaskCard
                     key={task.id}
                     task={task}
-                    onComplete={(taskId) =>
-                      dispatch({ type: "COMPLETE_TASK", payload: taskId })
-                    }
+                    onComplete={handleCompleteTask}
                     onUncomplete={handleUncompleteTask}
                     onRecurringToggle={
                       isRecurring ? handleRecurringTaskToggle : undefined
