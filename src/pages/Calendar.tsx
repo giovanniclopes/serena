@@ -21,8 +21,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Filter,
-  Search,
 } from "lucide-react";
 import { useState } from "react";
 import { CalendarSkeleton } from "../components/skeletons/CalendarSkeleton";
@@ -41,7 +39,6 @@ import {
   getPriorityColor,
   getTasksForDate,
   isRecurringInstance,
-  searchTasks,
 } from "../utils";
 
 type ViewMode = "month" | "week" | "day";
@@ -56,7 +53,6 @@ export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -129,7 +125,7 @@ export default function Calendar() {
         !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
     );
     const dateTasks = getTasksForDate(workspaceTasks, selectedDate);
-    const filteredTasks = filterTasks(searchTasks(dateTasks, searchQuery), {
+    const filteredTasks = filterTasks(dateTasks, {
       id: "default",
       name: "Filtro Padrão",
       workspaceId: state.activeWorkspaceId,
@@ -709,37 +705,6 @@ export default function Calendar() {
         >
           Calendário
         </h1>
-      </div>
-
-      <div className="flex items-center space-x-3">
-        <div className="flex-1 relative">
-          <Search
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          />
-          <input
-            type="text"
-            placeholder="Buscar tarefas..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-lg border transition-colors text-sm"
-            style={{
-              backgroundColor: state.currentTheme.colors.surface,
-              borderColor: state.currentTheme.colors.border,
-              color: state.currentTheme.colors.text,
-            }}
-          />
-        </div>
-
-        <button
-          className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
-          style={{
-            backgroundColor: state.currentTheme.colors.primary + "20",
-            color: state.currentTheme.colors.primary,
-          }}
-        >
-          <Filter className="w-4 h-4" />
-        </button>
       </div>
 
       <div className="flex items-center justify-between">
