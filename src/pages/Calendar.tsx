@@ -16,24 +16,30 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
+  BarChart3,
   Calendar as CalendarIcon,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Plus,
+  TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
 import { CalendarSkeleton } from "../components/skeletons/CalendarSkeleton";
 import TaskCard from "../components/TaskCard";
+import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
 import {
   useCompleteTask,
+  useCreateTask,
   useTasks,
   useUncompleteTask,
 } from "../features/tasks/useTasks";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
+import type { Task } from "../types";
 import {
   filterTasks,
   getPriorityColor,
@@ -49,11 +55,14 @@ export default function Calendar() {
   const { showSkeleton } = useSkeletonLoading(isLoading);
   const completeTaskMutation = useCompleteTask();
   const uncompleteTaskMutation = useUncompleteTask();
+  const createTaskMutation = useCreateTask();
   const { markInstanceComplete } = useRecurringTasks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const monthStart = startOfMonth(currentDate);
@@ -118,6 +127,27 @@ export default function Calendar() {
     setCurrentDate(new Date(currentDate));
   };
 
+  const handleCreateTask = () => {
+    setEditingTask(undefined);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleSaveTask = (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => {
+    createTaskMutation.mutate(
+      {
+        ...taskData,
+        workspaceId: state.activeWorkspaceId,
+      },
+      {
+        onSuccess: () => {
+          setIsTaskModalOpen(false);
+        },
+      }
+    );
+  };
+
   const getTasksForSelectedDate = () => {
     if (!selectedDate) return [];
     const workspaceTasks = tasks.filter(
@@ -164,6 +194,54 @@ export default function Calendar() {
         !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
     );
     return getTasksForDate(filteredTasks, currentDate);
+  };
+
+  const getProductivityStats = () => {
+    const today = new Date();
+    const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+    const weekEnd = endOfWeek(today, { weekStartsOn: 0 });
+
+    const workspaceTasks = tasks.filter(
+      (task) =>
+        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+    );
+
+    const todayTasks = getTasksForDate(workspaceTasks, today);
+
+    const weekTasks: Task[] = [];
+    const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+
+    weekDays.forEach((day) => {
+      const dayTasks = getTasksForDate(workspaceTasks, day);
+      weekTasks.push(...dayTasks);
+    });
+
+    const todayCompleted = todayTasks.filter((task) => task.isCompleted).length;
+    const todayPending = todayTasks.filter((task) => !task.isCompleted).length;
+    const weekCompleted = weekTasks.filter((task) => task.isCompleted).length;
+    const weekTotal = weekTasks.length;
+    const weekProductivity =
+      weekTotal > 0 ? Math.round((weekCompleted / weekTotal) * 100) : 0;
+
+    console.log("📊 Productivity Stats Debug:", {
+      todayTasks: todayTasks.length,
+      todayCompleted,
+      todayPending,
+      weekTasks: weekTasks.length,
+      weekCompleted,
+      weekTotal,
+      weekProductivity,
+      workspaceTasks: workspaceTasks.length,
+      totalTasks: tasks.length,
+    });
+
+    return {
+      todayCompleted,
+      todayPending,
+      weekCompleted,
+      weekTotal,
+      weekProductivity,
+    };
   };
 
   const renderWeekView = () => {
@@ -705,6 +783,71 @@ export default function Calendar() {
         >
           Calendário
         </h1>
+        <button
+          onClick={handleCreateTask}
+          className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors"
+          style={{
+            backgroundColor: state.currentTheme.colors.primary,
+            color: "white",
+          }}
+        >
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Nova Tarefa</span>
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-4 text-sm">
+        <div className="flex items-center space-x-2">
+          <CheckCircle
+            className="w-4 h-4"
+            style={{ color: state.currentTheme.colors.primary }}
+          />
+          <span style={{ color: state.currentTheme.colors.textSecondary }}>
+            Hoje:
+          </span>
+          <span className="font-medium text-black">
+            {getProductivityStats().todayCompleted} concluídas
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Clock
+            className="w-4 h-4"
+            style={{ color: state.currentTheme.colors.primary }}
+          />
+          <span style={{ color: state.currentTheme.colors.textSecondary }}>
+            Pendentes:
+          </span>
+          <span className="font-medium text-black">
+            {getProductivityStats().todayPending}
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <TrendingUp
+            className="w-4 h-4"
+            style={{ color: state.currentTheme.colors.primary }}
+          />
+          <span style={{ color: state.currentTheme.colors.textSecondary }}>
+            Semana:
+          </span>
+          <span className="font-medium text-black">
+            {getProductivityStats().weekProductivity}% produtividade
+          </span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <BarChart3
+            className="w-4 h-4"
+            style={{ color: state.currentTheme.colors.primary }}
+          />
+          <span style={{ color: state.currentTheme.colors.textSecondary }}>
+            Total:
+          </span>
+          <span
+            className="font-medium"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            {getProductivityStats().weekTotal} tarefas
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center justify-between">
@@ -842,6 +985,13 @@ export default function Calendar() {
           </p>
         </div>
       ) : null}
+
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        task={editingTask}
+        onSave={handleSaveTask}
+      />
     </div>
   );
 }
