@@ -234,7 +234,7 @@ export default function FilterControls({
                       onPrioritiesChange([...selectedPriorities, priority]);
                     }
                   }}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all sm:py-0 ${
+                  className={`px-3 md:px-5 py-1 md:py-2 rounded-full text-xs font-medium transition-all sm:py-0 ${
                     isSelected ? "text-white" : "opacity-70 hover:opacity-100"
                   }`}
                   style={{
