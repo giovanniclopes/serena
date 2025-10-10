@@ -6,6 +6,7 @@ import {
   deleteSubtask,
   getSubtasks,
   reorderSubtasks,
+  uncompleteSubtask,
   updateSubtask,
 } from "../../services/apiSubtasks";
 
@@ -91,6 +92,25 @@ export function useCompleteSubtask() {
     onError: (error) => {
       console.error("Erro ao completar subtarefa:", error);
       toast.error("Erro ao completar subtarefa. Tente novamente.");
+    },
+  });
+}
+
+export function useUncompleteSubtask() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: uncompleteSubtask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subtasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Subtarefa desmarcada como concluída!");
+    },
+    onError: (error) => {
+      console.error("Erro ao desmarcar subtarefa como concluída:", error);
+      toast.error(
+        "Erro ao desmarcar subtarefa como concluída. Tente novamente."
+      );
     },
   });
 }

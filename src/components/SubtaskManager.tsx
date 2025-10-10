@@ -24,6 +24,7 @@ import {
   useDeleteSubtask,
   useReorderSubtasks,
   useSubtasks,
+  useUncompleteSubtask,
   useUpdateSubtask,
 } from "../features/subtasks/useSubtasks";
 import type { Task, Theme } from "../types";
@@ -40,12 +41,12 @@ interface SortableSubtaskItemProps {
   onStartEditing: (subtask: Task) => void;
   onUpdateSubtask: (subtaskId: string) => void;
   onDeleteSubtask: (subtaskId: string) => void;
-  onCompleteSubtask: (subtaskId: string) => void;
+  onToggleSubtask: (subtaskId: string) => void;
   onCancelEditing: () => void;
   onEditingTitleChange: (title: string) => void;
   isUpdating: boolean;
   isDeleting: boolean;
-  isCompleting: boolean;
+  isToggling: boolean;
   theme: Theme;
 }
 
@@ -56,12 +57,12 @@ function SortableSubtaskItem({
   onStartEditing,
   onUpdateSubtask,
   onDeleteSubtask,
-  onCompleteSubtask,
+  onToggleSubtask,
   onCancelEditing,
   onEditingTitleChange,
   isUpdating,
   isDeleting,
-  isCompleting,
+  isToggling,
   theme,
 }: SortableSubtaskItemProps) {
   const {
@@ -101,8 +102,8 @@ function SortableSubtaskItem({
       </div>
 
       <button
-        onClick={() => onCompleteSubtask(subtask.id)}
-        disabled={isCompleting}
+        onClick={() => onToggleSubtask(subtask.id)}
+        disabled={isToggling}
         className={`p-3 sm:p-0 rounded border-2 flex items-center justify-center transition-colors subtask-checkbox sm:scale-100 min-h-[44px] min-w-[44px] sm:min-h-5 sm:min-w-5 ${
           subtask.isCompleted
             ? "bg-green-500 border-green-500 text-white"
@@ -182,6 +183,7 @@ export default function SubtaskManager({
   const updateSubtaskMutation = useUpdateSubtask();
   const deleteSubtaskMutation = useDeleteSubtask();
   const completeSubtaskMutation = useCompleteSubtask();
+  const uncompleteSubtaskMutation = useUncompleteSubtask();
   const reorderSubtasksMutation = useReorderSubtasks();
 
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
@@ -276,8 +278,15 @@ export default function SubtaskManager({
     }
   };
 
-  const handleCompleteSubtask = async (subtaskId: string) => {
-    await completeSubtaskMutation.mutateAsync(subtaskId);
+  const handleToggleSubtask = async (subtaskId: string) => {
+    const subtask = subtasks?.find((s) => s.id === subtaskId);
+    if (!subtask) return;
+
+    if (subtask.isCompleted) {
+      await uncompleteSubtaskMutation.mutateAsync(subtaskId);
+    } else {
+      await completeSubtaskMutation.mutateAsync(subtaskId);
+    }
   };
 
   const startEditing = (subtask: Task) => {
@@ -376,12 +385,15 @@ export default function SubtaskManager({
                     onStartEditing={startEditing}
                     onUpdateSubtask={handleUpdateSubtask}
                     onDeleteSubtask={handleDeleteSubtask}
-                    onCompleteSubtask={handleCompleteSubtask}
+                    onToggleSubtask={handleToggleSubtask}
                     onCancelEditing={cancelEditing}
                     onEditingTitleChange={setEditingTitle}
                     isUpdating={updateSubtaskMutation.isPending}
                     isDeleting={deleteSubtaskMutation.isPending}
-                    isCompleting={completeSubtaskMutation.isPending}
+                    isToggling={
+                      completeSubtaskMutation.isPending ||
+                      uncompleteSubtaskMutation.isPending
+                    }
                     theme={state.currentTheme}
                   />
                 ))}
