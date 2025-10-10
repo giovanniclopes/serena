@@ -107,7 +107,7 @@ export default function TaskCard({
         style={{ gap: spacing.sm }}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-start md:gap-3 justify-between">
+          <div className="flex items-start mb-4 md:gap-3 justify-between">
             {isBulkDeleteMode ? (
               <Checkbox
                 checked={isSelected}
@@ -130,9 +130,9 @@ export default function TaskCard({
               />
             )}
             <ResponsiveText
-              variant="h4"
+              variant="h3"
               weight="medium"
-              className={`flex-1 ${task.isCompleted ? "line-through" : ""}`}
+              className={`flex-1 mt-1 leading-tight ${task.isCompleted ? "line-through" : ""}`}
               style={{ color: state.currentTheme.colors.text }}
             >
               {task.title}
@@ -156,35 +156,37 @@ export default function TaskCard({
                   {getPriorityLabel(task.priority)}
                 </Badge>
               </div>
-              {!isBulkDeleteMode && onEdit && (
-                <MobileButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleEdit}
-                  style={{
-                    minWidth: touchTarget,
-                    minHeight: touchTarget,
-                    padding: 0,
-                  }}
-                >
-                  <Edit className={isMobile ? "w-4 h-4" : "w-3 h-3"} />
-                </MobileButton>
-              )}
-              {!isBulkDeleteMode && onDelete && (
-                <MobileButton
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDelete}
-                  style={{
-                    minWidth: touchTarget,
-                    minHeight: touchTarget,
-                    padding: 0,
-                    color: state.currentTheme.colors.error,
-                  }}
-                >
-                  <Trash2 className={isMobile ? "w-4 h-4" : "w-3 h-3"} />
-                </MobileButton>
-              )}
+              <div className="flex items-center gap-0 pl-5">
+                {!isBulkDeleteMode && onEdit && (
+                  <MobileButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleEdit}
+                    style={{
+                      minWidth: touchTarget,
+                      minHeight: touchTarget,
+                      padding: 0,
+                    }}
+                  >
+                    <Edit className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
+                  </MobileButton>
+                )}
+                {!isBulkDeleteMode && onDelete && (
+                  <MobileButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDelete}
+                    style={{
+                      minWidth: touchTarget,
+                      minHeight: touchTarget,
+                      padding: 0,
+                      color: state.currentTheme.colors.error,
+                    }}
+                  >
+                    <Trash2 className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
+                  </MobileButton>
+                )}
+              </div>
             </div>
           </div>
 

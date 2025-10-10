@@ -103,7 +103,7 @@ function SortableSubtaskItem({
       <button
         onClick={() => onCompleteSubtask(subtask.id)}
         disabled={isCompleting}
-        className={`p-3 sm:p-0 rounded border-2 flex items-center justify-center transition-colors subtask-checkbox sm:scale-100 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 ${
+        className={`p-3 sm:p-0 rounded border-2 flex items-center justify-center transition-colors subtask-checkbox sm:scale-100 min-h-[44px] min-w-[44px] sm:min-h-5 sm:min-w-5 ${
           subtask.isCompleted
             ? "bg-green-500 border-green-500 text-white"
             : "border-gray-300 hover:border-green-500"
