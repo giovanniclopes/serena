@@ -37,6 +37,13 @@ export interface Attachment {
   uploadedAt: Date;
 }
 
+export interface TimeEntry {
+  id: string;
+  startedAt: Date;
+  endedAt?: Date;
+  duration: number;
+}
+
 export interface Tag {
   id: string;
   name: string;
@@ -74,6 +81,10 @@ export interface Task {
   completedAt?: Date;
   workspaceId: string;
   order: number;
+  timeEntries: TimeEntry[];
+  totalTimeSpent: number;
+  isTimerRunning: boolean;
+  currentSessionStart?: Date;
   createdAt: Date;
   updatedAt: Date;
 }

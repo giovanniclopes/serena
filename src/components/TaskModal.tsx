@@ -7,6 +7,7 @@ import DateTimeInput from "./DateTimeInput";
 import RecurrenceManager from "./RecurrenceManager";
 import ResponsiveModal from "./ResponsiveModal";
 import SubtaskManager from "./SubtaskManager";
+import TaskTimer from "./TaskTimer";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -49,6 +50,9 @@ export default function TaskModal({
     tags: task?.tags || [],
     attachments: task?.attachments || [],
     recurrence: task?.recurrence,
+    timeEntries: task?.timeEntries || [],
+    totalTimeSpent: task?.totalTimeSpent || 0,
+    isTimerRunning: task?.isTimerRunning || false,
   });
 
   useEffect(() => {
@@ -68,6 +72,9 @@ export default function TaskModal({
         tags: task.tags || [],
         attachments: task.attachments || [],
         recurrence: task.recurrence,
+        timeEntries: task.timeEntries || [],
+        totalTimeSpent: task.totalTimeSpent || 0,
+        isTimerRunning: task.isTimerRunning || false,
       });
     } else {
       setFormData({
@@ -79,6 +86,9 @@ export default function TaskModal({
         tags: [],
         attachments: [],
         recurrence: undefined,
+        timeEntries: [],
+        totalTimeSpent: 0,
+        isTimerRunning: false,
       });
     }
   }, [task]);
@@ -94,6 +104,9 @@ export default function TaskModal({
         tags: [],
         attachments: [],
         recurrence: undefined,
+        timeEntries: [],
+        totalTimeSpent: 0,
+        isTimerRunning: false,
       });
     }
   }, [isOpen, task]);
@@ -118,6 +131,9 @@ export default function TaskModal({
       completedAt: task?.completedAt,
       workspaceId: state.activeWorkspaceId,
       order: task?.order || 0,
+      timeEntries: formData.timeEntries,
+      totalTimeSpent: formData.totalTimeSpent,
+      isTimerRunning: formData.isTimerRunning,
     };
 
     onSave(taskData);
@@ -289,6 +305,12 @@ export default function TaskModal({
           onAttachmentsChange={handleAttachmentsChange}
           workspaceId={state.activeWorkspaceId}
         />
+
+        {task && !task.isCompleted && (
+          <div className="pt-4 border-t">
+            <TaskTimer task={task} variant="full" />
+          </div>
+        )}
 
         {task && (
           <div className="pt-4 border-t">

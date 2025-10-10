@@ -16,6 +16,7 @@ import {
   isRecurringInstance as isRecurringTaskInstance,
 } from "../utils";
 import SubtaskManager from "./SubtaskManager";
+import TaskTimer from "./TaskTimer";
 import { Badge } from "./ui/badge";
 import { Checkbox } from "./ui/checkbox";
 import { MobileButton } from "./ui/mobile-button";
@@ -281,6 +282,10 @@ export default function TaskCard({
                   ))}
                 </div>
               </div>
+            )}
+
+            {!task.isCompleted && !isBulkDeleteMode && (
+              <TaskTimer task={task} variant="compact" />
             )}
           </div>
 

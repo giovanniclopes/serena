@@ -1,5 +1,5 @@
 import { supabase } from "../lib/supabaseClient";
-import type { Task } from "../types";
+import type { Task, TimeEntry } from "../types";
 import { sanitizeTaskIdForAPI } from "../utils/taskUtils";
 
 const formatDateForSupabase = (date: Date | undefined): string | undefined => {
@@ -52,6 +52,17 @@ export async function getTasks(): Promise<Task[]> {
             : undefined,
           workspaceId: subtask.workspace_id,
           order: subtask.order || 0,
+          timeEntries: (subtask.time_entries || []).map((entry: TimeEntry) => ({
+            id: entry.id,
+            startedAt: new Date(entry.startedAt),
+            endedAt: entry.endedAt ? new Date(entry.endedAt) : undefined,
+            duration: entry.duration,
+          })),
+          totalTimeSpent: subtask.total_time_spent || 0,
+          isTimerRunning: subtask.is_timer_running || false,
+          currentSessionStart: subtask.current_session_start
+            ? new Date(subtask.current_session_start)
+            : undefined,
           createdAt: new Date(subtask.created_at),
           updatedAt: new Date(subtask.updated_at),
         })) || [],
@@ -65,6 +76,17 @@ export async function getTasks(): Promise<Task[]> {
       completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
       workspaceId: task.workspace_id,
       order: task.order || 0,
+      timeEntries: (task.time_entries || []).map((entry: TimeEntry) => ({
+        id: entry.id,
+        startedAt: new Date(entry.startedAt),
+        endedAt: entry.endedAt ? new Date(entry.endedAt) : undefined,
+        duration: entry.duration,
+      })),
+      totalTimeSpent: task.total_time_spent || 0,
+      isTimerRunning: task.is_timer_running || false,
+      currentSessionStart: task.current_session_start
+        ? new Date(task.current_session_start)
+        : undefined,
       createdAt: new Date(task.created_at),
       updatedAt: new Date(task.updated_at),
     })) || []
@@ -128,6 +150,10 @@ export async function createTask(
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
     order: data.order || 0,
+    timeEntries: [],
+    totalTimeSpent: 0,
+    isTimerRunning: false,
+    currentSessionStart: undefined,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -153,6 +179,10 @@ export async function updateTask(task: Task): Promise<Task> {
       completed_at: formatDateForSupabase(task.completedAt),
       workspace_id: task.workspaceId,
       order: task.order || 0,
+      time_entries: task.timeEntries,
+      total_time_spent: task.totalTimeSpent,
+      is_timer_running: task.isTimerRunning,
+      current_session_start: formatDateForSupabase(task.currentSessionStart),
       updated_at: formatDateForSupabase(new Date()),
     })
     .eq("id", task.id)
@@ -181,6 +211,17 @@ export async function updateTask(task: Task): Promise<Task> {
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
     order: data.order || 0,
+    timeEntries: (data.time_entries || []).map((entry: TimeEntry) => ({
+      id: entry.id,
+      startedAt: new Date(entry.startedAt),
+      endedAt: entry.endedAt ? new Date(entry.endedAt) : undefined,
+      duration: entry.duration,
+    })),
+    totalTimeSpent: data.total_time_spent || 0,
+    isTimerRunning: data.is_timer_running || false,
+    currentSessionStart: data.current_session_start
+      ? new Date(data.current_session_start)
+      : undefined,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -229,6 +270,17 @@ export async function completeTask(taskId: string): Promise<Task> {
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
     order: data.order || 0,
+    timeEntries: (data.time_entries || []).map((entry: TimeEntry) => ({
+      id: entry.id,
+      startedAt: new Date(entry.startedAt),
+      endedAt: entry.endedAt ? new Date(entry.endedAt) : undefined,
+      duration: entry.duration,
+    })),
+    totalTimeSpent: data.total_time_spent || 0,
+    isTimerRunning: data.is_timer_running || false,
+    currentSessionStart: data.current_session_start
+      ? new Date(data.current_session_start)
+      : undefined,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -268,6 +320,17 @@ export async function uncompleteTask(taskId: string): Promise<Task> {
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
     order: data.order || 0,
+    timeEntries: (data.time_entries || []).map((entry: TimeEntry) => ({
+      id: entry.id,
+      startedAt: new Date(entry.startedAt),
+      endedAt: entry.endedAt ? new Date(entry.endedAt) : undefined,
+      duration: entry.duration,
+    })),
+    totalTimeSpent: data.total_time_spent || 0,
+    isTimerRunning: data.is_timer_running || false,
+    currentSessionStart: data.current_session_start
+      ? new Date(data.current_session_start)
+      : undefined,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -287,4 +350,120 @@ export async function completeAllTasks(taskIds: string[]): Promise<void> {
     console.error("Erro ao completar todas as tarefas:", error);
     throw new Error("Falha ao completar todas as tarefas");
   }
+}
+
+export async function startTaskTimer(taskId: string): Promise<Task> {
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({
+      is_timer_running: true,
+      current_session_start: formatDateForSupabase(new Date()),
+      updated_at: formatDateForSupabase(new Date()),
+    })
+    .eq("id", taskId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Erro ao iniciar cronômetro:", error);
+    throw error;
+  }
+
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    projectId: data.project_id,
+    parentTaskId: data.parent_task_id,
+    subtasks: [],
+    dueDate: data.due_date ? new Date(data.due_date) : undefined,
+    priority: data.priority,
+    reminders: data.reminders || [],
+    recurrence: data.recurrence || undefined,
+    tags: data.tags || [],
+    attachments: data.attachments || [],
+    isCompleted: data.is_completed,
+    completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
+    workspaceId: data.workspace_id,
+    order: data.order || 0,
+    timeEntries: (data.time_entries || []).map((entry: TimeEntry) => ({
+      id: entry.id,
+      startedAt: new Date(entry.startedAt),
+      endedAt: entry.endedAt ? new Date(entry.endedAt) : undefined,
+      duration: entry.duration,
+    })),
+    totalTimeSpent: data.total_time_spent || 0,
+    isTimerRunning: data.is_timer_running || false,
+    currentSessionStart: data.current_session_start
+      ? new Date(data.current_session_start)
+      : undefined,
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
+  };
+}
+
+export async function stopTaskTimer(
+  taskId: string,
+  timeEntry: TimeEntry
+): Promise<Task> {
+  const { data: currentTask } = await supabase
+    .from("tasks")
+    .select("time_entries, total_time_spent")
+    .eq("id", taskId)
+    .single();
+
+  const existingEntries = currentTask?.time_entries || [];
+  const newEntries = [...existingEntries, timeEntry];
+  const newTotalTime =
+    (currentTask?.total_time_spent || 0) + timeEntry.duration;
+
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({
+      is_timer_running: false,
+      current_session_start: null,
+      time_entries: newEntries,
+      total_time_spent: newTotalTime,
+      updated_at: formatDateForSupabase(new Date()),
+    })
+    .eq("id", taskId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Erro ao parar cronômetro:", error);
+    throw error;
+  }
+
+  return {
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    projectId: data.project_id,
+    parentTaskId: data.parent_task_id,
+    subtasks: [],
+    dueDate: data.due_date ? new Date(data.due_date) : undefined,
+    priority: data.priority,
+    reminders: data.reminders || [],
+    recurrence: data.recurrence || undefined,
+    tags: data.tags || [],
+    attachments: data.attachments || [],
+    isCompleted: data.is_completed,
+    completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
+    workspaceId: data.workspace_id,
+    order: data.order || 0,
+    timeEntries: (data.time_entries || []).map((entry: TimeEntry) => ({
+      id: entry.id,
+      startedAt: new Date(entry.startedAt),
+      endedAt: entry.endedAt ? new Date(entry.endedAt) : undefined,
+      duration: entry.duration,
+    })),
+    totalTimeSpent: data.total_time_spent || 0,
+    isTimerRunning: data.is_timer_running || false,
+    currentSessionStart: data.current_session_start
+      ? new Date(data.current_session_start)
+      : undefined,
+    createdAt: new Date(data.created_at),
+    updatedAt: new Date(data.updated_at),
+  };
 }

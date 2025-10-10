@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, CheckCircle, Clock, Target } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Target, Timer } from "lucide-react";
 import { useState } from "react";
 import FloatingActionButton from "../components/FloatingActionButton";
 import NextEventAlert from "../components/NextEventAlert";
@@ -127,18 +127,39 @@ export default function Home() {
     setEditingTask(undefined);
   };
 
+  const totalTimeToday = todayTasks
+    .filter((t) => t.isCompleted)
+    .reduce((sum, task) => sum + (task.totalTimeSpent || 0), 0);
+
+  const formatTimeDisplay = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${seconds}s`;
+  };
+
   const stats = [
     {
       icon: CheckCircle,
       label: "Concluídas Hoje",
       value: todayTasks.filter((t) => t.isCompleted).length,
       color: state.currentTheme.colors.success,
+      displayValue: undefined,
     },
     {
       icon: Clock,
       label: "Pendentes",
       value: todayTasks.filter((t) => !t.isCompleted).length,
       color: state.currentTheme.colors.warning,
+      displayValue: undefined,
+    },
+    {
+      icon: Timer,
+      label: "Tempo Hoje",
+      value: totalTimeToday,
+      color: "#3b82f6",
+      displayValue: formatTimeDisplay(totalTimeToday),
     },
     {
       icon: Target,
@@ -147,12 +168,14 @@ export default function Home() {
         (habit) => habit.workspaceId === state.activeWorkspaceId
       ).length,
       color: state.currentTheme.colors.primary,
+      displayValue: undefined,
     },
     {
       icon: Calendar,
       label: "Próximos 7 dias",
       value: upcomingTasks.length,
       color: state.currentTheme.colors.secondary,
+      displayValue: undefined,
     },
   ];
 
@@ -211,10 +234,12 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <p
-                    className="text-2xl font-bold"
+                    className={`font-bold ${
+                      stat.displayValue ? "text-xl" : "text-2xl"
+                    }`}
                     style={{ color: state.currentTheme.colors.text }}
                   >
-                    {stat.value}
+                    {stat.displayValue || stat.value}
                   </p>
                   <p
                     className="text-xs font-medium"
