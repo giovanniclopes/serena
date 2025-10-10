@@ -18,8 +18,10 @@ interface FilterControlsProps {
   isBulkDeleteMode?: boolean;
   onBulkDeleteToggle?: () => void;
   selectedTasksCount?: number;
-  sortBy?: "priority" | "recent" | "dueDate";
-  onSortChange?: (sort: "priority" | "recent" | "dueDate") => void;
+  sortBy?: "priority" | "recent" | "dueDate" | "date" | "dateNew" | "dateOld";
+  onSortChange?: (
+    sort: "priority" | "recent" | "dueDate" | "date" | "dateNew" | "dateOld"
+  ) => void;
 }
 
 export default function FilterControls({
@@ -81,14 +83,21 @@ export default function FilterControls({
           <div className="relative">
             <button
               onClick={() => {
-                const sortOptions: ("priority" | "recent" | "dueDate")[] = [
-                  "priority",
-                  "recent",
-                  "dueDate",
-                ];
-                const currentIndex = sortOptions.indexOf(sortBy);
-                const nextIndex = (currentIndex + 1) % sortOptions.length;
-                onSortChange(sortOptions[nextIndex]);
+                if (sortBy === "dateNew" || sortBy === "dateOld") {
+                  onSortChange(sortBy === "dateNew" ? "dateOld" : "dateNew");
+                } else {
+                  const sortOptions: (
+                    | "priority"
+                    | "recent"
+                    | "dueDate"
+                    | "date"
+                  )[] = ["priority", "recent", "dueDate", "date"];
+                  const currentIndex = sortOptions.indexOf(
+                    sortBy as "priority" | "recent" | "dueDate" | "date"
+                  );
+                  const nextIndex = (currentIndex + 1) % sortOptions.length;
+                  onSortChange(sortOptions[nextIndex]);
+                }
               }}
               className="p-2 rounded-lg hover:bg-opacity-10 transition-colors"
               style={{
@@ -100,7 +109,13 @@ export default function FilterControls({
                   ? "Prioridade"
                   : sortBy === "recent"
                   ? "Mais recentes"
-                  : "Data de vencimento"
+                  : sortBy === "dueDate"
+                  ? "Data de vencimento"
+                  : sortBy === "date"
+                  ? "Data do evento"
+                  : sortBy === "dateNew"
+                  ? "Data nova (mais próximas)"
+                  : "Data antiga (mais distantes)"
               }`}
             >
               <ArrowUpDown className="w-4 h-4" />

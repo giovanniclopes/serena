@@ -29,6 +29,7 @@ export default function Countdowns() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [sortBy, setSortBy] = useState<"dateNew" | "dateOld">("dateNew");
 
   const { countdowns, isLoading, error } = useCountdowns();
   const createCountdownMutation = useCreateCountdown();
@@ -42,6 +43,14 @@ export default function Countdowns() {
     searchCountdowns(workspaceCountdowns, searchQuery),
     showCompleted
   );
+
+  const sortedCountdowns = [...filteredCountdowns].sort((a, b) => {
+    if (sortBy === "dateNew") {
+      return a.targetDate.getTime() - b.targetDate.getTime();
+    } else {
+      return b.targetDate.getTime() - a.targetDate.getTime();
+    }
+  });
 
   const getTimeRemaining = (targetDate: Date) => {
     const now = new Date();
@@ -210,10 +219,10 @@ export default function Countdowns() {
     );
   };
 
-  const upcomingCountdowns = filteredCountdowns.filter(
+  const upcomingCountdowns = sortedCountdowns.filter(
     (c) => !isOverdue(c.targetDate)
   );
-  const pastCountdowns = filteredCountdowns.filter((c) =>
+  const pastCountdowns = sortedCountdowns.filter((c) =>
     isOverdue(c.targetDate)
   );
 
@@ -269,9 +278,11 @@ export default function Countdowns() {
         onShowCompletedChange={setShowCompleted}
         searchPlaceholder="Buscar countdowns..."
         showCompletedLabel="Mostrar concluídos"
+        sortBy={sortBy}
+        onSortChange={setSortBy}
       />
 
-      {filteredCountdowns.length > 0 ? (
+      {sortedCountdowns.length > 0 ? (
         <div className="space-y-4">
           {upcomingCountdowns.length > 0 && (
             <div>
