@@ -385,39 +385,6 @@ export default function Habits() {
         showCompletedLabel="Mostrar concluídos"
       />
 
-      {filteredHabits.length > 0 && (
-        <div
-          className="p-3 rounded-lg border text-sm"
-          style={{
-            backgroundColor: state.currentTheme.colors.surface,
-            borderColor: state.currentTheme.colors.border,
-          }}
-        >
-          <div
-            className="font-medium mb-1"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            💡 Como usar:
-          </div>
-          <div
-            className="text-xs space-y-1"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            <div>• Clique nos dias para marcar/desmarcar o hábito</div>
-            <div>
-              • <span className="font-medium">Verde sólido:</span> Hábito
-              completo
-            </div>
-            <div>
-              • <span className="font-medium">Verde claro:</span> Hábito parcial
-            </div>
-            <div>
-              • <span className="font-medium">Borda azul:</span> Dia atual
-            </div>
-          </div>
-        </div>
-      )}
-
       {filteredHabits.length > 0 ? (
         <div
           className={`${
