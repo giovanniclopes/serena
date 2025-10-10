@@ -26,6 +26,13 @@ export async function getHabits(): Promise<Habit[]> {
       description: habit.description,
       target: habit.target,
       unit: habit.unit,
+      frequency: habit.frequency || "day",
+      recurrenceType: habit.recurrence_type || "infinite",
+      recurrenceDuration: habit.recurrence_duration,
+      recurrenceDurationUnit: habit.recurrence_duration_unit,
+      recurrenceEndDate: habit.recurrence_end_date
+        ? new Date(habit.recurrence_end_date)
+        : undefined,
       color: habit.color,
       icon: habit.icon,
       category: habit.category,
@@ -55,6 +62,13 @@ export async function createHabit(
       description: habit.description,
       target: habit.target,
       unit: habit.unit,
+      frequency: habit.frequency,
+      recurrence_type: habit.recurrenceType,
+      recurrence_duration: habit.recurrenceDuration,
+      recurrence_duration_unit: habit.recurrenceDurationUnit,
+      recurrence_end_date: habit.recurrenceEndDate
+        ? formatDateForDB(habit.recurrenceEndDate)
+        : null,
       color: habit.color,
       icon: habit.icon,
       category: habit.category,
@@ -76,6 +90,13 @@ export async function createHabit(
     description: data.description,
     target: data.target,
     unit: data.unit,
+    frequency: data.frequency || "day",
+    recurrenceType: data.recurrence_type || "infinite",
+    recurrenceDuration: data.recurrence_duration,
+    recurrenceDurationUnit: data.recurrence_duration_unit,
+    recurrenceEndDate: data.recurrence_end_date
+      ? new Date(data.recurrence_end_date)
+      : undefined,
     color: data.color,
     icon: data.icon,
     category: data.category,
@@ -94,6 +115,13 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
       description: habit.description,
       target: habit.target,
       unit: habit.unit,
+      frequency: habit.frequency,
+      recurrence_type: habit.recurrenceType,
+      recurrence_duration: habit.recurrenceDuration,
+      recurrence_duration_unit: habit.recurrenceDurationUnit,
+      recurrence_end_date: habit.recurrenceEndDate
+        ? formatDateForDB(habit.recurrenceEndDate)
+        : null,
       color: habit.color,
       icon: habit.icon,
       category: habit.category,
@@ -116,6 +144,13 @@ export async function updateHabit(habit: Habit): Promise<Habit> {
     description: data.description,
     target: data.target,
     unit: data.unit,
+    frequency: data.frequency || "day",
+    recurrenceType: data.recurrence_type || "infinite",
+    recurrenceDuration: data.recurrence_duration,
+    recurrenceDurationUnit: data.recurrence_duration_unit,
+    recurrenceEndDate: data.recurrence_end_date
+      ? new Date(data.recurrence_end_date)
+      : undefined,
     color: data.color,
     icon: data.icon,
     category: data.category,

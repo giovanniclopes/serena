@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
-import type { Habit } from "../types";
+import type { Habit, HabitFrequency, HabitRecurrenceType } from "../types";
 import ResponsiveModal from "./ResponsiveModal";
 
 interface HabitModalProps {
@@ -65,6 +65,36 @@ const habitCategories = [
   { value: "outro", label: "Outro", icon: "📝" },
 ];
 
+const frequencyOptions = [
+  { value: "day" as HabitFrequency, label: "por dia" },
+  { value: "week" as HabitFrequency, label: "por semana" },
+  { value: "month" as HabitFrequency, label: "por mês" },
+];
+
+const recurrenceTypeOptions = [
+  {
+    value: "infinite" as HabitRecurrenceType,
+    label: "♾️ Infinito (sempre)",
+    icon: "♾️",
+  },
+  {
+    value: "duration" as HabitRecurrenceType,
+    label: "⏱️ Por período",
+    icon: "⏱️",
+  },
+  {
+    value: "until_date" as HabitRecurrenceType,
+    label: "📅 Até data",
+    icon: "📅",
+  },
+];
+
+const durationUnitOptions = [
+  { value: "days", label: "dia(s)" },
+  { value: "weeks", label: "semana(s)" },
+  { value: "months", label: "mês(es)" },
+];
+
 const habitTemplates = [
   {
     name: "Beber água",
@@ -73,6 +103,8 @@ const habitTemplates = [
     unit: "copo",
     category: "saude",
     color: "#06b6d4",
+    frequency: "day" as HabitFrequency,
+    recurrenceType: "infinite" as HabitRecurrenceType,
   },
   {
     name: "Exercitar-se",
@@ -81,6 +113,8 @@ const habitTemplates = [
     unit: "minuto",
     category: "fitness",
     color: "#10b981",
+    frequency: "day" as HabitFrequency,
+    recurrenceType: "infinite" as HabitRecurrenceType,
   },
   {
     name: "Meditar",
@@ -89,6 +123,8 @@ const habitTemplates = [
     unit: "minuto",
     category: "mental",
     color: "#8b5cf6",
+    frequency: "day" as HabitFrequency,
+    recurrenceType: "infinite" as HabitRecurrenceType,
   },
   {
     name: "Ler",
@@ -97,6 +133,8 @@ const habitTemplates = [
     unit: "minuto",
     category: "aprendizado",
     color: "#3b82f6",
+    frequency: "day" as HabitFrequency,
+    recurrenceType: "infinite" as HabitRecurrenceType,
   },
   {
     name: "Caminhar",
@@ -105,6 +143,8 @@ const habitTemplates = [
     unit: "minuto",
     category: "fitness",
     color: "#84cc16",
+    frequency: "day" as HabitFrequency,
+    recurrenceType: "infinite" as HabitRecurrenceType,
   },
   {
     name: "Dormir cedo",
@@ -113,6 +153,18 @@ const habitTemplates = [
     unit: "vez",
     category: "saude",
     color: "#6366f1",
+    frequency: "day" as HabitFrequency,
+    recurrenceType: "infinite" as HabitRecurrenceType,
+  },
+  {
+    name: "Tomar antibiótico",
+    description: "Medicação temporária",
+    target: 2,
+    unit: "vez",
+    category: "saude",
+    color: "#ec4899",
+    frequency: "day" as HabitFrequency,
+    recurrenceType: "duration" as HabitRecurrenceType,
   },
 ];
 
@@ -128,6 +180,12 @@ export default function HabitModal({
     description: habit?.description || "",
     target: habit?.target || 1,
     unit: habit?.unit || "vez",
+    frequency: (habit?.frequency || "day") as HabitFrequency,
+    recurrenceType: (habit?.recurrenceType ||
+      "infinite") as HabitRecurrenceType,
+    recurrenceDuration: habit?.recurrenceDuration,
+    recurrenceDurationUnit: habit?.recurrenceDurationUnit || "days",
+    recurrenceEndDate: habit?.recurrenceEndDate,
     color: habit?.color || colors[0],
     category: habit?.category || "outro",
   });
@@ -142,6 +200,11 @@ export default function HabitModal({
         description: habit.description || "",
         target: habit.target || 1,
         unit: habit.unit || "vez",
+        frequency: habit.frequency || "day",
+        recurrenceType: habit.recurrenceType || "infinite",
+        recurrenceDuration: habit.recurrenceDuration,
+        recurrenceDurationUnit: habit.recurrenceDurationUnit || "days",
+        recurrenceEndDate: habit.recurrenceEndDate,
         color: habit.color || colors[0],
         category: habit.category || "outro",
       });
@@ -158,6 +221,11 @@ export default function HabitModal({
         description: "",
         target: 1,
         unit: "vez",
+        frequency: "day",
+        recurrenceType: "infinite",
+        recurrenceDuration: undefined,
+        recurrenceDurationUnit: "days",
+        recurrenceEndDate: undefined,
         color: colors[0],
         category: "outro",
       });
@@ -173,6 +241,11 @@ export default function HabitModal({
         description: "",
         target: 1,
         unit: "vez",
+        frequency: "day",
+        recurrenceType: "infinite",
+        recurrenceDuration: undefined,
+        recurrenceDurationUnit: "days",
+        recurrenceEndDate: undefined,
         color: colors[0],
         category: "outro",
       });
@@ -188,6 +261,11 @@ export default function HabitModal({
       description: template.description,
       target: template.target,
       unit: template.unit,
+      frequency: template.frequency,
+      recurrenceType: template.recurrenceType,
+      recurrenceDuration: undefined,
+      recurrenceDurationUnit: "days",
+      recurrenceEndDate: undefined,
       color: template.color,
       category: template.category,
     });
@@ -204,6 +282,20 @@ export default function HabitModal({
       description: formData.description.trim() || undefined,
       target: formData.target,
       unit: formData.unit.trim(),
+      frequency: formData.frequency,
+      recurrenceType: formData.recurrenceType,
+      recurrenceDuration:
+        formData.recurrenceType === "duration"
+          ? formData.recurrenceDuration
+          : undefined,
+      recurrenceDurationUnit:
+        formData.recurrenceType === "duration"
+          ? formData.recurrenceDurationUnit
+          : undefined,
+      recurrenceEndDate:
+        formData.recurrenceType === "until_date"
+          ? formData.recurrenceEndDate
+          : undefined,
       color: formData.color,
       category: formData.category,
       reminders: habit?.reminders || [],
@@ -502,6 +594,179 @@ export default function HabitModal({
               </select>
             )}
           </div>
+        </div>
+
+        <div>
+          <label
+            className="block text-sm font-medium mb-2"
+            style={{ color: state.currentTheme.colors.text }}
+          >
+            Frequência
+          </label>
+          <select
+            value={formData.frequency}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                frequency: e.target.value as HabitFrequency,
+              }))
+            }
+            className="w-full px-3 py-2 rounded-lg border transition-colors"
+            style={{
+              backgroundColor: state.currentTheme.colors.background,
+              borderColor: state.currentTheme.colors.border,
+              color: state.currentTheme.colors.text,
+            }}
+          >
+            {frequencyOptions.map((freq) => (
+              <option key={freq.value} value={freq.value}>
+                {freq.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-3">
+          <div>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Recorrência
+            </label>
+            <div className="grid grid-cols-1 gap-2">
+              {recurrenceTypeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      recurrenceType: option.value,
+                    }))
+                  }
+                  className={`p-3 rounded-lg border-2 transition-all text-left focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+                    formData.recurrenceType === option.value
+                      ? "scale-[1.02]"
+                      : ""
+                  }`}
+                  style={{
+                    backgroundColor:
+                      formData.recurrenceType === option.value
+                        ? state.currentTheme.colors.primary + "20"
+                        : state.currentTheme.colors.background,
+                    borderColor:
+                      formData.recurrenceType === option.value
+                        ? state.currentTheme.colors.primary
+                        : state.currentTheme.colors.border,
+                    color: state.currentTheme.colors.text,
+                  }}
+                >
+                  <span className="text-sm font-medium">{option.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {formData.recurrenceType === "duration" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label
+                  className="block text-xs font-medium mb-1.5"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  Quantidade
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.recurrenceDuration || ""}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      recurrenceDuration: parseInt(e.target.value) || undefined,
+                    }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border transition-colors"
+                  style={{
+                    backgroundColor: state.currentTheme.colors.background,
+                    borderColor: state.currentTheme.colors.border,
+                    color: state.currentTheme.colors.text,
+                  }}
+                  placeholder="Ex: 7"
+                  required
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-xs font-medium mb-1.5"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  Unidade
+                </label>
+                <select
+                  value={formData.recurrenceDurationUnit}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      recurrenceDurationUnit: e.target.value as
+                        | "days"
+                        | "weeks"
+                        | "months",
+                    }))
+                  }
+                  className="w-full px-3 py-2 rounded-lg border transition-colors"
+                  style={{
+                    backgroundColor: state.currentTheme.colors.background,
+                    borderColor: state.currentTheme.colors.border,
+                    color: state.currentTheme.colors.text,
+                  }}
+                >
+                  {durationUnitOptions.map((unit) => (
+                    <option key={unit.value} value={unit.value}>
+                      {unit.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
+          {formData.recurrenceType === "until_date" && (
+            <div>
+              <label
+                className="block text-xs font-medium mb-1.5"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Data Final
+              </label>
+              <input
+                type="date"
+                value={
+                  formData.recurrenceEndDate
+                    ? new Date(formData.recurrenceEndDate)
+                        .toISOString()
+                        .split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    recurrenceEndDate: e.target.value
+                      ? new Date(e.target.value)
+                      : undefined,
+                  }))
+                }
+                className="w-full px-3 py-2 rounded-lg border transition-colors"
+                style={{
+                  backgroundColor: state.currentTheme.colors.background,
+                  borderColor: state.currentTheme.colors.border,
+                  color: state.currentTheme.colors.text,
+                }}
+                required
+              />
+            </div>
+          )}
         </div>
 
         <div>

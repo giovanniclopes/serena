@@ -5,7 +5,7 @@ import {
   isSameDay,
   startOfWeek,
 } from "date-fns";
-import { Edit3, Target } from "lucide-react";
+import { Edit3, Repeat, Target } from "lucide-react";
 import { useState } from "react";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
@@ -33,6 +33,37 @@ import {
   getHabitStreak,
   searchHabits,
 } from "../utils";
+
+const formatRecurrenceText = (habit: Habit): string => {
+  const frequencyMap = {
+    day: "dia",
+    week: "semana",
+    month: "mês",
+  };
+
+  const frequencyText = frequencyMap[habit.frequency];
+
+  if (habit.recurrenceType === "infinite") {
+    return `${habit.target} ${habit.unit} por ${frequencyText} · ♾️ Sempre`;
+  }
+
+  if (habit.recurrenceType === "duration") {
+    const durationMap = {
+      days: "dia(s)",
+      weeks: "semana(s)",
+      months: "mês(es)",
+    };
+    const unit = durationMap[habit.recurrenceDurationUnit || "days"];
+    return `${habit.target} ${habit.unit} por ${frequencyText} · ⏱️ Por ${habit.recurrenceDuration} ${unit}`;
+  }
+
+  if (habit.recurrenceType === "until_date" && habit.recurrenceEndDate) {
+    const endDate = format(new Date(habit.recurrenceEndDate), "dd/MM/yyyy");
+    return `${habit.target} ${habit.unit} por ${frequencyText} · 📅 Até ${endDate}`;
+  }
+
+  return `${habit.target} ${habit.unit} por ${frequencyText}`;
+};
 
 export default function Habits() {
   const { state } = useApp();
@@ -155,21 +186,27 @@ export default function Habits() {
             >
               <Target className="w-4 h-4" style={{ color: habit.color }} />
             </div>
-            <div>
+            <div className="flex-1">
               <h3
                 className="text-sm font-semibold"
                 style={{ color: state.currentTheme.colors.text }}
               >
                 {habit.name}
               </h3>
+              <div className="flex items-center gap-1 mt-0.5">
+                <Repeat
+                  className="w-3 h-3"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                />
+                <p
+                  className="text-xs"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  {formatRecurrenceText(habit)}
+                </p>
+              </div>
               <p
-                className="text-xs"
-                style={{ color: state.currentTheme.colors.textSecondary }}
-              >
-                Meta: {habit.target} {habit.unit}
-              </p>
-              <p
-                className="text-xs"
+                className="text-xs mt-0.5"
                 style={{ color: state.currentTheme.colors.textSecondary }}
               >
                 {habit.category}

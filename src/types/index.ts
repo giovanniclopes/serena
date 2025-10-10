@@ -114,12 +114,21 @@ export interface Workspace {
   updatedAt: Date;
 }
 
+export type HabitFrequency = "day" | "week" | "month";
+
+export type HabitRecurrenceType = "infinite" | "duration" | "until_date";
+
 export interface Habit {
   id: string;
   name: string;
   description?: string;
   target: number;
   unit: string;
+  frequency: HabitFrequency;
+  recurrenceType: HabitRecurrenceType;
+  recurrenceDuration?: number;
+  recurrenceDurationUnit?: "days" | "weeks" | "months";
+  recurrenceEndDate?: Date;
   color: string;
   icon?: string;
   category: string;

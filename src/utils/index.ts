@@ -381,7 +381,16 @@ export function searchHabits(habits: Habit[], query: string): Habit[] {
 export function filterHabits(habits: Habit[], showCompleted: boolean): Habit[] {
   if (showCompleted) return habits;
 
-  return habits.filter(() => {
+  return habits.filter((habit) => {
+    if (habit.recurrenceType === "infinite") {
+      return true;
+    }
+
+    if (habit.recurrenceType === "until_date" && habit.recurrenceEndDate) {
+      const today = startOfDay(new Date());
+      return habit.recurrenceEndDate >= today;
+    }
+
     return true;
   });
 }
