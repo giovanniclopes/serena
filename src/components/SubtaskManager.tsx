@@ -223,6 +223,10 @@ export default function SubtaskManager({
       completedAt: undefined,
       workspaceId,
       order: nextOrder,
+      timeEntries: [],
+      totalTimeSpent: 0,
+      isTimerRunning: false,
+      currentSessionStart: undefined,
     });
 
     setNewSubtaskTitle("");

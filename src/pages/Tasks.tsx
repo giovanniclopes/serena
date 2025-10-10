@@ -235,7 +235,11 @@ export default function Tasks() {
         onBulkDeleteToggle={handleBulkDeleteToggle}
         selectedTasksCount={selectedTasks.size}
         sortBy={sortBy}
-        onSortChange={setSortBy}
+        onSortChange={(sort) => {
+          if (sort === "priority" || sort === "recent" || sort === "dueDate") {
+            setSortBy(sort);
+          }
+        }}
       />
 
       {!isBulkDeleteMode && filteredTasks.some((task) => !task.isCompleted) && (

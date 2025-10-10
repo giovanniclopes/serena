@@ -39,6 +39,10 @@ export async function getSubtasks(taskId: string): Promise<Task[]> {
       : undefined,
     workspaceId: subtask.workspace_id,
     order: subtask.order || 0,
+    timeEntries: [],
+    totalTimeSpent: 0,
+    isTimerRunning: false,
+    currentSessionStart: undefined,
     createdAt: new Date(subtask.created_at),
     updatedAt: new Date(subtask.updated_at),
   }));
@@ -100,6 +104,10 @@ export async function createSubtask(
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
     order: data.order || 0,
+    timeEntries: [],
+    totalTimeSpent: 0,
+    isTimerRunning: false,
+    currentSessionStart: undefined,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -152,6 +160,10 @@ export async function updateSubtask(subtask: Task): Promise<Task> {
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
     order: data.order || 0,
+    timeEntries: [],
+    totalTimeSpent: 0,
+    isTimerRunning: false,
+    currentSessionStart: undefined,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };
@@ -202,6 +214,10 @@ export async function completeSubtask(subtaskId: string): Promise<Task> {
     completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
     workspaceId: data.workspace_id,
     order: data.order || 0,
+    timeEntries: [],
+    totalTimeSpent: 0,
+    isTimerRunning: false,
+    currentSessionStart: undefined,
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };

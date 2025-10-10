@@ -279,7 +279,11 @@ export default function Countdowns() {
         searchPlaceholder="Buscar countdowns..."
         showCompletedLabel="Mostrar concluídos"
         sortBy={sortBy}
-        onSortChange={setSortBy}
+        onSortChange={(sort) => {
+          if (sort === "dateNew" || sort === "dateOld") {
+            setSortBy(sort);
+          }
+        }}
       />
 
       {sortedCountdowns.length > 0 ? (

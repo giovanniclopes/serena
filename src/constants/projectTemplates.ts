@@ -217,6 +217,10 @@ export function createProjectFromTemplate(
       completedAt: undefined,
       workspaceId,
       order: index,
+      timeEntries: [],
+      totalTimeSpent: 0,
+      isTimerRunning: false,
+      currentSessionStart: undefined,
     }));
 
   return { project, tasks };
