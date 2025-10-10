@@ -1,8 +1,9 @@
-import { CheckCircle2, Folder, Target } from "lucide-react";
+import { CheckCircle2, Eye, Folder, Target } from "lucide-react";
 import { useState } from "react";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProjectModal from "../components/ProjectModal";
+import ProjectTasksModal from "../components/ProjectTasksModal";
 import {
   ProjectGridSkeleton,
   ProjectListSkeleton,
@@ -28,7 +29,9 @@ export default function Projects() {
   const deleteProjectMutation = useDeleteProject();
 
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [isProjectTasksModalOpen, setIsProjectTasksModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [viewingProject, setViewingProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -42,6 +45,11 @@ export default function Projects() {
   const handleOpenEditModal = (project: Project) => {
     setEditingProject(project);
     setIsProjectModalOpen(true);
+  };
+
+  const handleOpenViewModal = (project: Project) => {
+    setViewingProject(project);
+    setIsProjectTasksModalOpen(true);
   };
 
   const handleSaveProject = (
@@ -278,10 +286,24 @@ export default function Projects() {
                   </div>
                 )}
 
-                <div className="flex gap-3">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleOpenViewModal(project)}
+                    className="flex-1 py-3 px-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    style={{
+                      backgroundColor: state.currentTheme.colors.primary + "10",
+                      color: state.currentTheme.colors.primary,
+                      border: `1px solid ${state.currentTheme.colors.primary}30`,
+                      opacity: deleteProjectMutation.isPending ? 0.5 : 1,
+                    }}
+                    disabled={deleteProjectMutation.isPending}
+                  >
+                    <Eye className="w-4 h-4 inline mr-1" />
+                    Visualizar
+                  </button>
                   <button
                     onClick={() => handleOpenEditModal(project)}
-                    className="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                    className="flex-1 py-3 px-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                       backgroundColor: state.currentTheme.colors.background,
                       color: state.currentTheme.colors.text,
@@ -295,7 +317,7 @@ export default function Projects() {
                   <button
                     onClick={() => handleDeleteProject(project.id)}
                     disabled={deleteProjectMutation.isPending}
-                    className="flex-1 py-3 px-4 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                    className="flex-1 py-3 px-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                     style={{
                       backgroundColor: state.currentTheme.colors.error + "10",
                       color: state.currentTheme.colors.error,
@@ -357,6 +379,14 @@ export default function Projects() {
           onSave={handleSaveProject}
           project={editingProject || undefined}
           workspaceId={activeWorkspaceId}
+        />
+      )}
+
+      {isProjectTasksModalOpen && (
+        <ProjectTasksModal
+          isOpen={isProjectTasksModalOpen}
+          onClose={() => setIsProjectTasksModalOpen(false)}
+          project={viewingProject}
         />
       )}
 

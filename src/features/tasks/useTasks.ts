@@ -50,14 +50,14 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Tarefa atualizada com sucesso!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error("Erro ao atualizar tarefa:", error);
 
       if (
         error?.message?.includes("subtasks") ||
         error?.message?.includes("pendentes") ||
         error?.message?.includes("pending") ||
-        error?.code === "P0001"
+        error?.message?.includes("P0001")
       ) {
         toast.error("Ação Bloqueada", {
           description:
@@ -119,16 +119,17 @@ export function useCompleteTask() {
     mutationFn: completeTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Tarefa concluída com sucesso!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error("Erro ao completar tarefa:", error);
 
       if (
         error?.message?.includes("subtasks") ||
         error?.message?.includes("pendentes") ||
         error?.message?.includes("pending") ||
-        error?.code === "P0001"
+        error?.message?.includes("P0001")
       ) {
         toast.error("Ação Bloqueada", {
           description:
@@ -150,9 +151,10 @@ export function useUncompleteTask() {
     mutationFn: uncompleteTask,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success("Tarefa marcada como não concluída!");
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       console.error("Erro ao desmarcar tarefa como concluída:", error);
       toast.error("Erro ao desmarcar tarefa. Tente novamente.");
     },
