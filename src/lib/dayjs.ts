@@ -33,9 +33,17 @@ export const createBrazilDateTime = (
   const month = date.getMonth();
   const day = date.getDate();
 
-  const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, 0, 0));
+  const brazilDate = dayjs()
+    .tz(BRAZIL_TIMEZONE)
+    .year(year)
+    .month(month)
+    .date(day)
+    .hour(hours)
+    .minute(minutes)
+    .second(0)
+    .millisecond(0);
 
-  return utcDate;
+  return brazilDate.toDate();
 };
 
 export const debugTimezone = (date: Date, label: string) => {

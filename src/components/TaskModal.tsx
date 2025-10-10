@@ -38,7 +38,13 @@ export default function TaskModal({
     title: task?.title || "",
     description: task?.description || "",
     projectId: task?.projectId || "",
-    dueDate: task?.dueDate ? task.dueDate.toISOString().slice(0, 16) : "",
+    dueDate: task?.dueDate
+      ? new Date(
+          task.dueDate.getTime() - task.dueDate.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .slice(0, 16)
+      : "",
     priority: task?.priority || ("P3" as Priority),
     tags: task?.tags || [],
     attachments: task?.attachments || [],
@@ -51,7 +57,13 @@ export default function TaskModal({
         title: task.title || "",
         description: task.description || "",
         projectId: task.projectId || "",
-        dueDate: task.dueDate ? task.dueDate.toISOString().slice(0, 16) : "",
+        dueDate: task.dueDate
+          ? new Date(
+              task.dueDate.getTime() - task.dueDate.getTimezoneOffset() * 60000
+            )
+              .toISOString()
+              .slice(0, 16)
+          : "",
         priority: task.priority || ("P3" as Priority),
         tags: task.tags || [],
         attachments: task.attachments || [],
@@ -72,7 +84,7 @@ export default function TaskModal({
   }, [task]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!isOpen && !task) {
       setFormData({
         title: "",
         description: "",
@@ -84,7 +96,7 @@ export default function TaskModal({
         recurrence: undefined,
       });
     }
-  }, [isOpen]);
+  }, [isOpen, task]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

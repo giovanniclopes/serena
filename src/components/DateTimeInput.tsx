@@ -19,13 +19,18 @@ export default function DateTimeInput({
 }: DateTimeInputProps) {
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      onChange(date.toISOString().slice(0, 16));
+      const adjustedDate = new Date(
+        date.getTime() - date.getTimezoneOffset() * 60000
+      );
+      onChange(adjustedDate.toISOString().slice(0, 16));
     } else {
       onChange("");
     }
   };
 
-  const dateValue = value ? new Date(value) : undefined;
+  const dateValue = value
+    ? new Date(value + (value.includes("T") ? "" : "T00:00:00"))
+    : undefined;
 
   return (
     <DateTimePicker
