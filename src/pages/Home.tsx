@@ -127,9 +127,10 @@ export default function Home() {
     setEditingTask(undefined);
   };
 
-  const totalTimeToday = todayTasks
-    .filter((t) => t.isCompleted)
-    .reduce((sum, task) => sum + (task.totalTimeSpent || 0), 0);
+  const totalTimeToday = filteredTasks.reduce(
+    (sum, task) => sum + (task.totalTimeSpent || 0),
+    0
+  );
 
   const formatTimeDisplay = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
@@ -156,7 +157,7 @@ export default function Home() {
     },
     {
       icon: Timer,
-      label: "Tempo Hoje",
+      label: "Tempo Total",
       value: totalTimeToday,
       color: "#3b82f6",
       displayValue: formatTimeDisplay(totalTimeToday),
