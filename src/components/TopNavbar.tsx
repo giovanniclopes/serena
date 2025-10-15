@@ -120,7 +120,14 @@ export default function TopNavbar({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {getCurrentTime()}
+              <div className="flex flex-col items-center">
+                <span className="text-xl font-bold tracking-wide">
+                  {getCurrentTime()}
+                </span>
+                <span className="text-xs font-light opacity-75 capitalize">
+                  {new Date().toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
+                </span>
+              </div>
             </motion.span>
           )}
         </div>
