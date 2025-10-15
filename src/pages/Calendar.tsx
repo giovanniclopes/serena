@@ -33,8 +33,10 @@ import { useApp } from "../context/AppContext";
 import {
   useCompleteTask,
   useCreateTask,
+  useDeleteTask,
   useTasks,
   useUncompleteTask,
+  useUpdateTask,
 } from "../features/tasks/useTasks";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
@@ -56,6 +58,8 @@ export default function Calendar() {
   const completeTaskMutation = useCompleteTask();
   const uncompleteTaskMutation = useUncompleteTask();
   const createTaskMutation = useCreateTask();
+  const updateTaskMutation = useUpdateTask();
+  const deleteTaskMutation = useDeleteTask();
   const { markInstanceComplete } = useRecurringTasks();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
@@ -63,6 +67,8 @@ export default function Calendar() {
   const [showCompleted, setShowCompleted] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   const monthStart = startOfMonth(currentDate);
@@ -132,20 +138,54 @@ export default function Calendar() {
     setIsTaskModalOpen(true);
   };
 
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    setTaskToDelete(taskId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteTask = () => {
+    if (taskToDelete) {
+      deleteTaskMutation.mutate(taskToDelete);
+      setShowDeleteModal(false);
+      setTaskToDelete(null);
+    }
+  };
+
   const handleSaveTask = (
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
   ) => {
-    createTaskMutation.mutate(
-      {
-        ...taskData,
-        workspaceId: state.activeWorkspaceId,
-      },
-      {
-        onSuccess: () => {
-          setIsTaskModalOpen(false);
+    if (editingTask) {
+      updateTaskMutation.mutate(
+        {
+          ...editingTask,
+          ...taskData,
+          updatedAt: new Date(),
         },
-      }
-    );
+        {
+          onSuccess: () => {
+            setIsTaskModalOpen(false);
+            setEditingTask(undefined);
+          },
+        }
+      );
+    } else {
+      createTaskMutation.mutate(
+        {
+          ...taskData,
+          workspaceId: state.activeWorkspaceId,
+        },
+        {
+          onSuccess: () => {
+            setIsTaskModalOpen(false);
+          },
+        }
+      );
+    }
   };
 
   const getTasksForSelectedDate = () => {
@@ -521,6 +561,8 @@ export default function Calendar() {
                     task={task}
                     onComplete={handleCompleteTask}
                     onUncomplete={handleUncompleteTask}
+                    onEdit={handleEditTask}
+                    onDelete={handleDeleteTask}
                     onRecurringToggle={
                       isRecurring ? handleRecurringTaskToggle : undefined
                     }
@@ -936,6 +978,8 @@ export default function Calendar() {
                     task={task}
                     onComplete={handleCompleteTask}
                     onUncomplete={handleUncompleteTask}
+                    onEdit={handleEditTask}
+                    onDelete={handleDeleteTask}
                     onRecurringToggle={
                       isRecurring ? handleRecurringTaskToggle : undefined
                     }
@@ -992,6 +1036,56 @@ export default function Calendar() {
         task={editingTask}
         onSave={handleSaveTask}
       />
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+            style={{ backgroundColor: state.currentTheme.colors.surface }}
+          >
+            <h3
+              className="text-lg font-semibold mb-4"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Excluir tarefa
+            </h3>
+            <p
+              className="text-sm mb-6"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser
+              desfeita.
+            </p>
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setTaskToDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                style={{
+                  backgroundColor: state.currentTheme.colors.surface,
+                  color: state.currentTheme.colors.textSecondary,
+                  border: `1px solid ${state.currentTheme.colors.border}`,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteTask}
+                disabled={deleteTaskMutation.isPending}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                style={{
+                  backgroundColor: state.currentTheme.colors.error,
+                  color: "white",
+                }}
+              >
+                {deleteTaskMutation.isPending ? "Excluindo..." : "Excluir"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
