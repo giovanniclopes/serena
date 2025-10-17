@@ -1,5 +1,6 @@
 import { List } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
+import { toast } from "sonner";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import {
@@ -23,7 +24,6 @@ import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
-import { toast } from "sonner";
 
 export default function Tasks() {
   const { state } = useApp();
@@ -43,7 +43,7 @@ export default function Tasks() {
     "priority"
   );
 
-  const { tasks, isLoading, error } = useTasks();
+  const { tasks: rawTasks, isLoading, error } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
@@ -52,7 +52,20 @@ export default function Tasks() {
   const deleteTaskMutation = useDeleteTask();
   const bulkDeleteTasksMutation = useBulkDeleteTasks();
   const completeAllTasksMutation = useCompleteAllTasks();
-  const { markInstanceComplete } = useRecurringTasks();
+  const { markInstanceComplete, getInstancesForDate } = useRecurringTasks();
+
+  const [refreshKey, setRefreshKey] = React.useState(0);
+
+  // Processar tarefas para incluir instâncias recorrentes
+  const tasks = React.useMemo(() => {
+    if (!rawTasks) return [];
+
+    const today = new Date();
+    const nonRecurringTasks = rawTasks.filter((task) => !task.recurrence);
+    const recurringInstances = getInstancesForDate(rawTasks, today);
+
+    return [...nonRecurringTasks, ...recurringInstances];
+  }, [rawTasks, getInstancesForDate, refreshKey]);
 
   const sortTasks = (tasks: Task[]) => {
     return [...tasks].sort((a, b) => {
@@ -105,6 +118,7 @@ export default function Tasks() {
     isCompleted: boolean
   ) => {
     markInstanceComplete(taskId, date, isCompleted);
+    setRefreshKey((prev) => prev + 1);
 
     if (isCompleted) {
       toast.success("Tarefa recorrente concluída com sucesso!");

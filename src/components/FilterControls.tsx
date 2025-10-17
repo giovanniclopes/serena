@@ -170,15 +170,28 @@ export default function FilterControls({
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => onShowCompletedChange(!showCompleted)}
-            className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-colors ${
-              showCompleted ? "text-white" : ""
+            className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 hover:scale-105 ${
+              showCompleted ? "text-white shadow-md" : "hover:bg-opacity-10"
             }`}
             style={{
               backgroundColor: showCompleted
                 ? state.currentTheme.colors.primary
-                : state.currentTheme.colors.surface,
-              color: showCompleted ? "white" : state.currentTheme.colors.text,
+                : "transparent",
+              color: showCompleted
+                ? "white"
+                : state.currentTheme.colors.primary,
               border: `1px solid ${state.currentTheme.colors.primary}`,
+            }}
+            onMouseEnter={(e) => {
+              if (!showCompleted) {
+                e.currentTarget.style.backgroundColor =
+                  state.currentTheme.colors.primary + "10";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!showCompleted) {
+                e.currentTarget.style.backgroundColor = "transparent";
+              }
             }}
           >
             <input
@@ -199,17 +212,30 @@ export default function FilterControls({
           {onBulkDeleteToggle && (
             <button
               onClick={onBulkDeleteToggle}
-              className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-colors ${
-                isBulkDeleteMode ? "text-white" : ""
+              className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 hover:scale-105 ${
+                isBulkDeleteMode
+                  ? "text-white shadow-md"
+                  : "hover:bg-opacity-10"
               }`}
               style={{
                 backgroundColor: isBulkDeleteMode
                   ? state.currentTheme.colors.error
-                  : state.currentTheme.colors.surface,
+                  : "transparent",
                 color: isBulkDeleteMode
                   ? "white"
-                  : state.currentTheme.colors.text,
+                  : state.currentTheme.colors.error,
                 border: `1px solid ${state.currentTheme.colors.error}`,
+              }}
+              onMouseEnter={(e) => {
+                if (!isBulkDeleteMode) {
+                  e.currentTarget.style.backgroundColor =
+                    state.currentTheme.colors.error + "10";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isBulkDeleteMode) {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                }
               }}
             >
               <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />

@@ -9,7 +9,6 @@ import "./App.css";
 import AppUpdateNotification from "./components/AppUpdateNotification";
 import AppWithOnboarding from "./components/AppWithOnboarding";
 import LoadingSpinner from "./components/LoadingSpinner";
-import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AppProvider } from "./context/AppContext";
 import { AuthProvider } from "./context/AuthContext";
@@ -134,7 +133,6 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           </Routes>
-          <PWAInstallPrompt />
           <AppUpdateNotification />
         </Router>
       </AppProvider>
