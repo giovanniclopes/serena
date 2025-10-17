@@ -31,6 +31,7 @@ export async function getShoppingLists(
         name,
         quantity,
         notes,
+        price,
         is_purchased,
         purchased_at,
         order_index,
@@ -72,6 +73,7 @@ export async function getShoppingLists(
           name: item.name,
           quantity: item.quantity,
           notes: item.notes,
+          price: item.price,
           isPurchased: item.is_purchased,
           purchasedAt: item.purchased_at
             ? new Date(item.purchased_at)
@@ -224,6 +226,7 @@ export async function createShoppingListItem(
       name: item.name,
       quantity: item.quantity || "1",
       notes: item.notes,
+      price: item.price,
       order_index: item.orderIndex || 0,
       workspace_id: item.workspaceId,
       user_id: user.id, // Adicionar user_id explicitamente
@@ -242,6 +245,7 @@ export async function createShoppingListItem(
     name: data.name,
     quantity: data.quantity,
     notes: data.notes,
+    price: data.price,
     isPurchased: data.is_purchased,
     purchasedAt: data.purchased_at ? new Date(data.purchased_at) : undefined,
     orderIndex: data.order_index,
@@ -268,6 +272,7 @@ export async function updateShoppingListItem(
     name: updates.name,
     quantity: updates.quantity,
     notes: updates.notes,
+    price: updates.price,
     order_index: updates.orderIndex,
     updated_at: new Date().toISOString(),
   };
@@ -298,6 +303,7 @@ export async function updateShoppingListItem(
     name: data.name,
     quantity: data.quantity,
     notes: data.notes,
+    price: data.price,
     isPurchased: data.is_purchased,
     purchasedAt: data.purchased_at ? new Date(data.purchased_at) : undefined,
     orderIndex: data.order_index,

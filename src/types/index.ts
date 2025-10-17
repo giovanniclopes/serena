@@ -270,6 +270,7 @@ export interface ShoppingListItem {
   name: string;
   quantity: string;
   notes?: string;
+  price?: number;
   isPurchased: boolean;
   purchasedAt?: Date;
   actualPrice?: number;
@@ -301,6 +302,7 @@ export interface CreateShoppingListItemData {
   name: string;
   quantity?: string;
   notes?: string;
+  price?: number;
   orderIndex?: number;
   workspaceId: string;
 }
@@ -309,6 +311,7 @@ export interface UpdateShoppingListItemData {
   name?: string;
   quantity?: string;
   notes?: string;
+  price?: number;
   isPurchased?: boolean;
   actualPrice?: number;
   orderIndex?: number;

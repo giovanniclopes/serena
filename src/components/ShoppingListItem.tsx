@@ -20,6 +20,7 @@ export default function ShoppingListItem({
 }: ShoppingListItemProps) {
   const { state } = useApp();
   const [showActions, setShowActions] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const toggleItemMutation = useToggleShoppingListItem();
   const deleteItemMutation = useDeleteShoppingListItem();
@@ -32,7 +33,16 @@ export default function ShoppingListItem({
   };
 
   const handleDelete = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = () => {
     deleteItemMutation.mutate(item.id);
+    setShowDeleteConfirm(false);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   return (
@@ -88,15 +98,26 @@ export default function ShoppingListItem({
               {item.quantity}
             </span>
           )}
+          {item.notes && (
+            <p
+              className="text-sm mt-1"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              {item.notes}
+            </p>
+          )}
+          {item.price && (
+            <span
+              className="text-xs font-semibold px-2 py-1 rounded-full"
+              style={{
+                backgroundColor: "#fce7f3",
+                color: "#be185d",
+              }}
+            >
+              R$ {item.price.toFixed(2)}
+            </span>
+          )}
         </div>
-        {item.notes && (
-          <p
-            className="text-sm mt-1"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            {item.notes}
-          </p>
-        )}
       </div>
 
       {/* Ações */}
@@ -125,6 +146,69 @@ export default function ShoppingListItem({
           >
             <Trash2 className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {/* Popup de Confirmação de Exclusão */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-white rounded-lg w-full max-w-sm"
+            style={{ backgroundColor: state.currentTheme.colors.surface }}
+          >
+            {/* Header */}
+            <div
+              className="flex items-center justify-between p-4 border-b"
+              style={{ borderColor: state.currentTheme.colors.border }}
+            >
+              <h3
+                className="text-lg font-semibold"
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                Confirmar Exclusão
+              </h3>
+            </div>
+
+            {/* Content */}
+            <div className="p-4">
+              <p
+                className="text-sm"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Tem certeza que deseja excluir o item{" "}
+                <strong>"{item.name}"</strong>? Esta ação não pode ser desfeita.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div
+              className="flex space-x-3 p-4 border-t"
+              style={{ borderColor: state.currentTheme.colors.border }}
+            >
+              <button
+                onClick={cancelDelete}
+                className="flex-1 px-4 py-2 rounded-lg font-medium transition-colors"
+                style={{
+                  backgroundColor: state.currentTheme.colors.background,
+                  color: state.currentTheme.colors.textSecondary,
+                  border: `1px solid ${state.currentTheme.colors.border}`,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={deleteItemMutation.isPending}
+                className="flex-1 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                style={{
+                  backgroundColor: state.currentTheme.colors.error,
+                  color: "white",
+                }}
+              >
+                {deleteItemMutation.isPending ? "Excluindo..." : "Excluir"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

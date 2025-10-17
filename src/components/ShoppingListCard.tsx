@@ -38,6 +38,11 @@ export default function ShoppingListCard({
   const progressPercentage =
     totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
+  // Calcular total dos itens com preço
+  const totalPrice = list.items.reduce((sum, item) => {
+    return sum + (item.price || 0);
+  }, 0);
+
   const handleAddItem = () => {
     setEditingItem(undefined);
     setIsItemModalOpen(true);
@@ -52,6 +57,7 @@ export default function ShoppingListCard({
     name: string;
     quantity?: string;
     notes?: string;
+    price?: number;
   }) => {
     if (editingItem) {
       // Atualizar item existente
@@ -61,6 +67,7 @@ export default function ShoppingListCard({
           name: itemData.name,
           quantity: itemData.quantity,
           notes: itemData.notes,
+          price: itemData.price,
         },
       });
     } else {
@@ -70,6 +77,7 @@ export default function ShoppingListCard({
         name: itemData.name,
         quantity: itemData.quantity,
         notes: itemData.notes,
+        price: itemData.price,
         workspaceId: list.workspaceId,
       });
     }
@@ -149,6 +157,26 @@ export default function ShoppingListCard({
             </button>
           </div>
         </div>
+
+        {/* Total */}
+        {totalPrice > 0 && (
+          <div className="mb-3">
+            <div
+              className="inline-block py-1 px-3 rounded-lg"
+              style={{
+                backgroundColor: "#f8f9fa",
+                border: "1px solid #e9ecef",
+              }}
+            >
+              <span
+                className="text-sm font-semibold"
+                style={{ color: "#212529" }}
+              >
+                Total: R$ {totalPrice.toFixed(2)}
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Progress Bar */}
         {totalItems > 0 && (

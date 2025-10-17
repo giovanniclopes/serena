@@ -196,6 +196,7 @@ CREATE TABLE public.shopping_list_items (
   name text NOT NULL,
   quantity text DEFAULT '1',
   notes text,
+  price DECIMAL(10,2) DEFAULT NULL,
   is_purchased boolean NOT NULL DEFAULT false,
   purchased_at timestamptz,
   order_index integer NOT NULL DEFAULT 0,

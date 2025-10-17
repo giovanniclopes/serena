@@ -6,7 +6,12 @@ import type { ShoppingListItem } from "../types";
 interface ShoppingListItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: { name: string; quantity?: string; notes?: string }) => void;
+  onSave: (data: {
+    name: string;
+    quantity?: string;
+    notes?: string;
+    price?: number;
+  }) => void;
   listId: string;
   item?: ShoppingListItem;
 }
@@ -21,6 +26,8 @@ export default function ShoppingListItemModal({
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [notes, setNotes] = useState("");
+  const [price, setPrice] = useState("");
+  const [priceDisplay, setPriceDisplay] = useState("");
 
   // Preencher campos quando editando
   useEffect(() => {
@@ -28,20 +35,62 @@ export default function ShoppingListItemModal({
       setName(item.name);
       setQuantity(item.quantity || "");
       setNotes(item.notes || "");
+      if (item.price) {
+        setPrice(item.price.toString());
+        // Formatar o preço existente para exibição
+        const formatted = item.price.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        });
+        setPriceDisplay(formatted);
+      } else {
+        setPrice("");
+        setPriceDisplay("");
+      }
     } else {
       setName("");
       setQuantity("");
       setNotes("");
+      setPrice("");
+      setPriceDisplay("");
     }
   }, [item, isOpen]);
 
+  const handlePriceChange = (value: string) => {
+    // Remove tudo que não é dígito
+    const numericValue = value.replace(/\D/g, "");
+
+    // Se não há dígitos, limpa o campo
+    if (!numericValue) {
+      setPriceDisplay("");
+      setPrice("");
+      return;
+    }
+
+    // Converte para centavos e depois para reais
+    const cents = parseInt(numericValue);
+    const reais = cents / 100;
+
+    // Formata para exibição
+    const formatted = reais.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+
+    setPriceDisplay(formatted);
+    setPrice(reais.toString());
+  };
+
   const handleSave = () => {
     if (!name.trim()) return;
+
+    const priceValue = price.trim() ? parseFloat(price.trim()) : undefined;
 
     onSave({
       name: name.trim(),
       quantity: quantity.trim() || undefined,
       notes: notes.trim() || undefined,
+      price: priceValue,
     });
 
     // Reset form apenas se não estiver editando
@@ -49,6 +98,8 @@ export default function ShoppingListItemModal({
       setName("");
       setQuantity("");
       setNotes("");
+      setPrice("");
+      setPriceDisplay("");
     }
   };
 
@@ -59,6 +110,8 @@ export default function ShoppingListItemModal({
       setName("");
       setQuantity("");
       setNotes("");
+      setPrice("");
+      setPriceDisplay("");
     }
   };
 
@@ -133,6 +186,31 @@ export default function ShoppingListItemModal({
               value={quantity}
               onChange={(e) => setQuantity(e.target.value)}
               placeholder="Ex: 2 unidades, 1kg, 500ml..."
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors"
+              style={
+                {
+                  backgroundColor: state.currentTheme.colors.background,
+                  borderColor: state.currentTheme.colors.border,
+                  color: state.currentTheme.colors.text,
+                  "--tw-ring-color": state.currentTheme.colors.primary,
+                } as React.CSSProperties
+              }
+            />
+          </div>
+
+          {/* Preço */}
+          <div>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Preço
+            </label>
+            <input
+              type="text"
+              value={priceDisplay}
+              onInput={(e) => handlePriceChange(e.currentTarget.value)}
+              placeholder="Ex: R$ 15,50"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors"
               style={
                 {
