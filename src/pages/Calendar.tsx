@@ -16,6 +16,7 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
+  ArrowUpDown,
   BarChart3,
   Calendar as CalendarIcon,
   CheckCircle,
@@ -43,7 +44,12 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Task } from "../types";
-import { filterTasks, getPriorityColor, getTasksForDate } from "../utils";
+import {
+  filterTasks,
+  getPriorityColor,
+  getTasksForDate,
+  sortTasksByPriority,
+} from "../utils";
 
 type ViewMode = "month" | "week" | "day";
 
@@ -61,6 +67,7 @@ export default function Calendar() {
   const [viewMode, setViewMode] = useState<ViewMode>("month");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
+  const [sortByPriority, setSortByPriority] = useState(true);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -203,13 +210,25 @@ export default function Calendar() {
         !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
     );
     const dateTasks = getTasksForDate(workspaceTasks, selectedDate);
-    const filteredTasks = filterTasks(dateTasks, {
-      id: "default",
-      name: "Filtro Padrão",
-      workspaceId: state.activeWorkspaceId,
-      isCompleted: showCompleted ? undefined : false,
-    });
-    return filteredTasks;
+    const filteredTasks = filterTasks(
+      dateTasks,
+      {
+        id: "default",
+        name: "Filtro Padrão",
+        workspaceId: state.activeWorkspaceId,
+        isCompleted: showCompleted ? undefined : false,
+      },
+      false
+    );
+
+    if (sortByPriority) {
+      return sortTasksByPriority(filteredTasks);
+    } else {
+      return filteredTasks.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    }
   };
 
   const getDayTasks = (date: Date) => {
@@ -1138,16 +1157,38 @@ export default function Calendar() {
             >
               {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
             </h3>
-            <button
-              onClick={() => setSelectedDate(null)}
-              className="text-sm px-3 py-1 rounded-full transition-colors"
-              style={{
-                backgroundColor: state.currentTheme.colors.primary + "20",
-                color: state.currentTheme.colors.primary,
-              }}
-            >
-              Fechar
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSortByPriority(!sortByPriority)}
+                className="flex items-center gap-1 text-sm px-3 py-1 rounded-full transition-colors"
+                style={{
+                  backgroundColor: sortByPriority
+                    ? state.currentTheme.colors.primary + "20"
+                    : state.currentTheme.colors.surface + "50",
+                  color: sortByPriority
+                    ? state.currentTheme.colors.primary
+                    : state.currentTheme.colors.textSecondary,
+                }}
+                title={
+                  sortByPriority
+                    ? "Ordenar por data de criação"
+                    : "Ordenar por prioridade"
+                }
+              >
+                <ArrowUpDown size={14} />
+                {sortByPriority ? "Prioridade" : "Data"}
+              </button>
+              <button
+                onClick={() => setSelectedDate(null)}
+                className="text-sm px-3 py-1 rounded-full transition-colors"
+                style={{
+                  backgroundColor: state.currentTheme.colors.primary + "20",
+                  color: state.currentTheme.colors.primary,
+                }}
+              >
+                Fechar
+              </button>
+            </div>
           </div>
 
           {getTasksForSelectedDate().length > 0 ? (
