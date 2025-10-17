@@ -13,8 +13,8 @@ import {
   formatTime,
   getPriorityColor,
   getPriorityLabel,
-  isRecurringInstance as isRecurringTaskInstance,
 } from "../utils";
+import { extractOriginalTaskId } from "../utils/taskUtils";
 import SubtaskManager from "./SubtaskManager";
 import TaskTimer from "./TaskTimer";
 import { Badge } from "./ui/badge";
@@ -62,10 +62,11 @@ export default function TaskCard({
   const taskTags = state.tags.filter((tag) => task.tags.includes(tag.id));
 
   const handleToggleComplete = () => {
-    const isRecurring = isRecurringTaskInstance(task.id);
+    const isRecurringTask = task.recurrence !== undefined;
 
-    if (isRecurring && onRecurringToggle && task.dueDate) {
-      onRecurringToggle(task.id, task.dueDate, !task.isCompleted);
+    if (isRecurringTask && onRecurringToggle && task.dueDate) {
+      const originalTaskId = extractOriginalTaskId(task.id);
+      onRecurringToggle(originalTaskId, task.dueDate, !task.isCompleted);
     } else if (task.isCompleted) {
       if (onUncomplete) {
         onUncomplete(task.id);
@@ -132,7 +133,9 @@ export default function TaskCard({
             <ResponsiveText
               variant="h3"
               weight="medium"
-              className={`flex-1 mt-1 leading-tight ${task.isCompleted ? "line-through" : ""}`}
+              className={`flex-1 mt-1 leading-tight ${
+                task.isCompleted ? "line-through" : ""
+              }`}
               style={{ color: state.currentTheme.colors.text }}
             >
               {task.title}
@@ -332,7 +335,7 @@ export default function TaskCard({
           )}
 
           <div style={{ marginTop: spacing.sm }}>
-            {isRecurringTaskInstance(task.id) ? (
+            {task.recurrence !== undefined ? (
               <div className="space-y-2">
                 {task.subtasks && task.subtasks.length > 0 && (
                   <div>

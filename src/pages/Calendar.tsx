@@ -26,6 +26,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { CalendarSkeleton } from "../components/skeletons/CalendarSkeleton";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
@@ -42,12 +43,7 @@ import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Task } from "../types";
-import {
-  filterTasks,
-  getPriorityColor,
-  getTasksForDate,
-  isRecurringInstance,
-} from "../utils";
+import { filterTasks, getPriorityColor, getTasksForDate } from "../utils";
 
 type ViewMode = "month" | "week" | "day";
 
@@ -130,7 +126,19 @@ export default function Calendar() {
     isCompleted: boolean
   ) => {
     markInstanceComplete(taskId, date, isCompleted);
+
+    if (isCompleted) {
+      toast.success("Tarefa recorrente concluída com sucesso!");
+    } else {
+      toast.success("Tarefa recorrente marcada como não concluída!");
+    }
+
+    // Forçar re-render do calendário
     setCurrentDate(new Date(currentDate));
+    // Se a data selecionada for a mesma da tarefa, forçar atualização
+    if (selectedDate && isSameDay(selectedDate, date)) {
+      setSelectedDate(new Date(selectedDate));
+    }
   };
 
   const handleCreateTask = () => {
@@ -553,8 +561,6 @@ export default function Calendar() {
           {dayTasks.length > 0 ? (
             <div className="space-y-2">
               {dayTasks.map((task) => {
-                const isRecurring = isRecurringInstance(task.id);
-
                 return (
                   <TaskCard
                     key={task.id}
@@ -563,9 +569,7 @@ export default function Calendar() {
                     onUncomplete={handleUncompleteTask}
                     onEdit={handleEditTask}
                     onDelete={handleDeleteTask}
-                    onRecurringToggle={
-                      isRecurring ? handleRecurringTaskToggle : undefined
-                    }
+                    onRecurringToggle={handleRecurringTaskToggle}
                     showProject={true}
                     showDate={false}
                   />
@@ -1069,7 +1073,14 @@ export default function Calendar() {
 
                 {/* Ícone */}
                 <span className="text-sm">
-                  {(modeLabels[mode as keyof typeof modeLabels] as { label: string; icon: string }).icon}
+                  {
+                    (
+                      modeLabels[mode as keyof typeof modeLabels] as {
+                        label: string;
+                        icon: string;
+                      }
+                    ).icon
+                  }
                 </span>
 
                 {/* Label */}
@@ -1142,8 +1153,6 @@ export default function Calendar() {
           {getTasksForSelectedDate().length > 0 ? (
             <div className="space-y-2">
               {getTasksForSelectedDate().map((task) => {
-                const isRecurring = isRecurringInstance(task.id);
-
                 return (
                   <TaskCard
                     key={task.id}
@@ -1152,9 +1161,7 @@ export default function Calendar() {
                     onUncomplete={handleUncompleteTask}
                     onEdit={handleEditTask}
                     onDelete={handleDeleteTask}
-                    onRecurringToggle={
-                      isRecurring ? handleRecurringTaskToggle : undefined
-                    }
+                    onRecurringToggle={handleRecurringTaskToggle}
                     showProject={true}
                     showDate={true}
                   />

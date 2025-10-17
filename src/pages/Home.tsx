@@ -19,6 +19,7 @@ import {
 } from "../features/tasks/useTasks";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
+import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Task } from "../types";
 import { getOverdueTasks, getTodayTasks, getUpcomingTasks } from "../utils";
@@ -37,6 +38,7 @@ export default function Home() {
   const updateTaskMutation = useUpdateTask();
   const completeTaskMutation = useCompleteTask();
   const uncompleteTaskMutation = useUncompleteTask();
+  const { markInstanceComplete } = useRecurringTasks();
 
   const { elementRef, isRefreshing, pullDistance, progress } = usePullToRefresh(
     {
@@ -100,6 +102,21 @@ export default function Home() {
   const handleUncompleteTask = (taskId: string) => {
     triggerHaptic("light");
     uncompleteTaskMutation.mutate(taskId);
+  };
+
+  const handleRecurringTaskToggle = (
+    taskId: string,
+    date: Date,
+    isCompleted: boolean
+  ) => {
+    triggerHaptic("light");
+    markInstanceComplete(taskId, date, isCompleted);
+
+    if (isCompleted) {
+      toast.success("Tarefa recorrente concluída com sucesso!");
+    } else {
+      toast.success("Tarefa recorrente marcada como não concluída!");
+    }
   };
 
   const handleEditTask = (task: Task) => {
@@ -273,6 +290,7 @@ export default function Home() {
                   onComplete={handleCompleteTask}
                   onUncomplete={handleUncompleteTask}
                   onEdit={handleEditTask}
+                  onRecurringToggle={handleRecurringTaskToggle}
                   showProject={true}
                   showDate={true}
                 />
@@ -300,6 +318,7 @@ export default function Home() {
                   onComplete={handleCompleteTask}
                   onUncomplete={handleUncompleteTask}
                   onEdit={handleEditTask}
+                  onRecurringToggle={handleRecurringTaskToggle}
                   showProject={true}
                   showDate={false}
                 />
@@ -343,6 +362,7 @@ export default function Home() {
                   onComplete={handleCompleteTask}
                   onUncomplete={handleUncompleteTask}
                   onEdit={handleEditTask}
+                  onRecurringToggle={handleRecurringTaskToggle}
                   showProject={true}
                   showDate={true}
                 />

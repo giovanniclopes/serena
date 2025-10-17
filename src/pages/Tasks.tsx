@@ -19,6 +19,7 @@ import {
   useUncompleteTask,
   useUpdateTask,
 } from "../features/tasks/useTasks";
+import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
@@ -50,6 +51,7 @@ export default function Tasks() {
   const deleteTaskMutation = useDeleteTask();
   const bulkDeleteTasksMutation = useBulkDeleteTasks();
   const completeAllTasksMutation = useCompleteAllTasks();
+  const { markInstanceComplete } = useRecurringTasks();
 
   const sortTasks = (tasks: Task[]) => {
     return [...tasks].sort((a, b) => {
@@ -94,6 +96,20 @@ export default function Tasks() {
 
   const handleUncompleteTask = (taskId: string) => {
     uncompleteTaskMutation.mutate(taskId);
+  };
+
+  const handleRecurringTaskToggle = (
+    taskId: string,
+    date: Date,
+    isCompleted: boolean
+  ) => {
+    markInstanceComplete(taskId, date, isCompleted);
+
+    if (isCompleted) {
+      toast.success("Tarefa recorrente concluída com sucesso!");
+    } else {
+      toast.success("Tarefa recorrente marcada como não concluída!");
+    }
   };
 
   const handleEditTask = (task: Task) => {
@@ -289,6 +305,7 @@ export default function Tasks() {
               onUncomplete={handleUncompleteTask}
               onEdit={handleEditTask}
               onDelete={handleDeleteTask}
+              onRecurringToggle={handleRecurringTaskToggle}
               showProject={true}
               showDate={true}
               isBulkDeleteMode={isBulkDeleteMode}
