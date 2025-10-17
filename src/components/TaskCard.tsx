@@ -335,53 +335,7 @@ export default function TaskCard({
           )}
 
           <div style={{ marginTop: spacing.sm }}>
-            {task.recurrence !== undefined ? (
-              <div className="space-y-2">
-                {task.subtasks && task.subtasks.length > 0 && (
-                  <div>
-                    <h4
-                      className="text-sm font-medium mb-2"
-                      style={{ color: state.currentTheme.colors.text }}
-                    >
-                      Subtarefas:
-                    </h4>
-                    <div className="space-y-1">
-                      {task.subtasks.map((subtask) => (
-                        <div
-                          key={subtask.id}
-                          className="flex items-center space-x-2 p-2 rounded"
-                          style={{
-                            backgroundColor:
-                              state.currentTheme.colors.surface + "50",
-                            border: `1px solid ${state.currentTheme.colors.border}`,
-                          }}
-                        >
-                          <div
-                            className={`w-2 h-2 rounded-full ${
-                              subtask.isCompleted
-                                ? "bg-green-500"
-                                : "bg-gray-400"
-                            }`}
-                          />
-                          <span
-                            className={`text-sm ${
-                              subtask.isCompleted
-                                ? "line-through opacity-70"
-                                : ""
-                            }`}
-                            style={{ color: state.currentTheme.colors.text }}
-                          >
-                            {subtask.title}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <SubtaskManager taskId={task.id} workspaceId={task.workspaceId} />
-            )}
+            <SubtaskManager taskId={task.id} workspaceId={task.workspaceId} />
           </div>
         </div>
       </div>
