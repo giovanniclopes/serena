@@ -21,6 +21,7 @@ const NewTask = lazy(() => import("./pages/NewTask"));
 const Projects = lazy(() => import("./pages/Projects"));
 const Habits = lazy(() => import("./pages/Habits"));
 const Countdowns = lazy(() => import("./pages/Countdowns"));
+const ShoppingLists = lazy(() => import("./pages/ShoppingLists"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 
@@ -103,6 +104,14 @@ function App() {
                 element={
                   <Suspense fallback={<LoadingSpinner />}>
                     <Countdowns />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="shopping-lists"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <ShoppingLists />
                   </Suspense>
                 }
               />

@@ -169,6 +169,42 @@ CREATE TABLE public.tags (
 
 COMMENT ON TABLE public.tags IS 'Tags personalizadas para categorizar tarefas.';
 
+-- Tabela para armazenar listas de compras
+CREATE TABLE public.shopping_lists (
+  id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  description text,
+  category text NOT NULL DEFAULT 'geral',
+  color text NOT NULL DEFAULT '#ec4899',
+  icon text,
+  is_completed boolean NOT NULL DEFAULT false,
+  completed_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE public.shopping_lists IS 'Listas de compras organizadas por categoria e workspace.';
+
+-- Tabela para itens das listas de compras
+CREATE TABLE public.shopping_list_items (
+  id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  shopping_list_id uuid NOT NULL REFERENCES public.shopping_lists(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  quantity text DEFAULT '1',
+  notes text,
+  is_purchased boolean NOT NULL DEFAULT false,
+  purchased_at timestamptz,
+  order_index integer NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE public.shopping_list_items IS 'Itens individuais dentro de uma lista de compras.';
+
 -- =============================================================================
 -- 2. POLÍTICAS DE SEGURANÇA (ROW-LEVEL SECURITY - RLS)
 -- =============================================================================
@@ -228,6 +264,18 @@ ALTER TABLE
 
 CREATE POLICY "Utilizadores podem gerir as suas próprias tags." ON public.tags FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
+-- Listas de Compras
+ALTER TABLE
+  public.shopping_lists ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Utilizadores podem gerir as suas próprias listas de compras." ON public.shopping_lists FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+-- Itens das Listas de Compras
+ALTER TABLE
+  public.shopping_list_items ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Utilizadores podem gerir os seus próprios itens de lista de compras." ON public.shopping_list_items FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
 -- =============================================================================
 -- 3. ÍNDICES DE PERFORMANCE
 -- =============================================================================
@@ -266,6 +314,24 @@ CREATE INDEX idx_countdowns_workspace_id ON public.countdowns(workspace_id);
 CREATE INDEX idx_tags_user_id ON public.tags(user_id);
 
 CREATE INDEX idx_tags_workspace_id ON public.tags(workspace_id);
+
+CREATE INDEX idx_shopping_lists_user_id ON public.shopping_lists(user_id);
+
+CREATE INDEX idx_shopping_lists_workspace_id ON public.shopping_lists(workspace_id);
+
+CREATE INDEX idx_shopping_lists_category ON public.shopping_lists(category);
+
+CREATE INDEX idx_shopping_lists_is_completed ON public.shopping_lists(is_completed);
+
+CREATE INDEX idx_shopping_list_items_user_id ON public.shopping_list_items(user_id);
+
+CREATE INDEX idx_shopping_list_items_shopping_list_id ON public.shopping_list_items(shopping_list_id);
+
+CREATE INDEX idx_shopping_list_items_workspace_id ON public.shopping_list_items(workspace_id);
+
+CREATE INDEX idx_shopping_list_items_is_purchased ON public.shopping_list_items(is_purchased);
+
+CREATE INDEX idx_shopping_list_items_order_index ON public.shopping_list_items(order_index);
 
 -- =============================================================================
 -- 4. FUNÇÕES E TRIGGERS PARA MANTER CONTADORES ATUALIZADOS
@@ -367,3 +433,58 @@ UPDATE
 CREATE TRIGGER trigger_update_project_tasks_count_delete
 AFTER
   DELETE ON public.tasks FOR EACH ROW EXECUTE FUNCTION update_project_tasks_count();
+
+-- Função para atualizar automaticamente o status de conclusão da lista de compras
+CREATE OR REPLACE FUNCTION update_shopping_list_completion() 
+RETURNS TRIGGER AS $$
+DECLARE
+  list_id uuid;
+  total_items integer;
+  purchased_items integer;
+BEGIN
+  -- Determinar o ID da lista
+  IF TG_OP = 'DELETE' THEN
+    list_id := OLD.shopping_list_id;
+  ELSE
+    list_id := NEW.shopping_list_id;
+  END IF;
+
+  -- Contar itens totais e comprados
+  SELECT 
+    COUNT(*),
+    COUNT(*) FILTER (WHERE is_purchased = true)
+  INTO total_items, purchased_items
+  FROM public.shopping_list_items
+  WHERE shopping_list_id = list_id;
+
+  -- Atualizar status da lista
+  UPDATE public.shopping_lists
+  SET 
+    is_completed = (total_items > 0 AND purchased_items = total_items),
+    completed_at = CASE 
+      WHEN (total_items > 0 AND purchased_items = total_items) THEN now()
+      ELSE NULL
+    END,
+    updated_at = now()
+  WHERE id = list_id;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION update_shopping_list_completion() IS 'Atualiza automaticamente o status de conclusão da lista quando itens são modificados';
+
+-- Triggers para manter o status de conclusão das listas de compras atualizado
+CREATE TRIGGER trigger_update_shopping_list_completion_insert
+  AFTER INSERT ON public.shopping_list_items
+  FOR EACH ROW EXECUTE FUNCTION update_shopping_list_completion();
+
+CREATE TRIGGER trigger_update_shopping_list_completion_update
+  AFTER UPDATE ON public.shopping_list_items
+  FOR EACH ROW 
+  WHEN (OLD.is_purchased IS DISTINCT FROM NEW.is_purchased)
+  EXECUTE FUNCTION update_shopping_list_completion();
+
+CREATE TRIGGER trigger_update_shopping_list_completion_delete
+  AFTER DELETE ON public.shopping_list_items
+  FOR EACH ROW EXECUTE FUNCTION update_shopping_list_completion();

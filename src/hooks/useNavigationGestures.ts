@@ -23,6 +23,7 @@ export function useNavigationGestures({
       "/tasks",
       "/habits",
       "/projects",
+      "/shopping-lists",
       "/profile",
     ];
     const currentIndex = navigationOrder.indexOf(currentPath);
@@ -43,6 +44,7 @@ export function useNavigationGestures({
       "/tasks",
       "/habits",
       "/projects",
+      "/shopping-lists",
       "/profile",
     ];
     const currentIndex = navigationOrder.indexOf(currentPath);

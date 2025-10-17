@@ -17,6 +17,7 @@ import type {
   HabitEntry,
   Priority,
   Project,
+  ShoppingList,
   Task,
 } from "../types";
 import { getRecurringTaskInstancesForDate } from "./recurrenceUtils";
@@ -420,4 +421,29 @@ export function filterCountdowns(
     const now = new Date();
     return countdown.targetDate > now;
   });
+}
+
+export function searchShoppingLists(
+  shoppingLists: ShoppingList[],
+  query: string
+): ShoppingList[] {
+  if (!query.trim()) return shoppingLists;
+
+  const searchTerm = query.toLowerCase();
+  return shoppingLists.filter(
+    (list) =>
+      list.name.toLowerCase().includes(searchTerm) ||
+      (list.description &&
+        list.description.toLowerCase().includes(searchTerm)) ||
+      list.category.toLowerCase().includes(searchTerm)
+  );
+}
+
+export function filterShoppingLists(
+  shoppingLists: ShoppingList[],
+  showCompleted: boolean
+): ShoppingList[] {
+  if (showCompleted) return shoppingLists;
+
+  return shoppingLists.filter((list) => !list.isCompleted);
 }

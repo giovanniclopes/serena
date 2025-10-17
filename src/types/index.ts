@@ -197,6 +197,7 @@ export interface AppState {
   habits: Habit[];
   habitEntries: HabitEntry[];
   countdowns: Countdown[];
+  shoppingLists: ShoppingList[];
   tags: Tag[];
   filters: Filter[];
   currentTheme: Theme;
@@ -245,4 +246,97 @@ export interface UpdateUserProfileData {
   avatarUrl?: string;
   birthDate?: Date;
   status?: UserStatus;
+}
+
+export interface ShoppingList {
+  id: string;
+  name: string;
+  description?: string;
+  category: string;
+  color: string;
+  icon?: string;
+  location?: string;
+  isCompleted: boolean;
+  completedAt?: Date;
+  workspaceId: string;
+  items: ShoppingListItem[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ShoppingListItem {
+  id: string;
+  shoppingListId: string;
+  name: string;
+  quantity: string;
+  notes?: string;
+  isPurchased: boolean;
+  purchasedAt?: Date;
+  actualPrice?: number;
+  orderIndex: number;
+  workspaceId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateShoppingListData {
+  name: string;
+  description?: string;
+  category: string;
+  color: string;
+  icon?: string;
+  workspaceId: string;
+}
+
+export interface UpdateShoppingListData {
+  name?: string;
+  description?: string;
+  category?: string;
+  color?: string;
+  icon?: string;
+}
+
+export interface CreateShoppingListItemData {
+  shoppingListId: string;
+  name: string;
+  quantity?: string;
+  notes?: string;
+  orderIndex?: number;
+  workspaceId: string;
+}
+
+export interface UpdateShoppingListItemData {
+  name?: string;
+  quantity?: string;
+  notes?: string;
+  isPurchased?: boolean;
+  actualPrice?: number;
+  orderIndex?: number;
+}
+
+export interface ShoppingStatistics {
+  totalSpent: number;
+  totalLists: number;
+  completedLists: number;
+  averageListValue: number;
+  spendingByCategory: Array<{
+    category: string;
+    amount: number;
+    count: number;
+  }>;
+  mostPurchasedItems: Array<{
+    name: string;
+    count: number;
+    totalSpent: number;
+  }>;
+  spendingByMonth: Array<{
+    month: string;
+    amount: number;
+    count: number;
+  }>;
+  topLocations: Array<{
+    location: string;
+    amount: number;
+    count: number;
+  }>;
 }

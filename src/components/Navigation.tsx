@@ -5,6 +5,7 @@ import {
   Home,
   List,
   MoreHorizontal,
+  ShoppingCart,
   Target,
   User,
 } from "lucide-react";
@@ -26,6 +27,7 @@ export default function Navigation() {
 
   const moreNavItems = [
     { path: "/projects", icon: Folder, label: "Projetos" },
+    { path: "/shopping-lists", icon: ShoppingCart, label: "Compras" },
     { path: "/countdowns", icon: Clock, label: "Contagem" },
     { path: "/profile", icon: User, label: "Perfil" },
   ];

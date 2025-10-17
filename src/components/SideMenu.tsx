@@ -6,6 +6,7 @@ import {
   Home,
   List,
   LogOut,
+  ShoppingCart,
   Target,
   User,
   Wifi,
@@ -43,6 +44,7 @@ export default function SideMenu({
     { path: "/projects", icon: Folder, label: "Projetos" },
     { path: "/habits", icon: Target, label: "Hábitos" },
     { path: "/calendar", icon: Calendar, label: "Calendário" },
+    { path: "/shopping-lists", icon: ShoppingCart, label: "Compras" },
     { path: "/countdowns", icon: Clock, label: "Contagem" },
     { path: "/profile", icon: User, label: "Perfil" },
   ];

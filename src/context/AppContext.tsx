@@ -103,6 +103,7 @@ const getInitialState = (): AppState => {
     habits: [],
     habitEntries: [],
     countdowns: [],
+    shoppingLists: [],
     tags: [],
     filters: [],
     currentTheme: defaultTheme,
@@ -349,6 +350,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           habits: [],
           habitEntries: [],
           countdowns: [],
+          shoppingLists: [],
           tags: [],
           filters: [],
           currentTheme: defaultTheme,
@@ -397,6 +399,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             habits: [],
             habitEntries: [],
             countdowns: [],
+            shoppingLists: [],
             tags: [],
             filters: [],
             currentTheme: appData?.currentThemeId
