@@ -249,6 +249,8 @@ CREATE INDEX idx_subtasks_user_id ON public.subtasks(user_id);
 
 CREATE INDEX idx_subtasks_task_id ON public.subtasks(task_id);
 
+CREATE INDEX idx_subtasks_due_date ON public.subtasks(due_date);
+
 CREATE INDEX idx_habits_user_id ON public.habits(user_id);
 
 CREATE INDEX idx_habits_workspace_id ON public.habits(workspace_id);

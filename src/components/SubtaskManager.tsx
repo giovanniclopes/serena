@@ -15,7 +15,16 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Check, Edit, GripVertical, Plus, Trash2, X } from "lucide-react";
+import {
+  Calendar,
+  Check,
+  Edit,
+  GripVertical,
+  Plus,
+  Settings,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import {
@@ -28,6 +37,8 @@ import {
   useUpdateSubtask,
 } from "../features/subtasks/useSubtasks";
 import type { Task, Theme } from "../types";
+import { formatDate, formatTime } from "../utils";
+import SubtaskModal from "./SubtaskModal";
 
 interface SubtaskManagerProps {
   taskId: string;
@@ -44,6 +55,7 @@ interface SortableSubtaskItemProps {
   onToggleSubtask: (subtaskId: string) => void;
   onCancelEditing: () => void;
   onEditingTitleChange: (title: string) => void;
+  onOpenAdvancedEdit: (subtask: Task) => void;
   isUpdating: boolean;
   isDeleting: boolean;
   isToggling: boolean;
@@ -60,6 +72,7 @@ function SortableSubtaskItem({
   onToggleSubtask,
   onCancelEditing,
   onEditingTitleChange,
+  onOpenAdvancedEdit,
   isUpdating,
   isDeleting,
   isToggling,
@@ -144,18 +157,44 @@ function SortableSubtaskItem({
         </div>
       ) : (
         <>
-          <span
-            className={`flex-1 text-sm sm:text-sm py-1 ${
-              subtask.isCompleted ? "line-through text-gray-500" : ""
-            }`}
-            style={{ color: theme.colors.text }}
-          >
-            {subtask.title}
-          </span>
+          <div className="flex-1">
+            <span
+              className={`text-sm sm:text-sm py-1 block ${
+                subtask.isCompleted ? "line-through text-gray-500" : ""
+              }`}
+              style={{ color: theme.colors.text }}
+            >
+              {subtask.title}
+            </span>
+            {subtask.dueDate && (
+              <div className="flex items-center mt-1" style={{ gap: "4px" }}>
+                <Calendar
+                  className="w-3 h-3"
+                  style={{ color: theme.colors.textSecondary }}
+                />
+                <span
+                  className="text-xs"
+                  style={{ color: theme.colors.textSecondary }}
+                >
+                  {formatDate(subtask.dueDate)}
+                  {subtask.dueDate.getHours() !== 0 &&
+                    ` às ${formatTime(subtask.dueDate)}`}
+                </span>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-0">
+            <button
+              onClick={() => onOpenAdvancedEdit(subtask)}
+              className="p-2 sm:p-1 text-gray-500 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+              title="Editar detalhes"
+            >
+              <Settings size={16} className="w-4 h-4" />
+            </button>
             <button
               onClick={() => onStartEditing(subtask)}
               className="p-2 sm:p-1 text-gray-500 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+              title="Editar título"
             >
               <Edit size={16} className="w-4 h-4" />
             </button>
@@ -163,6 +202,7 @@ function SortableSubtaskItem({
               onClick={() => onDeleteSubtask(subtask.id)}
               disabled={isDeleting}
               className="p-2 sm:p-1 text-red-500 hover:bg-red-100 rounded disabled:opacity-50 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+              title="Excluir"
             >
               <Trash2 size={16} className="w-4 h-4" />
             </button>
@@ -190,6 +230,10 @@ export default function SubtaskManager({
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [editingTitle, setEditingTitle] = useState("");
+  const [isSubtaskModalOpen, setIsSubtaskModalOpen] = useState(false);
+  const [editingSubtask, setEditingSubtask] = useState<Task | undefined>();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [subtaskToDelete, setSubtaskToDelete] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -272,9 +316,16 @@ export default function SubtaskManager({
     setEditingTitle("");
   };
 
-  const handleDeleteSubtask = async (subtaskId: string) => {
-    if (window.confirm("Tem certeza que deseja excluir esta subtarefa?")) {
-      await deleteSubtaskMutation.mutateAsync(subtaskId);
+  const handleDeleteSubtask = (subtaskId: string) => {
+    setSubtaskToDelete(subtaskId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteSubtask = async () => {
+    if (subtaskToDelete) {
+      await deleteSubtaskMutation.mutateAsync(subtaskToDelete);
+      setShowDeleteModal(false);
+      setSubtaskToDelete(null);
     }
   };
 
@@ -299,6 +350,51 @@ export default function SubtaskManager({
     setEditingTitle("");
   };
 
+  const openAdvancedEdit = (subtask: Task) => {
+    setEditingSubtask(subtask);
+    setIsSubtaskModalOpen(true);
+  };
+
+  const handleSubtaskSave = async (
+    subtaskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+  ) => {
+    if (editingSubtask) {
+      await updateSubtaskMutation.mutateAsync({
+        ...editingSubtask,
+        ...subtaskData,
+      });
+    } else {
+      const nextOrder =
+        subtasks && subtasks.length > 0
+          ? Math.max(...subtasks.map((s) => s.order || 0)) + 1
+          : 0;
+
+      await createSubtaskMutation.mutateAsync({
+        ...subtaskData,
+        parentTaskId: taskId,
+        workspaceId,
+        order: nextOrder,
+        subtasks: [],
+        reminders: [],
+        tags: [],
+        attachments: [],
+        isCompleted: false,
+        completedAt: undefined,
+        timeEntries: [],
+        totalTimeSpent: 0,
+        isTimerRunning: false,
+        currentSessionStart: undefined,
+      });
+    }
+    setIsSubtaskModalOpen(false);
+    setEditingSubtask(undefined);
+  };
+
+  const closeSubtaskModal = () => {
+    setIsSubtaskModalOpen(false);
+    setEditingSubtask(undefined);
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-2">
@@ -317,14 +413,27 @@ export default function SubtaskManager({
           Subtarefas ({subtasks?.length || 0})
         </h4>
         {!isAddingSubtask && (
-          <button
-            onClick={() => setIsAddingSubtask(true)}
-            className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            <Plus size={14} className="sm:w-3 sm:h-3" />
-            Adicionar
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsAddingSubtask(true)}
+              className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              <Plus size={14} className="sm:w-3 sm:h-3" />
+              Rápido
+            </button>
+            <button
+              onClick={() => {
+                setEditingSubtask(undefined);
+                setIsSubtaskModalOpen(true);
+              }}
+              className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              <Settings size={14} className="sm:w-3 sm:h-3" />
+              Detalhado
+            </button>
+          </div>
         )}
       </div>
 
@@ -388,6 +497,7 @@ export default function SubtaskManager({
                     onToggleSubtask={handleToggleSubtask}
                     onCancelEditing={cancelEditing}
                     onEditingTitleChange={setEditingTitle}
+                    onOpenAdvancedEdit={openAdvancedEdit}
                     isUpdating={updateSubtaskMutation.isPending}
                     isDeleting={deleteSubtaskMutation.isPending}
                     isToggling={
@@ -400,6 +510,63 @@ export default function SubtaskManager({
             </div>
           </SortableContext>
         </DndContext>
+      )}
+
+      <SubtaskModal
+        isOpen={isSubtaskModalOpen}
+        onClose={closeSubtaskModal}
+        subtask={editingSubtask}
+        onSave={handleSubtaskSave}
+      />
+
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div
+            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
+            style={{ backgroundColor: state.currentTheme.colors.surface }}
+          >
+            <h3
+              className="text-lg font-semibold mb-4"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Excluir subtarefa
+            </h3>
+            <p
+              className="text-sm mb-6"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              Tem certeza que deseja excluir esta subtarefa? Esta ação não pode
+              ser desfeita.
+            </p>
+            <div className="flex space-x-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSubtaskToDelete(null);
+                }}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                style={{
+                  backgroundColor: state.currentTheme.colors.surface,
+                  color: state.currentTheme.colors.textSecondary,
+                  border: `1px solid ${state.currentTheme.colors.border}`,
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDeleteSubtask}
+                disabled={deleteSubtaskMutation.isPending}
+                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+                style={{
+                  backgroundColor: state.currentTheme.colors.error,
+                  color: "white",
+                }}
+              >
+                {deleteSubtaskMutation.isPending ? "Excluindo..." : "Excluir"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
