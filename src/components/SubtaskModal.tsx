@@ -96,16 +96,6 @@ export default function SubtaskModal({
     onClose();
   };
 
-  const getPriorityLabel = (priority: Priority) => {
-    const labels = {
-      P1: "Alta",
-      P2: "Média",
-      P3: "Baixa",
-      P4: "Muito Baixa",
-    };
-    return labels[priority];
-  };
-
   return (
     <ResponsiveModal
       isOpen={isOpen}

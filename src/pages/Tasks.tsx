@@ -23,6 +23,7 @@ import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
+import { toast } from "sonner";
 
 export default function Tasks() {
   const { state } = useApp();

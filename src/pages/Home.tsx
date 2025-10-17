@@ -24,6 +24,7 @@ import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import type { Task } from "../types";
 import { getOverdueTasks, getTodayTasks, getUpcomingTasks } from "../utils";
 import { adjustColorBrightness } from "../utils/colorUtils";
+import { toast } from "sonner";
 
 export default function Home() {
   const { state, loading, error } = useApp();
