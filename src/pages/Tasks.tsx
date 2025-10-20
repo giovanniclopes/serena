@@ -1,6 +1,7 @@
 import { List } from "lucide-react";
 import React, { useState } from "react";
 import { toast } from "sonner";
+import ConfettiEffect from "../components/ConfettiEffect";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import {
@@ -13,15 +14,14 @@ import { useApp } from "../context/AppContext";
 import {
   useBulkDeleteTasks,
   useCompleteAllTasks,
-  useCompleteTask,
   useCreateTask,
   useDeleteTask,
   useTasks,
-  useUncompleteTask,
   useUpdateTask,
 } from "../features/tasks/useTasks";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
+import { useTaskCompletionWithConfetti } from "../hooks/useTaskCompletionWithConfetti";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
 
@@ -47,8 +47,8 @@ export default function Tasks() {
   const { showSkeleton } = useSkeletonLoading(isLoading);
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
-  const completeTaskMutation = useCompleteTask();
-  const uncompleteTaskMutation = useUncompleteTask();
+  const { completeTask, uncompleteTask, confettiActive, stopConfetti } =
+    useTaskCompletionWithConfetti();
   const deleteTaskMutation = useDeleteTask();
   const bulkDeleteTasksMutation = useBulkDeleteTasks();
   const completeAllTasksMutation = useCompleteAllTasks();
@@ -105,11 +105,11 @@ export default function Tasks() {
   );
 
   const handleCompleteTask = (taskId: string) => {
-    completeTaskMutation.mutate(taskId);
+    completeTask(taskId);
   };
 
   const handleUncompleteTask = (taskId: string) => {
-    uncompleteTaskMutation.mutate(taskId);
+    uncompleteTask(taskId);
   };
 
   const handleRecurringTaskToggle = (
@@ -523,6 +523,24 @@ export default function Tasks() {
           setEditingTask(undefined);
           setIsTaskModalOpen(true);
         }}
+      />
+
+      <ConfettiEffect
+        isActive={confettiActive}
+        onComplete={stopConfetti}
+        numberOfPieces={150}
+        colors={[
+          "#ff6b6b",
+          "#4ecdc4",
+          "#45b7d1",
+          "#96ceb4",
+          "#feca57",
+          "#ff9ff3",
+          "#54a0ff",
+          "#5f27cd",
+        ]}
+        gravity={0.3}
+        wind={0.05}
       />
     </div>
   );

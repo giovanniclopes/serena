@@ -1,7 +1,17 @@
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, CheckCircle, Clock, Target, Timer } from "lucide-react";
+import {
+  Calendar,
+  CheckCircle,
+  Clock,
+  Target,
+  Timer,
+  Trophy,
+} from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
+import AchievementModal from "../components/AchievementModal";
+import ConfettiEffect from "../components/ConfettiEffect";
 import FloatingActionButton from "../components/FloatingActionButton";
 import NextEventAlert from "../components/NextEventAlert";
 import PullToRefreshIndicator from "../components/PullToRefreshIndicator";
@@ -11,25 +21,25 @@ import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
 import {
-  useCompleteTask,
   useCreateTask,
   useTasks,
-  useUncompleteTask,
   useUpdateTask,
 } from "../features/tasks/useTasks";
+import { useAchievements } from "../hooks/useAchievements";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
+import { useTaskCompletionWithConfetti } from "../hooks/useTaskCompletionWithConfetti";
 import type { Task } from "../types";
 import { getOverdueTasks, getTodayTasks, getUpcomingTasks } from "../utils";
 import { adjustColorBrightness } from "../utils/colorUtils";
-import { toast } from "sonner";
 
 export default function Home() {
   const { state, loading, error } = useApp();
   const { triggerHaptic, triggerSuccess } = useHapticFeedback();
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const { showSkeleton } = useSkeletonLoading(loading);
 
@@ -37,9 +47,10 @@ export default function Home() {
   const { profile } = useProfile();
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
-  const completeTaskMutation = useCompleteTask();
-  const uncompleteTaskMutation = useUncompleteTask();
+  const { completeTask, uncompleteTask, confettiActive, stopConfetti } =
+    useTaskCompletionWithConfetti();
   const { markInstanceComplete } = useRecurringTasks();
+  const { getUnlockedAchievements, getTotalXP } = useAchievements();
 
   const { elementRef, isRefreshing, pullDistance, progress } = usePullToRefresh(
     {
@@ -97,12 +108,12 @@ export default function Home() {
 
   const handleCompleteTask = (taskId: string) => {
     triggerHaptic("light");
-    completeTaskMutation.mutate(taskId);
+    completeTask(taskId);
   };
 
   const handleUncompleteTask = (taskId: string) => {
     triggerHaptic("light");
-    uncompleteTaskMutation.mutate(taskId);
+    uncompleteTask(taskId);
   };
 
   const handleRecurringTaskToggle = (
@@ -226,9 +237,26 @@ export default function Home() {
               className="text-sm mt-1"
               style={{ color: state.currentTheme.colors.textSecondary }}
             >
-              {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })}
+              {format(new Date(), "EEEE, d 'de' MMMM", { locale: ptBR })} às{" "}
+              {format(new Date(), "HH:mm", { locale: ptBR })}.
             </p>
           </div>
+          <button
+            onClick={() => setIsAchievementModalOpen(true)}
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors hover:scale-105"
+            style={{
+              backgroundColor: state.currentTheme.colors.primary + "15",
+              color: state.currentTheme.colors.primary,
+            }}
+          >
+            <Trophy className="w-5 h-5" />
+            <div className="text-right">
+              <div className="text-sm font-bold">
+                {getUnlockedAchievements().length}
+              </div>
+              <div className="text-xs opacity-75">{getTotalXP()} XP</div>
+            </div>
+          </button>
         </div>
       </div>
 
@@ -395,6 +423,29 @@ export default function Home() {
           setEditingTask(undefined);
           setIsTaskModalOpen(true);
         }}
+      />
+
+      <ConfettiEffect
+        isActive={confettiActive}
+        onComplete={stopConfetti}
+        numberOfPieces={150}
+        colors={[
+          "#ff6b6b",
+          "#4ecdc4",
+          "#45b7d1",
+          "#96ceb4",
+          "#feca57",
+          "#ff9ff3",
+          "#54a0ff",
+          "#5f27cd",
+        ]}
+        gravity={0.3}
+        wind={0.05}
+      />
+
+      <AchievementModal
+        isOpen={isAchievementModalOpen}
+        onClose={() => setIsAchievementModalOpen(false)}
       />
     </div>
   );

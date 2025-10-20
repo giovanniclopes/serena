@@ -334,7 +334,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       activeWorkspace.name,
       activeWorkspace.id
     );
-  }, [state.workspaces, state.activeWorkspaceId, state.currentTheme]);
+  }, [state.workspaces, state.activeWorkspaceId, state.currentTheme.id]);
 
   useEffect(() => {
     if (authLoading) return;
