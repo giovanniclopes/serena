@@ -36,6 +36,7 @@ import {
   useUncompleteSubtask,
   useUpdateSubtask,
 } from "../features/subtasks/useSubtasks";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 import type { Task, Theme } from "../types";
 import { formatDate, formatTime } from "../utils";
 import SubtaskModal from "./SubtaskModal";
@@ -78,6 +79,7 @@ function SortableSubtaskItem({
   isToggling,
   theme,
 }: SortableSubtaskItemProps) {
+  const isMobile = useMediaQuery("(max-width: 640px)");
   const {
     attributes,
     listeners,
@@ -97,7 +99,7 @@ function SortableSubtaskItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-3 sm:gap-2 p-3 sm:p-2 rounded-md transition-colors ${
+      className={`flex items-start sm:items-center gap-3 sm:gap-2 p-3 sm:p-2 rounded-md transition-colors ${
         subtask.isCompleted ? "bg-gray-50 opacity-60" : "bg-white border"
       } ${isDragging ? "shadow-lg" : ""}`}
     >
@@ -157,9 +159,9 @@ function SortableSubtaskItem({
         </div>
       ) : (
         <>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <span
-              className={`text-sm sm:text-sm py-1 block ${
+              className={`text-sm sm:text-sm py-1 block break-words ${
                 subtask.isCompleted ? "line-through text-gray-500" : ""
               }`}
               style={{ color: theme.colors.text }}
@@ -183,18 +185,22 @@ function SortableSubtaskItem({
               </div>
             )}
           </div>
-          <div className="flex items-center gap-0">
+          <div className="flex items-start sm:items-center gap-0 pt-1 sm:pt-0 flex-shrink-0">
+            {!isMobile && (
+              <button
+                onClick={() => onOpenAdvancedEdit(subtask)}
+                className="p-2 sm:p-1 text-gray-500 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                title="Editar detalhes"
+              >
+                <Settings size={16} className="w-4 h-4" />
+              </button>
+            )}
             <button
-              onClick={() => onOpenAdvancedEdit(subtask)}
+              onClick={() =>
+                isMobile ? onOpenAdvancedEdit(subtask) : onStartEditing(subtask)
+              }
               className="p-2 sm:p-1 text-gray-500 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
-              title="Editar detalhes"
-            >
-              <Settings size={16} className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onStartEditing(subtask)}
-              className="p-2 sm:p-1 text-gray-500 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
-              title="Editar título"
+              title={isMobile ? "Editar subtarefa" : "Editar título"}
             >
               <Edit size={16} className="w-4 h-4" />
             </button>

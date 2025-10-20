@@ -290,18 +290,6 @@ export default function Calendar() {
     const weekProductivity =
       weekTotal > 0 ? Math.round((weekCompleted / weekTotal) * 100) : 0;
 
-    console.log("📊 Productivity Stats Debug:", {
-      todayTasks: todayTasks.length,
-      todayCompleted,
-      todayPending,
-      weekTasks: weekTasks.length,
-      weekCompleted,
-      weekTotal,
-      weekProductivity,
-      workspaceTasks: workspaceTasks.length,
-      totalTasks: tasks.length,
-    });
-
     return {
       todayCompleted,
       todayPending,
