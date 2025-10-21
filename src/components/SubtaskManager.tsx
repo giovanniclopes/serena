@@ -416,7 +416,20 @@ export default function SubtaskManager({
           className="text-sm font-medium"
           style={{ color: state.currentTheme.colors.text }}
         >
-          Subtarefas ({subtasks?.length || 0})
+          <span
+            style={{
+              border: `1px solid ${state.currentTheme.colors.text}`,
+              borderRadius: "6px",
+              padding: "2px 8px",
+              display: "inline-block",
+              marginRight: 8,
+              color: state.currentTheme.colors.text,
+            }}
+          >
+            Subtarefas: {subtasks?.length || 0} (
+            {subtasks?.filter((subtask) => !subtask.isCompleted).length || 0}{" "}
+            não completadas)
+          </span>
         </h4>
         {!isAddingSubtask && (
           <div className="flex items-center gap-2">
