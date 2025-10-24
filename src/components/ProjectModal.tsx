@@ -48,22 +48,24 @@ export default function ProjectModal({
   const [showTemplates, setShowTemplates] = useState(!project);
 
   useEffect(() => {
-    if (project) {
-      setFormData({
-        name: project.name || "",
-        description: project.description || "",
-        color: project.color || colors[0],
-      });
-      setShowTemplates(false);
-    } else {
-      setFormData({
-        name: "",
-        description: "",
-        color: colors[0],
-      });
-      setShowTemplates(true);
+    if (isOpen) {
+      if (project) {
+        setFormData({
+          name: project.name || "",
+          description: project.description || "",
+          color: project.color || colors[0],
+        });
+        setShowTemplates(false);
+      } else {
+        setFormData({
+          name: "",
+          description: "",
+          color: colors[0],
+        });
+        setShowTemplates(true);
+      }
     }
-  }, [project]);
+  }, [project, isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -84,7 +86,7 @@ export default function ProjectModal({
 
     const projectData = {
       name: formData.name.trim(),
-      description: formData.description.trim() || undefined,
+      description: formData.description.trim() || null,
       color: formData.color,
       workspaceId: workspaceId || state.activeWorkspaceId,
       tasksCompletedCount: 0,

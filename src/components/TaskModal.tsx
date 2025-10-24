@@ -56,42 +56,45 @@ export default function TaskModal({
   });
 
   useEffect(() => {
-    if (task) {
-      setFormData({
-        title: task.title || "",
-        description: task.description || "",
-        projectId: task.projectId || "",
-        dueDate: task.dueDate
-          ? new Date(
-              task.dueDate.getTime() - task.dueDate.getTimezoneOffset() * 60000
-            )
-              .toISOString()
-              .slice(0, 16)
-          : "",
-        priority: task.priority || ("P3" as Priority),
-        tags: task.tags || [],
-        attachments: task.attachments || [],
-        recurrence: task.recurrence,
-        timeEntries: task.timeEntries || [],
-        totalTimeSpent: task.totalTimeSpent || 0,
-        isTimerRunning: task.isTimerRunning || false,
-      });
-    } else {
-      setFormData({
-        title: "",
-        description: "",
-        projectId: "",
-        dueDate: "",
-        priority: "P3" as Priority,
-        tags: [],
-        attachments: [],
-        recurrence: undefined,
-        timeEntries: [],
-        totalTimeSpent: 0,
-        isTimerRunning: false,
-      });
+    if (isOpen) {
+      if (task) {
+        setFormData({
+          title: task.title || "",
+          description: task.description || "",
+          projectId: task.projectId || "",
+          dueDate: task.dueDate
+            ? new Date(
+                task.dueDate.getTime() -
+                  task.dueDate.getTimezoneOffset() * 60000
+              )
+                .toISOString()
+                .slice(0, 16)
+            : "",
+          priority: task.priority || ("P3" as Priority),
+          tags: task.tags || [],
+          attachments: task.attachments || [],
+          recurrence: task.recurrence,
+          timeEntries: task.timeEntries || [],
+          totalTimeSpent: task.totalTimeSpent || 0,
+          isTimerRunning: task.isTimerRunning || false,
+        });
+      } else {
+        setFormData({
+          title: "",
+          description: "",
+          projectId: "",
+          dueDate: "",
+          priority: "P3" as Priority,
+          tags: [],
+          attachments: [],
+          recurrence: undefined,
+          timeEntries: [],
+          totalTimeSpent: 0,
+          isTimerRunning: false,
+        });
+      }
     }
-  }, [task]);
+  }, [task, isOpen]);
 
   useEffect(() => {
     if (!isOpen && !task) {
@@ -118,7 +121,7 @@ export default function TaskModal({
 
     const taskData = {
       title: formData.title.trim(),
-      description: formData.description.trim() || undefined,
+      description: formData.description.trim() || null,
       projectId: formData.projectId || undefined,
       dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
       priority: formData.priority,

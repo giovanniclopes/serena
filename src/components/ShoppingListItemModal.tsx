@@ -88,8 +88,8 @@ export default function ShoppingListItemModal({
 
     onSave({
       name: name.trim(),
-      quantity: quantity.trim() || undefined,
-      notes: notes.trim() || undefined,
+      quantity: quantity.trim() || null,
+      notes: notes.trim() || null,
       price: priceValue,
     });
 

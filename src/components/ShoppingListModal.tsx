@@ -58,7 +58,7 @@ export default function ShoppingListModal({
 
     onSave({
       name: name.trim(),
-      description: description.trim() || undefined,
+      description: description.trim() || null,
       category,
       color,
       icon,

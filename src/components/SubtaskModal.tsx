@@ -44,36 +44,38 @@ export default function SubtaskModal({
   });
 
   useEffect(() => {
-    if (subtask) {
-      setFormData({
-        title: subtask.title || "",
-        description: subtask.description || "",
-        dueDate: subtask.dueDate
-          ? new Date(
-              subtask.dueDate.getTime() -
-                subtask.dueDate.getTimezoneOffset() * 60000
-            )
-              .toISOString()
-              .slice(0, 16)
-          : "",
-        priority: subtask.priority || ("P3" as Priority),
-      });
-    } else {
-      setFormData({
-        title: "",
-        description: "",
-        dueDate: "",
-        priority: "P3" as Priority,
-      });
+    if (isOpen) {
+      if (subtask) {
+        setFormData({
+          title: subtask.title || "",
+          description: subtask.description || "",
+          dueDate: subtask.dueDate
+            ? new Date(
+                subtask.dueDate.getTime() -
+                  subtask.dueDate.getTimezoneOffset() * 60000
+              )
+                .toISOString()
+                .slice(0, 16)
+            : "",
+          priority: subtask.priority || ("P3" as Priority),
+        });
+      } else {
+        setFormData({
+          title: "",
+          description: "",
+          dueDate: "",
+          priority: "P3" as Priority,
+        });
+      }
     }
-  }, [subtask]);
+  }, [subtask, isOpen]);
 
   const handleSave = () => {
     if (!formData.title.trim()) return;
 
     const subtaskData: Omit<Task, "id" | "createdAt" | "updatedAt"> = {
       title: formData.title.trim(),
-      description: formData.description.trim() || undefined,
+      description: formData.description.trim() || null,
       projectId: subtask?.projectId,
       parentTaskId: subtask?.parentTaskId,
       subtasks: [],
