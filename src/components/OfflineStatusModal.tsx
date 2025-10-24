@@ -243,7 +243,7 @@ export default function OfflineStatusModal({
                         backgroundColor: state.currentTheme.colors.background,
                       }}
                     >
-                      <ActionIcon className="w-4 h-4 text-gray-500" />
+                      <ActionIcon className="w-4 h-4 text-gray-600" />
                       <div className="flex-1">
                         <p
                           className="text-sm font-medium"

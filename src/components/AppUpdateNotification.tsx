@@ -20,7 +20,7 @@ export default function AppUpdateNotification() {
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">
               Nova versão disponível
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Uma nova versão do app está disponível. Atualize para ter acesso
               às últimas funcionalidades.
             </p>

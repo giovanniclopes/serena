@@ -76,7 +76,7 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
           ) : (
             <div className="w-[120px] h-[120px] flex items-center justify-center">
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                <div className="text-2xl text-gray-400">📊</div>
+                <div className="text-2xl text-gray-500">📊</div>
               </div>
             </div>
           )}
@@ -87,7 +87,7 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
             >
               {totalUniqueTasks}
             </div>
-            <div className="text-xs text-gray-500">Tarefas Únicas</div>
+            <div className="text-xs text-gray-600">Tarefas Únicas</div>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
               style={{ backgroundColor: state.currentTheme.colors.primary }}
             ></div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm text-gray-500 mb-1">Total de Tarefas</div>
+              <div className="text-sm text-gray-600 mb-1">Total de Tarefas</div>
               <div
                 className="text-lg font-bold"
                 style={{ color: state.currentTheme.colors.text }}
@@ -119,7 +119,7 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
               }}
             ></div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm text-gray-500 mb-1">Total Devidas</div>
+              <div className="text-sm text-gray-600 mb-1">Total Devidas</div>
               <div
                 className="text-lg font-bold"
                 style={{ color: state.currentTheme.colors.text }}
@@ -140,7 +140,7 @@ export default function TaskOverview({ className = "" }: TaskOverviewProps) {
               }}
             ></div>
             <div className="flex-1 min-w-0">
-              <div className="text-sm text-gray-500 mb-1">Concluídas</div>
+              <div className="text-sm text-gray-600 mb-1">Concluídas</div>
               <div
                 className="text-lg font-bold"
                 style={{ color: state.currentTheme.colors.text }}

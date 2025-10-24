@@ -172,7 +172,7 @@ export default function OnboardingModal({
                 </div>
                 <button
                   onClick={handleSkip}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   <X size={24} />
                 </button>
@@ -190,7 +190,7 @@ export default function OnboardingModal({
               </div>
 
               <div className="text-right mt-2">
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-600">
                   {currentPage + 1} de {onboardingPages.length}
                 </span>
               </div>
@@ -204,7 +204,7 @@ export default function OnboardingModal({
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 {currentPageData.title}
               </h2>
-              <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+              <p className="text-gray-700 text-lg mb-8 leading-relaxed">
                 {currentPageData.description}
               </p>
 

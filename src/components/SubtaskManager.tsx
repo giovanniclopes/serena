@@ -158,7 +158,7 @@ function SortableSubtaskItem({
           </button>
           <button
             onClick={onCancelEditing}
-            className="p-1 text-gray-500 hover:bg-gray-200 rounded"
+            className="p-1 text-gray-600 hover:bg-gray-200 rounded"
             aria-label="Cancelar edição"
           >
             <X size={14} />
@@ -169,7 +169,7 @@ function SortableSubtaskItem({
           <div className="flex-1 min-w-0">
             <span
               className={`text-sm sm:text-sm py-1 block break-words ${
-                subtask.isCompleted ? "line-through text-gray-500" : ""
+                subtask.isCompleted ? "line-through text-gray-600" : ""
               }`}
               style={{ color: theme.colors.text }}
             >
@@ -196,7 +196,7 @@ function SortableSubtaskItem({
             {!isMobile && (
               <button
                 onClick={() => onOpenAdvancedEdit(subtask)}
-                className="p-2 sm:p-1 text-gray-500 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                className="p-2 sm:p-1 text-gray-600 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
                 title="Editar detalhes"
               >
                 <Settings size={16} className="w-4 h-4" />
@@ -206,7 +206,7 @@ function SortableSubtaskItem({
               onClick={() =>
                 isMobile ? onOpenAdvancedEdit(subtask) : onStartEditing(subtask)
               }
-              className="p-2 sm:p-1 text-gray-500 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+              className="p-2 sm:p-1 text-gray-600 hover:bg-gray-100 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
               title={isMobile ? "Editar subtarefa" : "Editar título"}
             >
               <Edit size={16} className="w-4 h-4" />
@@ -411,7 +411,7 @@ export default function SubtaskManager({
   if (isLoading) {
     return (
       <div className="text-center py-2">
-        <span className="text-sm text-gray-500">Carregando subtarefas...</span>
+        <span className="text-sm text-gray-600">Carregando subtarefas...</span>
       </div>
     );
   }
@@ -489,7 +489,7 @@ export default function SubtaskManager({
           </button>
           <button
             onClick={() => setIsAddingSubtask(false)}
-            className="p-2 sm:p-1 text-gray-500 hover:bg-gray-200 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+            className="p-2 sm:p-1 text-gray-600 hover:bg-gray-200 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
             aria-label="Cancelar adição de subtarefa"
           >
             <X size={16} className="sm:w-3.5 sm:h-3.5" />

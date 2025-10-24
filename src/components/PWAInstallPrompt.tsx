@@ -70,14 +70,14 @@ export function PWAInstallPrompt() {
             <h3 className="text-sm font-medium text-gray-900 dark:text-white">
               Instalar Serena
             </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Instale o app para uma experiência mais rápida e acesso offline.
             </p>
           </div>
         </div>
         <button
           onClick={handleDismiss}
-          className="flex-shrink-0 ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          className="flex-shrink-0 ml-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
         >
           <X className="h-5 w-5" />
         </button>

@@ -140,7 +140,7 @@ export default function EmailVerification() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   Email verificado!
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-700">
                   Sua conta foi ativada com sucesso. Você será redirecionado em
                   alguns segundos...
                 </p>

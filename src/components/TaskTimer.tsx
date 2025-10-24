@@ -77,7 +77,7 @@ export default function TaskTimer({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          <Clock className="h-5 w-5 text-gray-600 dark:text-gray-400" />
           <h3 className="font-semibold text-gray-900 dark:text-white">
             Tempo de Execução
           </h3>
@@ -157,7 +157,7 @@ export default function TaskTimer({
                   className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border border-gray-200 dark:border-gray-700"
                 >
                   <div className="flex flex-col">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
                       {new Date(entry.startedAt).toLocaleString("pt-BR", {
                         day: "2-digit",
                         month: "2-digit",
@@ -167,7 +167,7 @@ export default function TaskTimer({
                       })}
                     </span>
                     {entry.endedAt && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
+                      <span className="text-xs text-gray-500 dark:text-gray-500">
                         até{" "}
                         {new Date(entry.endedAt).toLocaleString("pt-BR", {
                           hour: "2-digit",

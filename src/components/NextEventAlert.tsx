@@ -131,10 +131,10 @@ export default function NextEventAlert() {
     ? `
     <div class="text-sm">
       <div class="font-semibold mb-1">${currentAlert.countdown.title}</div>
-      <div class="text-gray-600 mb-1">${
+      <div class="text-gray-700 mb-1">${
         currentAlert.countdown.description || "Sem descrição"
       }</div>
-      <div class="text-xs text-gray-500">
+      <div class="text-xs text-gray-600">
         Data: ${format(
           currentAlert.countdown.targetDate,
           "dd/MM/yyyy 'às' HH:mm",
@@ -158,7 +158,7 @@ export default function NextEventAlert() {
           <p className="text-sm font-medium text-gray-900">
             Próximo evento em {currentAlert.timeRemaining}!
           </p>
-          <p className="text-xs text-gray-600 truncate">
+          <p className="text-xs text-gray-700 truncate">
             {currentAlert.countdown.title}
           </p>
         </div>

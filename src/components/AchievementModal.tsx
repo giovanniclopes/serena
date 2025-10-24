@@ -9,7 +9,7 @@ interface AchievementModalProps {
 }
 
 const rarityIcons = {
-  common: <Star className="w-4 h-4 text-gray-400" />,
+  common: <Star className="w-4 h-4 text-gray-500" />,
   rare: <Star className="w-4 h-4 text-blue-400" />,
   epic: <Zap className="w-4 h-4 text-purple-400" />,
   legendary: <Crown className="w-4 h-4 text-yellow-400" />,
@@ -127,7 +127,7 @@ export default function AchievementModal({
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === tab.id
                     ? "text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
                 style={{
                   backgroundColor:
@@ -150,7 +150,7 @@ export default function AchievementModal({
                 className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                   selectedCategory === category.id
                     ? "text-white"
-                    : "text-gray-600 hover:bg-gray-100"
+                    : "text-gray-700 hover:bg-gray-100"
                 }`}
                 style={{
                   backgroundColor:
@@ -288,7 +288,7 @@ export default function AchievementModal({
                         </span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-2 text-gray-500">
+                      <div className="flex items-center space-x-2 text-gray-600">
                         <div className="w-2 h-2 bg-gray-400 rounded-full" />
                         <span className="text-sm">Bloqueada</span>
                       </div>

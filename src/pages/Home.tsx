@@ -77,7 +77,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold text-gray-800 mb-2">
             Erro ao carregar dados
           </h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-gray-700 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 text-white rounded-lg"

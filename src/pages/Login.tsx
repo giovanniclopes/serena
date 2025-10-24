@@ -43,7 +43,7 @@ export default function Login() {
             <h1 className="text-3xl font-bold bg-pink-500 bg-clip-text text-transparent">
               Serena
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-700 mt-2">
               Sua jornada de produtividade começa aqui
             </p>
           </div>
@@ -53,7 +53,7 @@ export default function Login() {
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 Bem-vindo de volta!
               </h2>
-              <p className="text-gray-600">Entre na sua conta para continuar</p>
+              <p className="text-gray-700">Entre na sua conta para continuar</p>
             </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
@@ -66,7 +66,7 @@ export default function Login() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                    <Mail className="h-5 w-5 text-gray-500" />
                   </div>
                   <input
                     id="email"
@@ -96,7 +96,7 @@ export default function Login() {
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                    <Lock className="h-5 w-5 text-gray-500" />
                   </div>
                   <input
                     id="password"
@@ -120,9 +120,9 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <EyeOff className="h-5 w-5 text-gray-500 hover:text-gray-700" />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                      <Eye className="h-5 w-5 text-gray-500 hover:text-gray-700" />
                     )}
                   </button>
                 </div>
@@ -157,7 +157,7 @@ export default function Login() {
             </form>
 
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-700">
                 Não tem uma conta?{" "}
                 <Link
                   to="/register"

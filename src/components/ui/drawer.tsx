@@ -85,14 +85,14 @@ export function Drawer({
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
             {description && (
-              <p className="text-sm text-gray-500 mt-1">{description}</p>
+              <p className="text-sm text-gray-600 mt-1">{description}</p>
             )}
           </div>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-100 transition-colors"
           >
-            <X className="h-5 w-5 text-gray-500" />
+            <X className="h-5 w-5 text-gray-600" />
           </button>
         </div>
 

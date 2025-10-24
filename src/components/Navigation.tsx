@@ -93,7 +93,7 @@ export default function Navigation() {
 
           <div className="absolute bottom-20 left-4 right-4 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
             <div className="p-4">
-              <h3 className="text-sm font-semibold text-gray-500 mb-3 px-2">
+              <h3 className="text-sm font-semibold text-gray-600 mb-3 px-2">
                 Mais opções
               </h3>
               <div className="grid grid-cols-2 gap-2">
