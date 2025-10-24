@@ -6,10 +6,6 @@ export function extractOriginalTaskId(taskId: string): string {
     }
   }
 
-  if (taskId.includes("_recurring_")) {
-    return taskId.split("_recurring_")[0];
-  }
-
   return taskId;
 }
 
@@ -19,14 +15,7 @@ export function isRecurringInstance(taskId: string): boolean {
     return parts[1].match(/^\d{4}-\d{2}-\d{2}$/) !== null;
   }
 
-  return taskId.includes("_recurring_");
-}
-
-export function generateRecurringInstanceId(
-  originalTaskId: string,
-  instanceDate: Date
-): string {
-  return `${originalTaskId}_recurring_${instanceDate.getTime()}`;
+  return false;
 }
 
 export function isValidUUID(id: string): boolean {
