@@ -338,77 +338,58 @@ CREATE INDEX idx_shopping_list_items_order_index ON public.shopping_list_items(o
 -- 4. FUNÇÕES E TRIGGERS PARA MANTER CONTADORES ATUALIZADOS
 -- =============================================================================
 -- Função para atualizar automaticamente os contadores de tarefas dos projetos
-CREATE
-OR REPLACE FUNCTION update_project_tasks_count() RETURNS TRIGGER AS $ $ DECLARE affected_project_id uuid;
+CREATE OR REPLACE FUNCTION update_project_tasks_count() 
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
+DECLARE 
+  affected_project_id uuid;
+BEGIN 
+  IF TG_OP = 'DELETE' THEN 
+    affected_project_id := OLD.project_id;
+  ELSE 
+    affected_project_id := NEW.project_id;
+  END IF;
 
-BEGIN IF TG_OP = 'DELETE' THEN affected_project_id := OLD.project_id;
+  IF affected_project_id IS NOT NULL THEN
+    UPDATE public.projects
+    SET
+      tasks_total_count = (
+        SELECT COUNT(*)
+        FROM public.tasks
+        WHERE project_id = affected_project_id
+      ),
+      tasks_completed_count = (
+        SELECT COUNT(*)
+        FROM public.tasks
+        WHERE project_id = affected_project_id
+        AND is_completed = true
+      )
+    WHERE id = affected_project_id;
+  END IF;
 
-ELSE affected_project_id := NEW.project_id;
+  IF TG_OP = 'UPDATE' AND OLD.project_id IS DISTINCT FROM NEW.project_id THEN 
+    IF OLD.project_id IS NOT NULL THEN
+      UPDATE public.projects
+      SET
+        tasks_total_count = (
+          SELECT COUNT(*)
+          FROM public.tasks
+          WHERE project_id = OLD.project_id
+        ),
+        tasks_completed_count = (
+          SELECT COUNT(*)
+          FROM public.tasks
+          WHERE project_id = OLD.project_id
+          AND is_completed = true
+        )
+      WHERE id = OLD.project_id;
+    END IF;
+  END IF;
 
-END IF;
-
-IF affected_project_id IS NOT NULL THEN
-UPDATE
-  public.projects
-SET
-  tasks_total_count = (
-    SELECT
-      COUNT(*)
-    FROM
-      public.tasks
-    WHERE
-      project_id = affected_project_id
-  ),
-  tasks_completed_count = (
-    SELECT
-      COUNT(*)
-    FROM
-      public.tasks
-    WHERE
-      project_id = affected_project_id
-      AND is_completed = true
-  )
-WHERE
-  id = affected_project_id;
-
-END IF;
-
-IF TG_OP = 'UPDATE'
-AND OLD.project_id IS DISTINCT
-FROM
-  NEW.project_id THEN IF OLD.project_id IS NOT NULL THEN
-UPDATE
-  public.projects
-SET
-  tasks_total_count = (
-    SELECT
-      COUNT(*)
-    FROM
-      public.tasks
-    WHERE
-      project_id = OLD.project_id
-  ),
-  tasks_completed_count = (
-    SELECT
-      COUNT(*)
-    FROM
-      public.tasks
-    WHERE
-      project_id = OLD.project_id
-      AND is_completed = true
-  )
-WHERE
-  id = OLD.project_id;
-
-END IF;
-
-END IF;
-
-RETURN COALESCE(NEW, OLD);
-
+  RETURN COALESCE(NEW, OLD);
 END;
-
-$ $ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION update_project_tasks_count() IS 'Atualiza automaticamente os contadores de tarefas quando uma tarefa é inserida, atualizada ou deletada';
 
@@ -437,7 +418,9 @@ AFTER
 
 -- Função para atualizar automaticamente o status de conclusão da lista de compras
 CREATE OR REPLACE FUNCTION update_shopping_list_completion() 
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
 DECLARE
   list_id uuid;
   total_items integer;
@@ -489,3 +472,207 @@ CREATE TRIGGER trigger_update_shopping_list_completion_update
 CREATE TRIGGER trigger_update_shopping_list_completion_delete
   AFTER DELETE ON public.shopping_list_items
   FOR EACH ROW EXECUTE FUNCTION update_shopping_list_completion();
+
+-- =============================================================================
+-- 5. FUNÇÕES ADICIONAIS DE SEGURANÇA E UTILIDADE
+-- =============================================================================
+
+-- Função para atualizar timestamp updated_at automaticamente
+CREATE OR REPLACE FUNCTION handle_updated_at() 
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Função para verificar subtarefas pendentes antes de completar tarefa principal
+CREATE OR REPLACE FUNCTION check_pending_subtasks_before_completion() 
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
+DECLARE
+  pending_subtasks_count integer;
+BEGIN
+  -- Se a tarefa está sendo marcada como concluída
+  IF NEW.is_completed = true AND (OLD.is_completed = false OR OLD IS NULL) THEN
+    -- Contar subtarefas pendentes
+    SELECT COUNT(*)
+    INTO pending_subtasks_count
+    FROM public.subtasks
+    WHERE task_id = NEW.id AND is_completed = false;
+    
+    -- Se há subtarefas pendentes, impedir a conclusão
+    IF pending_subtasks_count > 0 THEN
+      RAISE EXCEPTION 'Não é possível concluir a tarefa. Existem % subtarefas pendentes.', pending_subtasks_count;
+    END IF;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Função para atualizar estatísticas de compra de itens
+CREATE OR REPLACE FUNCTION update_item_purchase_stats() 
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
+DECLARE
+  list_id uuid;
+BEGIN
+  -- Determinar o ID da lista
+  IF TG_OP = 'DELETE' THEN
+    list_id := OLD.shopping_list_id;
+  ELSE
+    list_id := NEW.shopping_list_id;
+  END IF;
+
+  -- Atualizar estatísticas da lista (pode ser expandido no futuro)
+  UPDATE public.shopping_lists
+  SET updated_at = now()
+  WHERE id = list_id;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Função para criar lista de compras recorrente
+CREATE OR REPLACE FUNCTION create_recurring_shopping_list() 
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
+DECLARE
+  new_list_id uuid;
+BEGIN
+  -- Esta função pode ser expandida para criar listas recorrentes
+  -- Por enquanto, apenas retorna o registro original
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Função para criar workspace padrão para novos usuários
+CREATE OR REPLACE FUNCTION create_default_workspace() 
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
+DECLARE
+  default_workspace_id uuid;
+BEGIN
+  -- Criar workspace padrão para o novo usuário
+  INSERT INTO public.workspaces (user_id, name, description, is_default)
+  VALUES (NEW.id, 'Pessoal', 'Workspace padrão', true)
+  RETURNING id INTO default_workspace_id;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Função alternativa para atualizar contadores de tarefas
+CREATE OR REPLACE FUNCTION update_project_task_counts() 
+RETURNS TRIGGER 
+SET search_path = public
+AS $$
+DECLARE 
+  affected_project_id uuid;
+BEGIN 
+  IF TG_OP = 'DELETE' THEN 
+    affected_project_id := OLD.project_id;
+  ELSE 
+    affected_project_id := NEW.project_id;
+  END IF;
+
+  IF affected_project_id IS NOT NULL THEN
+    UPDATE public.projects
+    SET
+      tasks_total_count = (
+        SELECT COUNT(*)
+        FROM public.tasks
+        WHERE project_id = affected_project_id
+      ),
+      tasks_completed_count = (
+        SELECT COUNT(*)
+        FROM public.tasks
+        WHERE project_id = affected_project_id
+        AND is_completed = true
+      )
+    WHERE id = affected_project_id;
+  END IF;
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$$ LANGUAGE plpgsql;
+
+-- =============================================================================
+-- 6. TRIGGERS ADICIONAIS PARA FUNCIONALIDADES DE SEGURANÇA
+-- =============================================================================
+
+-- Triggers para atualizar updated_at automaticamente em todas as tabelas
+CREATE TRIGGER trigger_handle_updated_at_profiles
+  BEFORE UPDATE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_workspaces
+  BEFORE UPDATE ON public.workspaces
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_projects
+  BEFORE UPDATE ON public.projects
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_tasks
+  BEFORE UPDATE ON public.tasks
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_subtasks
+  BEFORE UPDATE ON public.subtasks
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_habits
+  BEFORE UPDATE ON public.habits
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_countdowns
+  BEFORE UPDATE ON public.countdowns
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_tags
+  BEFORE UPDATE ON public.tags
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_shopping_lists
+  BEFORE UPDATE ON public.shopping_lists
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_shopping_list_items
+  BEFORE UPDATE ON public.shopping_list_items
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+-- Trigger para verificar subtarefas pendentes antes de completar tarefa
+CREATE TRIGGER trigger_check_pending_subtasks_before_completion
+  BEFORE UPDATE ON public.tasks
+  FOR EACH ROW 
+  WHEN (OLD.is_completed IS DISTINCT FROM NEW.is_completed)
+  EXECUTE FUNCTION check_pending_subtasks_before_completion();
+
+-- Trigger para atualizar estatísticas de compra
+CREATE TRIGGER trigger_update_item_purchase_stats
+  AFTER INSERT OR UPDATE OR DELETE ON public.shopping_list_items
+  FOR EACH ROW EXECUTE FUNCTION update_item_purchase_stats();
+
+-- Trigger para criar workspace padrão para novos usuários
+CREATE TRIGGER trigger_create_default_workspace
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION create_default_workspace();
+
+-- =============================================================================
+-- 7. COMENTÁRIOS DAS FUNÇÕES ADICIONAIS
+-- =============================================================================
+
+COMMENT ON FUNCTION handle_updated_at() IS 'Atualiza automaticamente o campo updated_at em todas as tabelas';
+COMMENT ON FUNCTION check_pending_subtasks_before_completion() IS 'Verifica se há subtarefas pendentes antes de permitir conclusão da tarefa principal';
+COMMENT ON FUNCTION update_item_purchase_stats() IS 'Atualiza estatísticas de compra de itens das listas';
+COMMENT ON FUNCTION create_recurring_shopping_list() IS 'Cria listas de compras recorrentes (funcionalidade futura)';
+COMMENT ON FUNCTION create_default_workspace() IS 'Cria workspace padrão para novos usuários';
+COMMENT ON FUNCTION update_project_task_counts() IS 'Versão alternativa para atualizar contadores de tarefas dos projetos';
