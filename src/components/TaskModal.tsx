@@ -121,7 +121,7 @@ export default function TaskModal({
 
     const taskData = {
       title: formData.title.trim(),
-      description: formData.description.trim() || null,
+      description: formData.description.trim() || undefined,
       projectId: formData.projectId || undefined,
       dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
       priority: formData.priority,

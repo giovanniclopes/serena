@@ -75,7 +75,7 @@ export default function SubtaskModal({
 
     const subtaskData: Omit<Task, "id" | "createdAt" | "updatedAt"> = {
       title: formData.title.trim(),
-      description: formData.description.trim() || null,
+      description: formData.description.trim() || undefined,
       projectId: subtask?.projectId,
       parentTaskId: subtask?.parentTaskId,
       subtasks: [],

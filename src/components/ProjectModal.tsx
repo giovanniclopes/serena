@@ -86,7 +86,7 @@ export default function ProjectModal({
 
     const projectData = {
       name: formData.name.trim(),
-      description: formData.description.trim() || null,
+      description: formData.description.trim() || undefined,
       color: formData.color,
       workspaceId: workspaceId || state.activeWorkspaceId,
       tasksCompletedCount: 0,
