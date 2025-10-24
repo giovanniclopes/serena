@@ -124,6 +124,11 @@ function SortableSubtaskItem({
             ? "bg-green-500 border-green-500 text-white"
             : "border-gray-300 hover:border-green-500"
         }`}
+        aria-label={
+          subtask.isCompleted
+            ? "Marcar como não concluída"
+            : "Marcar como concluída"
+        }
       >
         {subtask.isCompleted && (
           <Check size={16} className="sm:w-2.5 sm:h-2.5" />
@@ -147,12 +152,14 @@ function SortableSubtaskItem({
             onClick={() => onUpdateSubtask(subtask.id)}
             disabled={!editingTitle.trim() || isUpdating}
             className="p-1 text-green-600 hover:bg-green-100 rounded disabled:opacity-50"
+            aria-label="Salvar alterações"
           >
             <Check size={14} />
           </button>
           <button
             onClick={onCancelEditing}
             className="p-1 text-gray-500 hover:bg-gray-200 rounded"
+            aria-label="Cancelar edição"
           >
             <X size={14} />
           </button>
@@ -476,12 +483,14 @@ export default function SubtaskManager({
               !newSubtaskTitle.trim() || createSubtaskMutation.isPending
             }
             className="p-2 sm:p-1 text-green-600 hover:bg-green-100 rounded disabled:opacity-50 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+            aria-label="Adicionar subtarefa"
           >
             <Check size={16} className="sm:w-3.5 sm:h-3.5" />
           </button>
           <button
             onClick={() => setIsAddingSubtask(false)}
             className="p-2 sm:p-1 text-gray-500 hover:bg-gray-200 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+            aria-label="Cancelar adição de subtarefa"
           >
             <X size={16} className="sm:w-3.5 sm:h-3.5" />
           </button>

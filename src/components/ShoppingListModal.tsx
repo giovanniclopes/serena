@@ -269,6 +269,7 @@ export default function ShoppingListModal({
                             ? state.currentTheme.colors.primary
                             : state.currentTheme.colors.border,
                       }}
+                      aria-label={`Selecionar ícone ${iconOption}`}
                     >
                       <span className="text-sm">{iconOption}</span>
                     </button>

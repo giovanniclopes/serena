@@ -76,6 +76,7 @@ export default function Navigation() {
             onClick={() => setShowMoreMenu(!showMoreMenu)}
             className="flex flex-col items-center space-y-1 p-3 rounded-xl transition-all duration-200 hover:bg-gray-50"
             style={{ color: "#6B7280" }}
+            aria-label="Mais opções"
           >
             <MoreHorizontal className="w-5 h-5" />
             <span className="text-xs font-medium">Mais</span>

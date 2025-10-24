@@ -70,6 +70,9 @@ export default function ShoppingListItem({
             : state.currentTheme.colors.border,
         }}
         disabled={toggleItemMutation.isPending}
+        aria-label={
+          item.isPurchased ? "Marcar como não comprado" : "Marcar como comprado"
+        }
       >
         {item.isPurchased && <Check className="w-3 h-3 text-white" />}
       </button>
@@ -131,6 +134,7 @@ export default function ShoppingListItem({
                 color: state.currentTheme.colors.textSecondary,
                 backgroundColor: state.currentTheme.colors.textSecondary + "10",
               }}
+              aria-label="Editar item"
             >
               <Edit className="w-4 h-4" />
             </button>
@@ -143,6 +147,7 @@ export default function ShoppingListItem({
               backgroundColor: state.currentTheme.colors.error + "10",
             }}
             disabled={deleteItemMutation.isPending}
+            aria-label="Excluir item"
           >
             <Trash2 className="w-4 h-4" />
           </button>

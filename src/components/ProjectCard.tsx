@@ -100,6 +100,7 @@ export default function ProjectCard({
                   padding: 0,
                   color: state.currentTheme.colors.primary,
                 }}
+                aria-label="Visualizar projeto"
               >
                 <Eye className="w-5 h-5" />
               </MobileButton>
@@ -114,6 +115,7 @@ export default function ProjectCard({
                   padding: 0,
                   color: state.currentTheme.colors.textSecondary,
                 }}
+                aria-label="Editar projeto"
               >
                 <Edit className="w-5 h-5" />
               </MobileButton>
@@ -130,6 +132,7 @@ export default function ProjectCard({
                   color: state.currentTheme.colors.error,
                   opacity: isDeleting ? 0.5 : 1,
                 }}
+                aria-label="Excluir projeto"
               >
                 <Trash2 className="w-5 h-5" />
               </MobileButton>

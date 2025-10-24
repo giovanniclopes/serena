@@ -170,6 +170,7 @@ export default function TaskCard({
                       minHeight: touchTarget,
                       padding: 0,
                     }}
+                    aria-label="Editar tarefa"
                   >
                     <Edit className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
                   </MobileButton>
@@ -185,6 +186,7 @@ export default function TaskCard({
                       padding: 0,
                       color: state.currentTheme.colors.error,
                     }}
+                    aria-label="Excluir tarefa"
                   >
                     <Trash2 className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
                   </MobileButton>

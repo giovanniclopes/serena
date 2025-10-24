@@ -74,6 +74,7 @@ export default function FilterControls({
               backgroundColor: state.currentTheme.colors.primary + "20",
               color: state.currentTheme.colors.primary,
             }}
+            aria-label="Filtros"
           >
             <Filter className="w-4 h-4" />
           </button>
@@ -142,6 +143,7 @@ export default function FilterControls({
                   ? state.currentTheme.colors.primary
                   : state.currentTheme.colors.textSecondary,
             }}
+            aria-label="Visualização em lista"
           >
             <List className="w-4 h-4" />
           </button>
@@ -160,6 +162,7 @@ export default function FilterControls({
                   ? state.currentTheme.colors.primary
                   : state.currentTheme.colors.textSecondary,
             }}
+            aria-label="Visualização em grade"
           >
             <Grid className="w-4 h-4" />
           </button>

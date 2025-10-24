@@ -142,6 +142,7 @@ export default function ShoppingListCard({
                 color: state.currentTheme.colors.textSecondary,
                 backgroundColor: state.currentTheme.colors.textSecondary + "10",
               }}
+              aria-label="Editar lista de compras"
             >
               <Edit className="w-4 h-4" />
             </button>
@@ -152,6 +153,7 @@ export default function ShoppingListCard({
                 color: state.currentTheme.colors.error,
                 backgroundColor: state.currentTheme.colors.error + "10",
               }}
+              aria-label="Excluir lista de compras"
             >
               <Trash2 className="w-4 h-4" />
             </button>

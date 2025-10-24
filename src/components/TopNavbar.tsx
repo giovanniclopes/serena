@@ -73,6 +73,7 @@ export default function TopNavbar({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               transition={{ duration: 0.2 }}
+              aria-label="Voltar"
             >
               <ArrowLeft className="w-5 h-5" />
             </motion.button>
@@ -95,6 +96,7 @@ export default function TopNavbar({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               transition={{ duration: 0.2 }}
+              aria-label="Menu"
             >
               <Menu className="w-5 h-5" />
             </motion.button>
@@ -125,7 +127,11 @@ export default function TopNavbar({
                   {getCurrentTime()}
                 </span>
                 <span className="text-xs font-light opacity-75 capitalize">
-                  {new Date().toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}
+                  {new Date().toLocaleDateString("pt-BR", {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                  })}
                 </span>
               </div>
             </motion.span>
@@ -154,6 +160,7 @@ export default function TopNavbar({
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ duration: 0.2 }}
+                  aria-label="Compartilhar"
                 >
                   <Share className="w-5 h-5" />
                 </motion.button>
@@ -166,6 +173,7 @@ export default function TopNavbar({
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   transition={{ duration: 0.2 }}
+                  aria-label="Editar"
                 >
                   <Edit className="w-5 h-5" />
                 </motion.button>
