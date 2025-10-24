@@ -215,67 +215,67 @@ COMMENT ON TABLE public.shopping_list_items IS 'Itens individuais dentro de uma 
 ALTER TABLE
   public.profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem ver e editar o seu próprio perfil." ON public.profiles FOR ALL USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+CREATE POLICY "Utilizadores podem ver e editar o seu próprio perfil." ON public.profiles FOR ALL USING ((select auth.uid()) = id) WITH CHECK ((select auth.uid()) = id);
 
 -- Workspaces
 ALTER TABLE
   public.workspaces ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir os seus próprios workspaces." ON public.workspaces FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir os seus próprios workspaces." ON public.workspaces FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Projetos
 ALTER TABLE
   public.projects ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir os seus próprios projetos." ON public.projects FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir os seus próprios projetos." ON public.projects FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Tarefas
 ALTER TABLE
   public.tasks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir as suas próprias tarefas." ON public.tasks FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir as suas próprias tarefas." ON public.tasks FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Subtarefas
 ALTER TABLE
   public.subtasks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir as suas próprias subtarefas." ON public.subtasks FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir as suas próprias subtarefas." ON public.subtasks FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Hábitos
 ALTER TABLE
   public.habits ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir os seus próprios hábitos." ON public.habits FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir os seus próprios hábitos." ON public.habits FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Entradas de Hábitos
 ALTER TABLE
   public.habit_entries ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir as suas próprias entradas de hábitos." ON public.habit_entries FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir as suas próprias entradas de hábitos." ON public.habit_entries FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Contagens Regressivas
 ALTER TABLE
   public.countdowns ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir as suas próprias contagens regressivas." ON public.countdowns FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir as suas próprias contagens regressivas." ON public.countdowns FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Tags
 ALTER TABLE
   public.tags ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir as suas próprias tags." ON public.tags FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir as suas próprias tags." ON public.tags FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Listas de Compras
 ALTER TABLE
   public.shopping_lists ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir as suas próprias listas de compras." ON public.shopping_lists FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir as suas próprias listas de compras." ON public.shopping_lists FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Itens das Listas de Compras
 ALTER TABLE
   public.shopping_list_items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir os seus próprios itens de lista de compras." ON public.shopping_list_items FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Utilizadores podem gerir os seus próprios itens de lista de compras." ON public.shopping_list_items FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- =============================================================================
 -- 3. ÍNDICES DE PERFORMANCE
