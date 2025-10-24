@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface OfflineAction {
@@ -30,6 +30,7 @@ export function useOfflineMode() {
     lastSyncTime: null,
     syncInProgress: false,
   });
+  const syncInProgressRef = useRef(false);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -119,13 +120,14 @@ export function useOfflineMode() {
 
   const syncPendingActions = useCallback(async () => {
     if (
-      state.syncInProgress ||
+      syncInProgressRef.current ||
       !state.isOnline ||
       state.pendingActions.length === 0
     ) {
       return;
     }
 
+    syncInProgressRef.current = true;
     setState((prev) => ({ ...prev, syncInProgress: true }));
 
     try {
@@ -162,6 +164,7 @@ export function useOfflineMode() {
         lastSyncTime: Date.now(),
         syncInProgress: false,
       }));
+      syncInProgressRef.current = false;
 
       saveOfflineState(remainingActions, Date.now());
 
@@ -185,6 +188,7 @@ export function useOfflineMode() {
     } catch (error) {
       console.error("Erro durante sincronização:", error);
       setState((prev) => ({ ...prev, syncInProgress: false }));
+      syncInProgressRef.current = false;
       toast.error(
         "Erro durante sincronização. Tentando novamente em alguns segundos..."
       );

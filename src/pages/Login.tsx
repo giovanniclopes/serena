@@ -19,6 +19,21 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
+    if (!email.trim()) {
+      setError("Email é obrigatório");
+      return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      setError("Email inválido");
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Senha é obrigatória");
+      return;
+    }
+
     try {
       await signIn(email, password);
       console.log("🎉 Login realizado com sucesso");

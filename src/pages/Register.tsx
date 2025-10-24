@@ -43,6 +43,26 @@ export default function Register() {
     e.preventDefault();
     setError("");
 
+    if (!name.trim()) {
+      setError("Nome é obrigatório");
+      return;
+    }
+
+    if (!email.trim()) {
+      setError("Email é obrigatório");
+      return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      setError("Email inválido");
+      return;
+    }
+
+    if (!password.trim()) {
+      setError("Senha é obrigatória");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("As senhas não coincidem");
       return;
