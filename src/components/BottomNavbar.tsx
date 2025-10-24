@@ -57,6 +57,7 @@ export default function BottomNavbar({
             <NavLink
               to={path}
               className="flex flex-col items-center justify-center transition-all duration-200 w-10 h-10"
+              aria-label={navItems.find((item) => item.path === path)?.label}
             >
               {({ isActive }) => (
                 <motion.div
@@ -120,6 +121,7 @@ export default function BottomNavbar({
             <NavLink
               to={path}
               className="flex flex-col items-center justify-center transition-all duration-200 w-10 h-10"
+              aria-label={navItems.find((item) => item.path === path)?.label}
             >
               {({ isActive }) => (
                 <motion.div

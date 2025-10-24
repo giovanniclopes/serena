@@ -145,12 +145,12 @@ export default function ProjectModal({
                     {template.icon === "palette" && "🎨"}
                   </div>
                   <div>
-                    <h4
+                    <h3
                       className="font-medium"
                       style={{ color: state.currentTheme.colors.text }}
                     >
                       {template.name}
-                    </h4>
+                    </h3>
                     <p
                       className="text-sm"
                       style={{ color: state.currentTheme.colors.textSecondary }}

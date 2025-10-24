@@ -2,7 +2,7 @@
 
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { cn } from "@/lib/utils";
-import { type ReactNode } from "react";
+import React, { createElement, type ReactNode } from "react";
 
 interface ResponsiveTextProps {
   children: ReactNode;
@@ -50,17 +50,19 @@ export function ResponsiveText({
     accent: "text-accent-foreground",
   };
 
-  return (
-    <Component
-      className={cn(
+  const actualComponent = variant.startsWith("h") ? "div" : Component;
+
+  return createElement(
+    actualComponent,
+    {
+      className: cn(
         variantClasses[variant],
         weightClasses[weight],
         colorClasses[color],
         className
-      )}
-      style={style}
-    >
-      {children}
-    </Component>
+      ),
+      style,
+    },
+    children
   );
 }
