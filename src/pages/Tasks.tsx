@@ -66,8 +66,8 @@ export default function Tasks() {
   const bulkDeleteTasksMutation = useBulkDeleteTasks();
   const completeAllTasksMutation = useCompleteAllTasks();
   const { markInstanceComplete, getInstancesForDate } = useRecurringTasks();
-  const parseTaskMutation = useParseTaskInput();
   const { projects } = useProjects();
+  const parseTaskMutation = useParseTaskInput({ availableProjects: projects });
 
   const [refreshKey, setRefreshKey] = React.useState(0);
 
@@ -104,10 +104,8 @@ export default function Tasks() {
                   originalSearchName: result.data!.projectName,
                 });
 
-                // Busca exata
                 if (projectName === searchName) return true;
 
-                // Busca por palavras-chave (remove artigos e preposições)
                 const projectWords = projectName
                   .split(/\s+/)
                   .filter(
@@ -148,7 +146,6 @@ export default function Tasks() {
                   searchWords,
                 });
 
-                // Verifica se todas as palavras de busca estão no nome do projeto
                 const match = searchWords.every((searchWord) =>
                   projectWords.some(
                     (projectWord) =>
@@ -188,6 +185,93 @@ export default function Tasks() {
         setShowAIConfirmModal(true);
 
         toast.success("Tarefa criada com sucesso!");
+      } else if (result.partialData) {
+        const taskData = {
+          title: result.partialData.title || aiInputValue,
+          description: result.partialData.description || undefined,
+          projectId: result.partialData.projectName
+            ? projects?.find((p) => {
+                const projectName = p.name.toLowerCase().trim();
+                const searchName = result
+                  .partialData!.projectName!.toLowerCase()
+                  .trim();
+
+                if (projectName === searchName) return true;
+
+                const projectWords = projectName
+                  .split(/\s+/)
+                  .filter(
+                    (word) =>
+                      ![
+                        "de",
+                        "da",
+                        "do",
+                        "das",
+                        "dos",
+                        "em",
+                        "na",
+                        "no",
+                        "nas",
+                        "nos",
+                      ].includes(word)
+                  );
+                const searchWords = searchName
+                  .split(/\s+/)
+                  .filter(
+                    (word) =>
+                      ![
+                        "de",
+                        "da",
+                        "do",
+                        "das",
+                        "dos",
+                        "em",
+                        "na",
+                        "no",
+                        "nas",
+                        "nos",
+                      ].includes(word)
+                  );
+
+                return searchWords.every((searchWord) =>
+                  projectWords.some(
+                    (projectWord) =>
+                      projectWord.includes(searchWord) ||
+                      searchWord.includes(projectWord)
+                  )
+                );
+              })?.id || undefined
+            : undefined,
+          dueDate: result.partialData.dueDate
+            ? new Date(result.partialData.dueDate)
+            : undefined,
+          priority: result.partialData.priority || "P3",
+          tags: [],
+          attachments: [],
+          recurrence: undefined,
+          subtasks: [],
+          reminders: [],
+          isCompleted: false,
+          completedAt: undefined,
+          workspaceId: state.activeWorkspaceId,
+          order: 0,
+          timeEntries: [],
+          totalTimeSpent: 0,
+          isTimerRunning: false,
+          currentSessionStart: undefined,
+        };
+
+        const createdTask = await createTaskMutation.mutateAsync(taskData);
+
+        setCreatedTaskData(createdTask);
+        setAiInputValue("");
+        setIsAIInputOpen(false);
+        setShowAIConfirmModal(true);
+
+        toast.success("Tarefa criada com dados parciais!");
+        if (result.suggestions && result.suggestions.length > 0) {
+          toast.info(result.suggestions[0]);
+        }
       } else {
         if (result.error) {
           toast.error(result.error);

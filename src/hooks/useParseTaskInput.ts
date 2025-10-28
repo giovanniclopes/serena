@@ -5,9 +5,14 @@ import {
   type ParseTaskResult,
 } from "../services/aiTasks";
 
-export function useParseTaskInput() {
+interface UseParseTaskInputOptions {
+  availableProjects?: Array<{ id: string; name: string }>;
+}
+
+export function useParseTaskInput(options?: UseParseTaskInputOptions) {
   return useMutation({
-    mutationFn: parseTaskFromNaturalLanguage,
+    mutationFn: (input: string) =>
+      parseTaskFromNaturalLanguage(input, options?.availableProjects),
     onSuccess: (result: ParseTaskResult) => {
       if (result.success && result.data) {
         console.log("Tarefa processada com sucesso:", result.data);

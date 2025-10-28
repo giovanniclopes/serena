@@ -1,4 +1,5 @@
 import { geminiModel, isGeminiAvailable } from "../lib/geminiClient";
+import { validateDateTime, validateProject } from "../utils/validation";
 
 let requestCount = 0;
 let resetTime = Date.now() + 60000;
@@ -38,7 +39,8 @@ export interface ParseTaskResult {
 }
 
 export async function parseTaskFromNaturalLanguage(
-  input: string
+  input: string,
+  availableProjects?: Array<{ id: string; name: string }>
 ): Promise<ParseTaskResult> {
   if (!isGeminiAvailable()) {
     return {
@@ -138,9 +140,50 @@ Exemplo de resposta:
       };
     }
 
+    const validationErrors: string[] = [];
+    const validationSuggestions: string[] = [];
+
+    if (parsed.dueDate) {
+      const dateValidation = validateDateTime(parsed.dueDate);
+      if (!dateValidation.isValid) {
+        validationErrors.push(dateValidation.error || "Data inválida");
+        if (dateValidation.suggestion) {
+          validationSuggestions.push(dateValidation.suggestion);
+        }
+        delete parsed.dueDate;
+      }
+    }
+
+    if (parsed.projectName && availableProjects) {
+      const projectValidation = validateProject(
+        parsed.projectName,
+        availableProjects
+      );
+      if (!projectValidation.isValid) {
+        validationErrors.push(projectValidation.error || "Projeto inválido");
+        if (projectValidation.suggestion) {
+          validationSuggestions.push(projectValidation.suggestion);
+        }
+        delete parsed.projectName;
+      } else if (projectValidation.suggestion) {
+        validationSuggestions.push(projectValidation.suggestion);
+      }
+    }
+
+    if (validationErrors.length > 0) {
+      return {
+        success: false,
+        error: validationErrors.join("; "),
+        partialData: parsed,
+        suggestions: validationSuggestions,
+      };
+    }
+
     return {
       success: true,
       data: parsed,
+      suggestions:
+        validationSuggestions.length > 0 ? validationSuggestions : undefined,
     };
   } catch (error) {
     console.error("Erro ao processar linguagem natural:", error);
