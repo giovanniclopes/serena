@@ -12,7 +12,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 ## Configurações da API Gemini (novas)
 
 ```
-VITE_GOOGLE_AI_API_KEY=your_google_ai_api_key_here
+VITE_GOOGLE_AI_API=your_google_ai_api_key_here
 VITE_ENABLE_AI_FEATURES=true
 ```
 
