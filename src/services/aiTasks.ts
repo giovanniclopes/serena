@@ -29,14 +29,35 @@ export interface ParsedTask {
   projectName?: string;
 }
 
+export interface ParseTaskResult {
+  success: boolean;
+  data?: ParsedTask;
+  partialData?: Partial<ParsedTask>;
+  suggestions?: string[];
+  error?: string;
+}
+
 export async function parseTaskFromNaturalLanguage(
   input: string
-): Promise<ParsedTask> {
+): Promise<ParseTaskResult> {
   if (!isGeminiAvailable()) {
-    throw new Error("IA não disponível");
+    return {
+      success: false,
+      error: "IA não disponível",
+    };
   }
 
-  checkRateLimit();
+  try {
+    checkRateLimit();
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Limite de requisições excedido",
+    };
+  }
 
   const prompt = `
 Analise o seguinte texto em linguagem natural e extraia informações estruturadas para uma tarefa.
@@ -56,6 +77,7 @@ Regras:
 - Se não mencionar prioridade, omita o campo
 - Se não mencionar projeto, omita projectName
 - Seja conciso mas preciso
+- SEMPRE extraia pelo menos o título da tarefa
 
 Exemplo de resposta:
 {
@@ -74,14 +96,53 @@ Exemplo de resposta:
 
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      throw new Error("Resposta da IA não contém JSON válido");
+      return {
+        success: false,
+        error: "Resposta da IA não contém JSON válido",
+        suggestions: ["Tente ser mais específico na descrição da tarefa"],
+      };
     }
 
     const parsed = JSON.parse(jsonMatch[0]);
-    return parsed;
+
+    if (!parsed.title || typeof parsed.title !== "string") {
+      return {
+        success: false,
+        error: "Não foi possível identificar o título da tarefa",
+        suggestions: ["Inclua um título claro para a tarefa"],
+      };
+    }
+
+    return {
+      success: true,
+      data: parsed,
+    };
   } catch (error) {
     console.error("Erro ao processar linguagem natural:", error);
-    throw new Error("Falha ao processar entrada. Tente novamente.");
+
+    const partialData: Partial<ParsedTask> = {};
+    const suggestions: string[] = [];
+
+    if (
+      input.toLowerCase().includes("amanhã") ||
+      input.toLowerCase().includes("hoje")
+    ) {
+      partialData.title = input.split(" ")[0] || input;
+      suggestions.push(
+        "Tente especificar a data completa: 'Reunião amanhã às 14h'"
+      );
+    } else if (input.length > 0) {
+      partialData.title = input;
+      suggestions.push("Adicione mais detalhes como data, hora ou prioridade");
+    }
+
+    return {
+      success: false,
+      error: "Falha ao processar entrada. Tente novamente.",
+      partialData:
+        Object.keys(partialData).length > 0 ? partialData : undefined,
+      suggestions: suggestions.length > 0 ? suggestions : undefined,
+    };
   }
 }
 

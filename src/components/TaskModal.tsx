@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { FEATURES } from "../config/features";
 import { useApp } from "../context/AppContext";
 import { useProjects } from "../features/projects/useProjects";
-import { useParseTaskInput } from "../hooks/useParseTaskInput";
 import { useSuggestSubtasks } from "../hooks/useSuggestSubtasks";
 import type { Attachment, Priority, Project, Recurrence, Task } from "../types";
 import AttachmentManager from "./AttachmentManager";
@@ -45,7 +44,6 @@ export default function TaskModal({
   const { state } = useApp();
   const { projects } = useProjects();
   const queryClient = useQueryClient();
-  const parseTaskMutation = useParseTaskInput();
   const suggestSubtasksMutation = useSuggestSubtasks();
   const [formData, setFormData] = useState({
     title: task?.title || "",
@@ -67,7 +65,6 @@ export default function TaskModal({
     isTimerRunning: task?.isTimerRunning || false,
   });
 
-  const [smartInput, setSmartInput] = useState("");
   const [suggestedSubtasks, setSuggestedSubtasks] = useState<string[]>([]);
   const [isCreatingSubtasks, setIsCreatingSubtasks] = useState(false);
 
@@ -109,7 +106,6 @@ export default function TaskModal({
           isTimerRunning: false,
         });
       }
-      setSmartInput("");
       setSuggestedSubtasks([]);
       setIsCreatingSubtasks(false);
     }
@@ -130,7 +126,6 @@ export default function TaskModal({
         totalTimeSpent: 0,
         isTimerRunning: false,
       });
-      setSmartInput("");
       setSuggestedSubtasks([]);
       setIsCreatingSubtasks(false);
     }
@@ -256,33 +251,6 @@ export default function TaskModal({
     }));
   };
 
-  const handleSmartInputProcess = async () => {
-    if (!smartInput.trim()) return;
-
-    try {
-      const result = await parseTaskMutation.mutateAsync(smartInput);
-
-      setFormData((prev) => ({
-        ...prev,
-        title: result.title || prev.title,
-        description: result.description || prev.description,
-        dueDate: result.dueDate
-          ? new Date(result.dueDate).toISOString().slice(0, 16)
-          : prev.dueDate,
-        priority: result.priority || prev.priority,
-        projectId: result.projectName
-          ? availableProjects.find((p) =>
-              p.name.toLowerCase().includes(result.projectName!.toLowerCase())
-            )?.id || prev.projectId
-          : prev.projectId,
-      }));
-
-      setSmartInput("");
-    } catch (error) {
-      console.error("Erro ao processar input inteligente:", error);
-    }
-  };
-
   const handleSuggestSubtasks = async () => {
     if (!formData.title.trim()) return;
 
@@ -291,7 +259,7 @@ export default function TaskModal({
         const suggestions = await suggestSubtasksMutation.mutateAsync({
           taskTitle: formData.title,
           taskDescription: formData.description,
-            taskId: "preview",
+          taskId: "preview",
           workspaceId: state.activeWorkspaceId,
         });
         setSuggestedSubtasks(suggestions);
@@ -325,41 +293,35 @@ export default function TaskModal({
       description=""
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {FEATURES.AI_ENABLED && (
-          <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
-            <Label
-              htmlFor="smartInput"
-              className="text-sm font-medium text-purple-700 mb-2 block"
-            >
-              ✨ Descreva sua tarefa
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                id="smartInput"
-                type="text"
-                value={smartInput}
-                onChange={(e) => setSmartInput(e.target.value)}
-                placeholder="Ex: 'Reunião amanhã às 14h no projeto App v2 com prioridade alta'"
-                className="flex-1"
-                disabled={parseTaskMutation.isPending}
+        {FEATURES.AI_ENABLED && !task && (
+          <div
+            className="p-3 rounded-lg border cursor-pointer transition-colors hover:opacity-80"
+            style={{
+              backgroundColor: state.currentTheme.colors.primary + "10",
+              borderColor: state.currentTheme.colors.primary + "30",
+            }}
+            onClick={() => {
+              onClose();
+              window.dispatchEvent(new CustomEvent("openAIInput"));
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles
+                className="w-4 h-4"
+                style={{ color: state.currentTheme.colors.primary }}
               />
-              <Button
-                type="button"
-                onClick={handleSmartInputProcess}
-                disabled={!smartInput.trim() || parseTaskMutation.isPending}
-                className="px-3"
-                variant="outline"
+              <span
+                className="text-sm font-medium"
+                style={{ color: state.currentTheme.colors.primary }}
               >
-                {parseTaskMutation.isPending ? (
-                  <InlineLoadingSpinner size={16} className="mr-1" />
-                ) : (
-                  <Sparkles size={16} className="mr-1" />
-                )}
-                {parseTaskMutation.isPending ? "Processando..." : "Processar"}
-              </Button>
+                ✨ Prefere usar IA? Experimente criar tarefas mais rápido!
+              </span>
             </div>
-            <p className="text-xs text-purple-600 mt-1">
-              A IA preencherá automaticamente os campos abaixo
+            <p
+              className="text-xs mt-1"
+              style={{ color: state.currentTheme.colors.textSecondary }}
+            >
+              Clique aqui para usar o assistente de IA na página principal
             </p>
           </div>
         )}

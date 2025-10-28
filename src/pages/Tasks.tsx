@@ -1,6 +1,8 @@
-import { List } from "lucide-react";
-import React, { useState } from "react";
+import { List, Sparkles } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import AITaskConfirmModal from "../components/AITaskConfirmModal";
+import AITaskInput from "../components/AITaskInput";
 import ConfettiEffect from "../components/ConfettiEffect";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
@@ -10,7 +12,9 @@ import {
 } from "../components/skeletons/TaskSkeleton";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
+import { FEATURES } from "../config/features";
 import { useApp } from "../context/AppContext";
+import { useProjects } from "../features/projects/useProjects";
 import {
   useBulkDeleteTasks,
   useCompleteAllTasks,
@@ -19,6 +23,7 @@ import {
   useTasks,
   useUpdateTask,
 } from "../features/tasks/useTasks";
+import { useParseTaskInput } from "../hooks/useParseTaskInput";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import { useTaskCompletionWithConfetti } from "../hooks/useTaskCompletionWithConfetti";
@@ -43,6 +48,14 @@ export default function Tasks() {
     "priority"
   );
 
+  const [isAIInputOpen, setIsAIInputOpen] = useState(false);
+  const [aiInputValue, setAiInputValue] = useState("");
+  const [showAIConfirmModal, setShowAIConfirmModal] = useState(false);
+  const [createdTaskData, setCreatedTaskData] = useState<Task | null>(null);
+  const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(
+    null
+  );
+
   const { tasks: rawTasks, isLoading, error } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
   const createTaskMutation = useCreateTask();
@@ -53,8 +66,101 @@ export default function Tasks() {
   const bulkDeleteTasksMutation = useBulkDeleteTasks();
   const completeAllTasksMutation = useCompleteAllTasks();
   const { markInstanceComplete, getInstancesForDate } = useRecurringTasks();
+  const parseTaskMutation = useParseTaskInput();
+  const { projects } = useProjects();
 
   const [refreshKey, setRefreshKey] = React.useState(0);
+
+  useEffect(() => {
+    const handleOpenAIInput = () => {
+      setIsAIInputOpen(true);
+    };
+
+    window.addEventListener("openAIInput", handleOpenAIInput);
+    return () => window.removeEventListener("openAIInput", handleOpenAIInput);
+  }, []);
+
+  const handleAITaskCreation = async () => {
+    if (!aiInputValue.trim()) return;
+
+    try {
+      const result = await parseTaskMutation.mutateAsync(aiInputValue);
+
+      if (result.success && result.data) {
+        const taskData = {
+          title: result.data.title,
+          description: result.data.description || undefined,
+          projectId: result.data.projectName
+            ? projects?.find((p) =>
+                p.name
+                  .toLowerCase()
+                  .includes(result.data!.projectName!.toLowerCase())
+              )?.id || undefined
+            : undefined,
+          dueDate: result.data.dueDate
+            ? new Date(result.data.dueDate)
+            : undefined,
+          priority: result.data.priority || "P3",
+          tags: [],
+          attachments: [],
+          recurrence: undefined,
+          subtasks: [],
+          reminders: [],
+          isCompleted: false,
+          completedAt: undefined,
+          workspaceId: state.activeWorkspaceId,
+          order: 0,
+          timeEntries: [],
+          totalTimeSpent: 0,
+          isTimerRunning: false,
+          currentSessionStart: undefined,
+        };
+
+        const createdTask = await createTaskMutation.mutateAsync(taskData);
+
+        setCreatedTaskData(createdTask);
+        setAiInputValue("");
+        setIsAIInputOpen(false);
+        setShowAIConfirmModal(true);
+
+        toast.success("Tarefa criada com sucesso!");
+      } else {
+        if (result.error) {
+          toast.error(result.error);
+        }
+        if (result.suggestions && result.suggestions.length > 0) {
+          toast.info(result.suggestions[0]);
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao criar tarefa via IA:", error);
+      toast.error("Falha ao criar tarefa. Tente novamente.");
+    }
+  };
+
+  const handleConfirmAndEdit = () => {
+    if (createdTaskData) {
+      setEditingTask(createdTaskData);
+      setIsTaskModalOpen(true);
+    }
+    setShowAIConfirmModal(false);
+    setCreatedTaskData(null);
+  };
+
+  const highlightTask = (taskId: string) => {
+    setHighlightedTaskId(taskId);
+
+    setTimeout(() => {
+      const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+      if (taskElement) {
+        taskElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
+
+    setTimeout(() => {
+      setHighlightedTaskId(null);
+    }, 3000);
+  };
 
   const tasks = React.useMemo(() => {
     if (!rawTasks) return [];
@@ -210,6 +316,9 @@ export default function Tasks() {
           {
             onSuccess: (data) => {
               setIsTaskModalOpen(false);
+              if (data && data.id) {
+                highlightTask(data.id);
+              }
               resolve(data);
             },
             onError: (error) => {
@@ -338,20 +447,29 @@ export default function Tasks() {
           }`}
         >
           {filteredTasks.map((task) => (
-            <TaskCard
+            <div
               key={task.id}
-              task={task}
-              onComplete={handleCompleteTask}
-              onUncomplete={handleUncompleteTask}
-              onEdit={handleEditTask}
-              onDelete={handleDeleteTask}
-              onRecurringToggle={handleRecurringTaskToggle}
-              showProject={true}
-              showDate={true}
-              isBulkDeleteMode={isBulkDeleteMode}
-              isSelected={selectedTasks.has(task.id)}
-              onSelectionChange={handleTaskSelection}
-            />
+              data-task-id={task.id}
+              className={`transition-all duration-500 ${
+                highlightedTaskId === task.id
+                  ? "ring-2 ring-blue-400 ring-opacity-75 shadow-lg scale-105"
+                  : ""
+              }`}
+            >
+              <TaskCard
+                task={task}
+                onComplete={handleCompleteTask}
+                onUncomplete={handleUncompleteTask}
+                onEdit={handleEditTask}
+                onDelete={handleDeleteTask}
+                onRecurringToggle={handleRecurringTaskToggle}
+                showProject={true}
+                showDate={true}
+                isBulkDeleteMode={isBulkDeleteMode}
+                isSelected={selectedTasks.has(task.id)}
+                onSelectionChange={handleTaskSelection}
+              />
+            </div>
           ))}
         </div>
       ) : (
@@ -542,6 +660,58 @@ export default function Tasks() {
           </div>
         </div>
       )}
+
+      {FEATURES.AI_ENABLED && (
+        <button
+          onClick={() => setIsAIInputOpen(true)}
+          className="fixed bottom-32 right-4 z-50 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border-0 flex items-center justify-center"
+          style={{
+            border: `1px solid ${state.currentTheme.colors.primary}`,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              state.currentTheme.colors.primary + "60";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+          aria-label="Criar tarefa com IA"
+        >
+          <Sparkles
+            className="w-6 h-6 hover:text-white"
+            style={{
+              color: state.currentTheme.colors.primary,
+              transition: "color 0.2s ease-in-out",
+            }}
+          />
+        </button>
+      )}
+
+      {isAIInputOpen && (
+        <AITaskInput
+          value={aiInputValue}
+          onChange={setAiInputValue}
+          onSubmit={handleAITaskCreation}
+          onClose={() => {
+            setIsAIInputOpen(false);
+            setAiInputValue("");
+          }}
+          isProcessing={parseTaskMutation.isPending}
+        />
+      )}
+
+      <AITaskConfirmModal
+        isOpen={showAIConfirmModal}
+        onClose={() => {
+          setShowAIConfirmModal(false);
+          setCreatedTaskData(null);
+          if (createdTaskData) {
+            highlightTask(createdTaskData.id);
+          }
+        }}
+        task={createdTaskData}
+        onEdit={handleConfirmAndEdit}
+      />
 
       <FloatingActionButton
         onClick={() => {
