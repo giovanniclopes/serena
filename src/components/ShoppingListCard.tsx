@@ -91,7 +91,6 @@ export default function ShoppingListCard({
           borderColor: state.currentTheme.colors.border,
         }}
       >
-        {/* Header da Lista */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-3">
             <div
@@ -157,7 +156,6 @@ export default function ShoppingListCard({
           </div>
         </div>
 
-        {/* Total */}
         {totalPrice > 0 && (
           <div className="mb-3">
             <div
@@ -177,7 +175,6 @@ export default function ShoppingListCard({
           </div>
         )}
 
-        {/* Progress Bar */}
         {totalItems > 0 && (
           <div className="mb-3">
             <div className="flex justify-between text-sm mb-1">
@@ -203,7 +200,6 @@ export default function ShoppingListCard({
           </div>
         )}
 
-        {/* Lista de Itens (Expandida) */}
         {isExpanded && (
           <div className="space-y-2 mb-3">
             {list.items.length > 0 ? (
@@ -235,7 +231,6 @@ export default function ShoppingListCard({
           </div>
         )}
 
-        {/* Footer */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <button
@@ -273,7 +268,6 @@ export default function ShoppingListCard({
         </div>
       </div>
 
-      {/* Modal de Item */}
       <ShoppingListItemModal
         isOpen={isItemModalOpen}
         onClose={() => {

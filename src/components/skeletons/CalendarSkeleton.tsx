@@ -3,7 +3,6 @@ import { Skeleton } from "../ui/Skeleton";
 export function CalendarSkeleton() {
   return (
     <div className="space-y-4">
-      {/* Header skeleton */}
       <div className="flex items-center justify-between">
         <Skeleton className="h-8 w-48" />
         <div className="flex space-x-2">
@@ -12,16 +11,13 @@ export function CalendarSkeleton() {
         </div>
       </div>
 
-      {/* Calendar grid skeleton */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-        {/* Week days header */}
         <div className="grid grid-cols-7 gap-1 p-2 border-b border-gray-100">
           {Array.from({ length: 7 }).map((_, index) => (
             <Skeleton key={index} className="h-8 w-full rounded" />
           ))}
         </div>
 
-        {/* Calendar days */}
         <div className="grid grid-cols-7 gap-1 p-2">
           {Array.from({ length: 35 }).map((_, index) => (
             <div key={index} className="aspect-square p-1">
@@ -41,7 +37,6 @@ export function CalendarSkeleton() {
         </div>
       </div>
 
-      {/* Events list skeleton */}
       <div className="space-y-3">
         <Skeleton className="h-6 w-32" />
         {Array.from({ length: 3 }).map((_, index) => (

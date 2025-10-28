@@ -15,9 +15,6 @@ export interface UploadAttachmentResult {
   error?: string;
 }
 
-/**
- * Faz upload de um arquivo para o Supabase Storage
- */
 export const uploadAttachment = async ({
   file,
   workspaceId,
@@ -80,9 +77,6 @@ export const uploadAttachment = async ({
   }
 };
 
-/**
- * Remove um arquivo do Supabase Storage
- */
 export const deleteAttachment = async (
   attachment: Attachment
 ): Promise<boolean> => {
@@ -109,9 +103,6 @@ export const deleteAttachment = async (
   }
 };
 
-/**
- * Faz upload de múltiplos arquivos
- */
 export const uploadMultipleAttachments = async (
   files: File[],
   workspaceId: string,
@@ -131,9 +122,6 @@ export const uploadMultipleAttachments = async (
   return results;
 };
 
-/**
- * Valida se o arquivo é permitido
- */
 export const validateFile = (
   file: File
 ): { valid: boolean; error?: string } => {

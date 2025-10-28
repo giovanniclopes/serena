@@ -64,7 +64,6 @@ export default function PullToRefreshIndicator({
         </motion.div>
       </div>
 
-      {/* Progress bar */}
       <motion.div
         className="absolute bottom-0 left-0 h-1 rounded-full"
         style={{

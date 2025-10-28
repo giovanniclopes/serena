@@ -1077,7 +1077,6 @@ export default function Calendar() {
                   }
                 }}
               >
-                {/* Indicador de ativo */}
                 {isActive && (
                   <div
                     className="absolute inset-0 rounded-lg opacity-20"
@@ -1088,7 +1087,6 @@ export default function Calendar() {
                   />
                 )}
 
-                {/* Ícone */}
                 <span className="text-sm">
                   {
                     (
@@ -1100,7 +1098,6 @@ export default function Calendar() {
                   }
                 </span>
 
-                {/* Label */}
                 <span className="font-semibold">
                   {modeLabels[mode as keyof typeof modeLabels].label}
                 </span>

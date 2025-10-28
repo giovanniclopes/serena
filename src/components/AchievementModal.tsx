@@ -75,7 +75,6 @@ export default function AchievementModal({
         className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
         style={{ backgroundColor: state.currentTheme.colors.surface }}
       >
-        {/* Header */}
         <div
           className="p-6 border-b"
           style={{ borderColor: state.currentTheme.colors.border }}
@@ -114,7 +113,6 @@ export default function AchievementModal({
             </button>
           </div>
 
-          {/* Tabs */}
           <div className="flex space-x-1 mt-4">
             {[
               { id: "all", label: "Todas" },
@@ -123,7 +121,9 @@ export default function AchievementModal({
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() =>
+                  setActiveTab(tab.id as "all" | "unlocked" | "locked")
+                }
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                   activeTab === tab.id
                     ? "text-white"
@@ -141,7 +141,6 @@ export default function AchievementModal({
             ))}
           </div>
 
-          {/* Categories */}
           <div className="flex flex-wrap gap-2 mt-4">
             {categories.map((category) => (
               <button
@@ -165,7 +164,6 @@ export default function AchievementModal({
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[60vh]">
           {filteredAchievements.length === 0 ? (
             <div className="text-center py-12">
@@ -243,7 +241,6 @@ export default function AchievementModal({
                       </div>
                     </div>
 
-                    {/* Progress Bar */}
                     <div className="mb-2">
                       <div className="flex justify-between text-xs mb-1">
                         <span
@@ -275,7 +272,6 @@ export default function AchievementModal({
                       </div>
                     </div>
 
-                    {/* Status */}
                     {achievement.isUnlocked ? (
                       <div className="flex items-center space-x-2 text-green-600">
                         <div className="w-2 h-2 bg-green-500 rounded-full" />

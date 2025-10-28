@@ -12,7 +12,6 @@ export function HabitSkeleton() {
         <Skeleton className="w-16 h-6 rounded-full" />
       </div>
 
-      {/* Heatmap skeleton */}
       <div className="grid grid-cols-7 gap-1 mb-3">
         {Array.from({ length: 35 }).map((_, index) => (
           <Skeleton

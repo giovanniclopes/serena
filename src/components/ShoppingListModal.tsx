@@ -73,7 +73,6 @@ export default function ShoppingListModal({
         className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto"
         style={{ backgroundColor: state.currentTheme.colors.surface }}
       >
-        {/* Header */}
         <div
           className="flex items-center justify-between p-4 border-b"
           style={{ borderColor: state.currentTheme.colors.border }}
@@ -96,9 +95,7 @@ export default function ShoppingListModal({
           </button>
         </div>
 
-        {/* Form */}
         <div className="p-4 space-y-4">
-          {/* Nome */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -123,7 +120,6 @@ export default function ShoppingListModal({
             />
           </div>
 
-          {/* Descrição */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -148,7 +144,6 @@ export default function ShoppingListModal({
             />
           </div>
 
-          {/* Categoria */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -177,7 +172,6 @@ export default function ShoppingListModal({
             </select>
           </div>
 
-          {/* Cor */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -228,7 +222,6 @@ export default function ShoppingListModal({
             </div>
           </div>
 
-          {/* Ícone */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -279,8 +272,7 @@ export default function ShoppingListModal({
             </div>
           </div>
         </div>
-
-        {/* Footer */}
+                
         <div
           className="flex space-x-3 p-4 border-t"
           style={{ borderColor: state.currentTheme.colors.border }}
