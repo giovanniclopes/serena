@@ -7,7 +7,7 @@ import type { Task, TimeEntry } from "../types";
 export function useTaskTimer(task: Task) {
   const queryClient = useQueryClient();
   const [elapsedTime, setElapsedTime] = useState(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<number | null>(null);
 
   const startMutation = useMutation({
     mutationFn: startTaskTimer,

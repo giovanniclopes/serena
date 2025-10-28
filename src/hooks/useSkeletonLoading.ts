@@ -16,8 +16,8 @@ export function useSkeletonLoading(
   const [isLoadingComplete, setIsLoadingComplete] = useState(false);
 
   useEffect(() => {
-    let showTimer: NodeJS.Timeout | undefined;
-    let hideTimer: NodeJS.Timeout | undefined;
+    let showTimer: number | undefined;
+    let hideTimer: number | undefined;
 
     if (isLoading) {
       showTimer = setTimeout(() => {
@@ -57,7 +57,7 @@ export function useDelayedLoading(isLoading: boolean, delay: number = 200) {
   const [delayedLoading, setDelayedLoading] = useState(false);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: number;
 
     if (isLoading) {
       timer = setTimeout(() => {
