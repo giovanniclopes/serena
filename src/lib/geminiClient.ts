@@ -1,10 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = import.meta.env.VITE_GOOGLE_AI_API_KEY;
+const apiKey = import.meta.env.VITE_GOOGLE_AI_API;
 
 if (!apiKey) {
   console.warn(
-    "VITE_GOOGLE_AI_API_KEY não encontrada. Funcionalidades de IA serão desabilitadas."
+    "VITE_GOOGLE_AI_API não encontrada. Funcionalidades de IA serão desabilitadas."
   );
 }
 
