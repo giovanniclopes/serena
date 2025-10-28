@@ -22,10 +22,12 @@ import {
   GripVertical,
   Plus,
   Settings,
+  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { FEATURES } from "../config/features";
 import { useApp } from "../context/AppContext";
 import {
   useCompleteSubtask,
@@ -37,13 +39,16 @@ import {
   useUpdateSubtask,
 } from "../features/subtasks/useSubtasks";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import { useSuggestSubtasks } from "../hooks/useSuggestSubtasks";
 import type { Task, Theme } from "../types";
 import { formatDate, formatTime } from "../utils";
+import InlineLoadingSpinner from "./InlineLoadingSpinner";
 import SubtaskModal from "./SubtaskModal";
 
 interface SubtaskManagerProps {
   taskId: string;
   workspaceId: string;
+  parentTask?: Task; // Adicionar dados da tarefa pai
 }
 
 interface SortableSubtaskItemProps {
@@ -229,6 +234,7 @@ function SortableSubtaskItem({
 export default function SubtaskManager({
   taskId,
   workspaceId,
+  parentTask,
 }: SubtaskManagerProps) {
   const { state } = useApp();
   const { subtasks, isLoading } = useSubtasks(taskId);
@@ -238,6 +244,7 @@ export default function SubtaskManager({
   const completeSubtaskMutation = useCompleteSubtask();
   const uncompleteSubtaskMutation = useUncompleteSubtask();
   const reorderSubtasksMutation = useReorderSubtasks();
+  const suggestSubtasksMutation = useSuggestSubtasks();
 
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
@@ -408,6 +415,26 @@ export default function SubtaskManager({
     setEditingSubtask(undefined);
   };
 
+  const handleSuggestSubtasks = async () => {
+    if (!parentTask) {
+      console.error(
+        "Dados da tarefa pai não disponíveis para sugerir subtarefas"
+      );
+      return;
+    }
+
+    try {
+      await suggestSubtasksMutation.mutateAsync({
+        taskTitle: parentTask.title,
+        taskDescription: parentTask.description,
+        taskId,
+        workspaceId,
+      });
+    } catch (error) {
+      console.error("Erro ao sugerir subtarefas:", error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="text-center py-2">
@@ -459,6 +486,27 @@ export default function SubtaskManager({
               <Settings size={14} className="sm:w-3 sm:h-3" />
               Detalhado
             </button>
+            {FEATURES.AI_ENABLED && (
+              <button
+                onClick={handleSuggestSubtasks}
+                disabled={suggestSubtasksMutation.isPending}
+                className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-purple-100 transition-colors min-h-[44px] sm:min-h-0 disabled:opacity-50"
+                style={{
+                  color: suggestSubtasksMutation.isPending
+                    ? state.currentTheme.colors.textSecondary
+                    : "#7c3aed",
+                }}
+              >
+                {suggestSubtasksMutation.isPending ? (
+                  <InlineLoadingSpinner size={14} className="sm:w-3 sm:h-3" />
+                ) : (
+                  <Sparkles size={14} className="sm:w-3 sm:h-3" />
+                )}
+                {suggestSubtasksMutation.isPending
+                  ? "Gerando..."
+                  : "Sugerir com IA"}
+              </button>
+            )}
           </div>
         )}
       </div>

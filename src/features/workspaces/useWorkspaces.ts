@@ -16,8 +16,8 @@ export function useWorkspaces() {
   } = useQuery({
     queryKey: ["workspaces"],
     queryFn: getWorkspaces,
-    staleTime: 1000 * 60 * 10, // 10 minutos (workspaces mudam pouco)
-    gcTime: 1000 * 60 * 15, // 15 minutos
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 15,
   });
 
   return { workspaces, isLoading, error };

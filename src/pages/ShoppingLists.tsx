@@ -83,7 +83,6 @@ export default function ShoppingLists() {
     icon?: string;
   }) => {
     if (editingList) {
-      // TODO: Implementar update
       console.log("Update list:", editingList.id, listData);
     } else {
       createListMutation.mutate({
@@ -154,7 +153,6 @@ export default function ShoppingLists() {
         showCompletedLabel="Mostrar concluídas"
       />
 
-      {/* Filtros de Categoria */}
       <div>
         <h3
           className="text-sm font-medium mb-2"
@@ -223,7 +221,6 @@ export default function ShoppingLists() {
         </Select>
       </div>
 
-      {/* Lista de Listas */}
       {filteredLists.length > 0 ? (
         <div
           className={`${
@@ -276,7 +273,6 @@ export default function ShoppingLists() {
         </div>
       )}
 
-      {/* Modal de Criação/Edição */}
       <ShoppingListModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -285,7 +281,6 @@ export default function ShoppingLists() {
         categories={SHOPPING_CATEGORIES}
       />
 
-      {/* Modal de Confirmação de Exclusão */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div

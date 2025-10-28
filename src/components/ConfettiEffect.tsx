@@ -60,7 +60,7 @@ export default function ConfettiEffect({
     if (isActive && onComplete) {
       const timer = setTimeout(() => {
         onComplete();
-      }, 3000); // Confetti dura 3 segundos
+      }, 3000);
 
       return () => clearTimeout(timer);
     }

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import TaskModal from "../components/TaskModal";
 import { useApp } from "../context/AppContext";
 import { useCreateTask } from "../features/tasks/useTasks";
+import { createTask } from "../services/apiTasks";
 import type { Task } from "../types";
 
 export default function NewTask() {
@@ -11,21 +12,22 @@ export default function NewTask() {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(true);
   const createTaskMutation = useCreateTask();
 
-  const handleSaveTask = (
+  const handleSaveTask = async (
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
-  ) => {
-    createTaskMutation.mutate(
-      {
+  ): Promise<Task> => {
+    try {
+      const result = await createTask({
         ...taskData,
         workspaceId: state.activeWorkspaceId,
-      },
-      {
-        onSuccess: () => {
-          setIsTaskModalOpen(false);
-          navigate("/tasks");
-        },
-      }
-    );
+      });
+
+      createTaskMutation.reset();
+
+      return result;
+    } catch (error) {
+      console.error("Erro ao criar tarefa:", error);
+      throw error;
+    }
   };
 
   const handleCancel = () => {
@@ -42,6 +44,10 @@ export default function NewTask() {
         isOpen={isTaskModalOpen}
         onClose={handleCancel}
         onSave={handleSaveTask}
+        onSuccess={() => {
+          setIsTaskModalOpen(false);
+          navigate("/tasks");
+        }}
       />
     </div>
   );

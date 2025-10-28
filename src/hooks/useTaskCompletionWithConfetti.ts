@@ -18,11 +18,9 @@ export function useTaskCompletionWithConfetti() {
         onSuccess: () => {
           if (!isCelebratingRef.current) {
             isCelebratingRef.current = true;
-            // Trigger confetti celebration and sound
             triggerCelebration("task");
             playSuccessSound();
 
-            // Reset flag after celebration
             setTimeout(() => {
               isCelebratingRef.current = false;
             }, 3000);

@@ -15,8 +15,8 @@ export function useCountdowns() {
   } = useQuery({
     queryKey: ["countdowns"],
     queryFn: getCountdowns,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 10, // 10 minutos
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
   });
 
   return { countdowns: countdowns || [], isLoading, error };

@@ -41,7 +41,6 @@ export default function ShoppingStatisticsModal({
         className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto"
         style={{ backgroundColor: state.currentTheme.colors.surface }}
       >
-        {/* Header */}
         <div
           className="flex items-center justify-between p-4 border-b"
           style={{ borderColor: state.currentTheme.colors.border }}
@@ -65,9 +64,7 @@ export default function ShoppingStatisticsModal({
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-4 space-y-6">
-          {/* Resumo Geral */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div
               className="p-4 rounded-lg border"
@@ -182,7 +179,6 @@ export default function ShoppingStatisticsModal({
             </div>
           </div>
 
-          {/* Gastos por Categoria */}
           {statistics.spendingByCategory.length > 0 && (
             <div>
               <h3
@@ -249,7 +245,6 @@ export default function ShoppingStatisticsModal({
             </div>
           )}
 
-          {/* Itens Mais Comprados */}
           {statistics.mostPurchasedItems.length > 0 && (
             <div>
               <h3
@@ -314,7 +309,6 @@ export default function ShoppingStatisticsModal({
             </div>
           )}
 
-          {/* Top Localizações */}
           {statistics.topLocations.length > 0 && (
             <div>
               <h3
@@ -385,7 +379,6 @@ export default function ShoppingStatisticsModal({
             </div>
           )}
 
-          {/* Gastos por Mês */}
           {statistics.spendingByMonth.length > 0 && (
             <div>
               <h3
@@ -440,7 +433,6 @@ export default function ShoppingStatisticsModal({
           )}
         </div>
 
-        {/* Footer */}
         <div
           className="flex justify-end p-4 border-t"
           style={{ borderColor: state.currentTheme.colors.border }}

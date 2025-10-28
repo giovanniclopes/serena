@@ -27,7 +27,7 @@ export default function FloatingActionButton({
     <button
       onClick={handleClick}
       className={`
-        fixed bottom-24 right-4 z-50
+        fixed bottom-16 right-4 z-50
         w-14 h-14 rounded-full
         shadow-lg hover:shadow-xl
         transition-all duration-200

@@ -53,7 +53,6 @@ export function Drawer({
 
   return (
     <div className="fixed inset-0 z-50">
-      {/* Overlay */}
       <div
         className={cn(
           "fixed inset-0 bg-black transition-opacity duration-300",
@@ -62,7 +61,6 @@ export function Drawer({
         onClick={onClose}
       />
 
-      {/* Drawer */}
       <div
         className={cn(
           "fixed bottom-0 left-0 right-0 z-50",
@@ -75,12 +73,10 @@ export function Drawer({
           transform: isVisible ? "translateY(0)" : "translateY(100%)",
         }}
       >
-        {/* Handle bar */}
         <div className="flex justify-center pt-3 pb-2">
           <div className="w-12 h-1 bg-gray-300 rounded-full" />
         </div>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-4 pb-4">
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
@@ -96,7 +92,6 @@ export function Drawer({
           </button>
         </div>
 
-        {/* Content */}
         <div className="overflow-y-auto max-h-[calc(95vh-120px)] px-4 pb-4">
           {children}
         </div>

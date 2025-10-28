@@ -1,4 +1,4 @@
-# 🌸 Serena - Aplicativo de Produtividade e Bem-Estar
+# Serena - Organize sua vida
 
 Serena é um assistente pessoal inteligente e esteticamente agradável que combina gerenciamento de tarefas com planejamento visual e módulos de bem-estar, oferecendo uma experiência nativa e polida.
 

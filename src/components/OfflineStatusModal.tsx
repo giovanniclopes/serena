@@ -122,7 +122,6 @@ export default function OfflineStatusModal({
         className="bg-white rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden"
         style={{ backgroundColor: state.currentTheme.colors.surface }}
       >
-        {/* Header */}
         <div
           className="p-6 border-b"
           style={{ borderColor: state.currentTheme.colors.border }}
@@ -161,9 +160,7 @@ export default function OfflineStatusModal({
           </div>
         </div>
 
-        {/* Content */}
         <div className="p-6 space-y-6 max-h-96 overflow-y-auto">
-          {/* Status Info */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <span
@@ -223,7 +220,6 @@ export default function OfflineStatusModal({
             </div>
           </div>
 
-          {/* Pending Actions */}
           {pendingActions.length > 0 && (
             <div>
               <h3
@@ -287,7 +283,6 @@ export default function OfflineStatusModal({
             </div>
           )}
 
-          {/* Actions */}
           <div className="space-y-3">
             {!isOnline && pendingActions.length > 0 && (
               <button
@@ -325,7 +320,6 @@ export default function OfflineStatusModal({
           </div>
         </div>
 
-        {/* Clear Confirmation */}
         {showClearConfirm && (
           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
             <motion.div

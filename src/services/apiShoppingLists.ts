@@ -11,7 +11,6 @@ import type {
 export async function getShoppingLists(
   workspaceId?: string
 ): Promise<ShoppingList[]> {
-  // Obter o usuário atual
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -41,9 +40,8 @@ export async function getShoppingLists(
       )
     `
     )
-    .eq("user_id", user.id); // Filtrar por usuário
+    .eq("user_id", user.id); 
 
-  // Filtrar por workspace se especificado
   if (workspaceId) {
     query = query.eq("workspace_id", workspaceId);
   }
@@ -92,7 +90,6 @@ export async function getShoppingLists(
 export async function createShoppingList(
   shoppingList: CreateShoppingListData
 ): Promise<ShoppingList> {
-  // Obter o usuário atual
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -110,7 +107,7 @@ export async function createShoppingList(
       color: shoppingList.color,
       icon: shoppingList.icon,
       workspace_id: shoppingList.workspaceId,
-      user_id: user.id, // Adicionar user_id explicitamente
+      user_id: user.id,
     })
     .select()
     .single();
@@ -140,7 +137,6 @@ export async function updateShoppingList(
   id: string,
   updates: UpdateShoppingListData
 ): Promise<ShoppingList> {
-  // Obter o usuário atual
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -160,7 +156,7 @@ export async function updateShoppingList(
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .eq("user_id", user.id) // Garantir que só atualiza listas do usuário
+    .eq("user_id", user.id)
     .select()
     .single();
 
@@ -186,7 +182,6 @@ export async function updateShoppingList(
 }
 
 export async function deleteShoppingList(id: string): Promise<void> {
-  // Obter o usuário atual
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -199,7 +194,7 @@ export async function deleteShoppingList(id: string): Promise<void> {
     .from("shopping_lists")
     .delete()
     .eq("id", id)
-    .eq("user_id", user.id); // Garantir que só deleta listas do usuário
+    .eq("user_id", user.id);
 
   if (error) {
     console.error("Erro ao excluir lista de compras:", error);
@@ -210,7 +205,6 @@ export async function deleteShoppingList(id: string): Promise<void> {
 export async function createShoppingListItem(
   item: CreateShoppingListItemData
 ): Promise<ShoppingListItem> {
-  // Obter o usuário atual
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -229,7 +223,7 @@ export async function createShoppingListItem(
       price: item.price,
       order_index: item.orderIndex || 0,
       workspace_id: item.workspaceId,
-      user_id: user.id, // Adicionar user_id explicitamente
+      user_id: user.id,
     })
     .select()
     .single();
@@ -259,7 +253,6 @@ export async function updateShoppingListItem(
   id: string,
   updates: UpdateShoppingListItemData
 ): Promise<ShoppingListItem> {
-  // Obter o usuário atual
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -288,7 +281,7 @@ export async function updateShoppingListItem(
     .from("shopping_list_items")
     .update(updateData)
     .eq("id", id)
-    .eq("user_id", user.id) // Garantir que só atualiza itens do usuário
+    .eq("user_id", user.id)
     .select()
     .single();
 
@@ -314,7 +307,6 @@ export async function updateShoppingListItem(
 }
 
 export async function deleteShoppingListItem(id: string): Promise<void> {
-  // Obter o usuário atual
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -327,7 +319,7 @@ export async function deleteShoppingListItem(id: string): Promise<void> {
     .from("shopping_list_items")
     .delete()
     .eq("id", id)
-    .eq("user_id", user.id); // Garantir que só deleta itens do usuário
+    .eq("user_id", user.id);
 
   if (error) {
     console.error("Erro ao excluir item da lista:", error);

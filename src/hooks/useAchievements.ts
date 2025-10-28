@@ -23,7 +23,6 @@ export function useAchievements() {
   const { triggerCelebration } = useConfetti();
   const { playAchievementSound, playMilestoneSound } = useCelebrationSound();
 
-  // Carregar conquistas salvas
   useEffect(() => {
     const savedAchievements = localStorage.getItem("serena_achievements");
     const savedProgress = localStorage.getItem("serena_achievement_progress");
@@ -31,7 +30,6 @@ export function useAchievements() {
     if (savedAchievements) {
       setAchievements(JSON.parse(savedAchievements));
     } else {
-      // Inicializar com conquistas não desbloqueadas
       const initialAchievements = ACHIEVEMENTS.map((achievement) => ({
         ...achievement,
         currentProgress: 0,
@@ -45,7 +43,6 @@ export function useAchievements() {
     }
   }, []);
 
-  // Salvar conquistas
   useEffect(() => {
     if (achievements.length > 0) {
       localStorage.setItem("serena_achievements", JSON.stringify(achievements));
@@ -61,18 +58,15 @@ export function useAchievements() {
     }
   }, [progress]);
 
-  // Calcular progresso das conquistas
   const calculateProgress = useCallback(() => {
     setAchievements((currentAchievements) => {
       const newProgress: AchievementProgress[] = [];
       const newAchievements = [...currentAchievements];
       const newlyUnlockedAchievements: Achievement[] = [];
 
-      // Conquistas de tarefas
       const completedTasks = tasks.filter((task) => task.isCompleted);
       const completedTasksCount = completedTasks.length;
 
-      // Conquistas de hábitos
       const completedHabits = habits.filter((habit) => {
         const today = new Date();
         const todayEntry = habitEntries.find(
@@ -83,13 +77,11 @@ export function useAchievements() {
         return todayEntry && todayEntry.value >= habit.target;
       });
 
-      // Conquistas de streak (baseado em dias consecutivos com tarefas completadas)
       const today = new Date();
       const streakDays = (() => {
         let currentStreak = 0;
         let checkDate = new Date(today);
 
-        // Verificar dias consecutivos começando de hoje
         for (let i = 0; i < 100; i++) {
           const dayTasks = tasks.filter(
             (task) =>
@@ -110,7 +102,6 @@ export function useAchievements() {
         return currentStreak;
       })();
 
-      // Conquistas de marcos
       const earlyBirdTasks = completedTasks.filter(
         (task) => task.completedAt && new Date(task.completedAt).getHours() < 8
       );
@@ -119,7 +110,6 @@ export function useAchievements() {
           task.completedAt && new Date(task.completedAt).getHours() >= 22
       );
 
-      // Calcular tarefas por dia
       const tasksByDay = new Map<string, number>();
       completedTasks.forEach((task) => {
         if (task.completedAt) {
@@ -130,7 +120,6 @@ export function useAchievements() {
 
       const maxTasksInDay = Math.max(...Array.from(tasksByDay.values()), 0);
 
-      // Verificar cada conquista
       ACHIEVEMENTS.forEach((achievement) => {
         let currentValue = 0;
         let isCompleted = false;
@@ -178,16 +167,13 @@ export function useAchievements() {
             break;
 
           case "perfectionist":
-            // Verificar se houve dias com todas as tarefas completadas
             const perfectDays = Array.from(tasksByDay.entries()).filter(
               ([day, count]) => {
-                // Buscar todas as tarefas que tinham prazo para esse dia
                 const dayTasks = tasks.filter(
                   (task) =>
                     task.dueDate &&
                     new Date(task.dueDate).toDateString() === day
                 );
-                // Um dia perfeito é quando todas as tarefas com prazo foram completadas
                 return dayTasks.length > 0 && count === dayTasks.length;
               }
             ).length;
@@ -219,7 +205,6 @@ export function useAchievements() {
             break;
 
           case "project_completer":
-            // Verificar se há projetos completados (todas as tarefas do projeto completadas)
             const completedProjects = (projects || []).filter((project) => {
               const projectTasks = tasks.filter(
                 (task) => task.projectId === project.id
@@ -234,19 +219,16 @@ export function useAchievements() {
             break;
 
           case "multitasker":
-            // Verificar se houve dias com tarefas de 3+ categorias diferentes completadas
             const multitaskDays = Array.from(tasksByDay.entries()).filter(
               ([day, count]) => {
-                if (count < 3) return false; // Precisa de pelo menos 3 tarefas
+                if (count < 3) return false;
 
-                // Buscar tarefas completadas nesse dia
                 const dayTasks = completedTasks.filter(
                   (task) =>
                     task.completedAt &&
                     new Date(task.completedAt).toDateString() === day
                 );
 
-                // Contar categorias únicas (usando tags como categorias)
                 const uniqueCategories = new Set(
                   dayTasks
                     .filter((task) => task.tags && task.tags.length > 0)
@@ -260,11 +242,7 @@ export function useAchievements() {
             isCompleted = currentValue >= achievement.requirement;
             break;
 
-          // Conquistas Geek
           case "ill_be_back":
-            // Verificar se há tarefas que foram desmarcadas e marcadas novamente
-            // Por simplicidade, vamos contar tarefas completadas nos últimos 3 dias
-            // (assumindo que se foi completada recentemente, pode ter sido re-completada)
             const recentCompletedTasks = completedTasks.filter((task) => {
               return (
                 task.completedAt &&
@@ -277,19 +255,16 @@ export function useAchievements() {
             break;
 
           case "may_the_force":
-            // Já calculado acima como streak_7, mas vamos manter separado
             currentValue = streakDays;
             isCompleted = currentValue >= achievement.requirement;
             break;
 
           case "to_infinity_beyond":
-            // Já calculado acima como task_master_100
             currentValue = completedTasksCount;
             isCompleted = currentValue >= achievement.requirement;
             break;
 
           case "great_power_responsibility":
-            // Já calculado acima como project_completer
             const completedProjectsCount = (projects || []).filter(
               (project) => {
                 const projectTasks = tasks.filter(
@@ -306,18 +281,15 @@ export function useAchievements() {
             break;
 
           case "i_am_iron_man":
-            // Já calculado acima como speed_demon
             currentValue = maxTasksInDay;
             isCompleted = currentValue >= achievement.requirement;
             break;
 
           case "back_to_future":
-            // Verificar se há tarefas que estavam atrasadas e foram completadas
             const overdueCompletedTasks = completedTasks.filter((task) => {
               if (!task.completedAt || !task.dueDate) return false;
               const completedDate = new Date(task.completedAt);
               const dueDate = new Date(task.dueDate);
-              // Tarefa estava atrasada se foi completada após o prazo
               return completedDate > dueDate;
             });
             currentValue = overdueCompletedTasks.length > 0 ? 1 : 0;
@@ -332,7 +304,6 @@ export function useAchievements() {
           completedAt: isCompleted ? new Date() : undefined,
         });
 
-        // Verificar se a conquista foi desbloqueada
         const existingAchievement = newAchievements.find(
           (a) => a.id === achievement.id
         );
@@ -367,7 +338,6 @@ export function useAchievements() {
       if (newlyUnlockedAchievements.length > 0) {
         setNewlyUnlocked(newlyUnlockedAchievements);
 
-        // Celebrar conquistas desbloqueadas
         newlyUnlockedAchievements.forEach((achievement) => {
           const rarity = achievement.rarity;
 
@@ -407,7 +377,6 @@ export function useAchievements() {
     playMilestoneSound,
   ]);
 
-  // Executar cálculo de progresso quando as dependências mudarem
   useEffect(() => {
     if (achievements.length > 0) {
       calculateProgress();

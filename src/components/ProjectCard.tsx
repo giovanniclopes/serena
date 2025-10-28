@@ -50,7 +50,6 @@ export default function ProjectCard({
       padding="md"
     >
       <div className="flex flex-col" style={{ gap: spacing.md }}>
-        {/* Header */}
         <div className="flex items-start" style={{ gap: spacing.md }}>
           <div
             className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg flex-shrink-0"
@@ -87,7 +86,6 @@ export default function ProjectCard({
             )}
           </div>
 
-          {/* Action Buttons - Desktop Only */}
           {!isMobile && (
             <div className="flex items-center" style={{ gap: spacing.xs }}>
               <MobileButton
@@ -140,7 +138,6 @@ export default function ProjectCard({
           )}
         </div>
 
-        {/* Progress Section */}
         {project.tasksTotalCount > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
@@ -182,7 +179,6 @@ export default function ProjectCard({
               </div>
             </div>
 
-            {/* Progress Bar */}
             <div className="relative">
               <div
                 className="w-full rounded-full h-3 overflow-hidden"
@@ -213,7 +209,6 @@ export default function ProjectCard({
               </div>
             </div>
 
-            {/* Completion Message */}
             {completionPercentage === 100 && (
               <div
                 className="flex items-center gap-2 mt-4 p-3 rounded-xl"
@@ -237,7 +232,6 @@ export default function ProjectCard({
           </div>
         )}
 
-        {/* Action Buttons for Mobile */}
         {isMobile && (
           <div className="flex gap-2 pt-2">
             <button

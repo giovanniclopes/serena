@@ -20,6 +20,7 @@ import { useProfile } from "../features/profile/useProfile";
 import { useOfflineMode } from "../hooks/useOfflineMode";
 import LogoutModal from "./LogoutModal";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { ShimmeringText } from "./ui/shimmering-text";
 
 interface SideMenuProps {
   isOpen: boolean;
@@ -85,12 +86,15 @@ export default function SideMenu({
               }}
             >
               <div className="flex items-center justify-between mb-2 p-6 py-2 pb-0">
-                <h2
-                  className="text-xl font-bold"
-                  style={{ color: state.currentTheme.colors.primary }}
-                >
-                  Serena
-                </h2>
+                <ShimmeringText
+                  text="Serena"
+                  className="text-2xl font-bold"
+                  duration={0.8}
+                  wave={true}
+                  color={state.currentTheme.colors.primary}
+                  shimmeringColor={state.currentTheme.colors.primary + "80"}
+                  shouldAnimate={isOpen}
+                />
                 <button
                   onClick={onClose}
                   className="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"

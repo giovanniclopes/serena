@@ -3,7 +3,6 @@ import { Skeleton } from "../ui/Skeleton";
 export function HomeSkeleton() {
   return (
     <div className="space-y-6">
-      {/* Header skeleton */}
       <div className="bg-white shadow-sm border-b border-gray-100 px-4 py-4">
         <div className="flex items-center justify-between">
           <div>
@@ -13,7 +12,6 @@ export function HomeSkeleton() {
         </div>
       </div>
 
-      {/* Stats grid skeleton */}
       <div className="px-4">
         <div className="grid grid-cols-2 gap-3 mb-6">
           {Array.from({ length: 4 }).map((_, index) => (
@@ -32,9 +30,7 @@ export function HomeSkeleton() {
           ))}
         </div>
 
-        {/* Section skeletons */}
         <div className="space-y-6">
-          {/* Tarefas de hoje */}
           <div>
             <div className="flex items-center space-x-2 mb-3">
               <Skeleton className="w-1 h-6 rounded-full" />
@@ -58,8 +54,7 @@ export function HomeSkeleton() {
               ))}
             </div>
           </div>
-
-          {/* Próximos 7 dias */}
+              
           <div>
             <div className="flex items-center space-x-2 mb-3">
               <Skeleton className="w-1 h-6 rounded-full" />

@@ -157,28 +157,40 @@ export default function Layout() {
     setIsProjectModalOpen(true);
   };
 
-  const handleSaveTask = (
+  const handleSaveTask = async (
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
-  ) => {
+  ): Promise<Task> => {
     const offlineResult = createTaskOffline({
       ...taskData,
       workspaceId: state.activeWorkspaceId,
     });
 
     if (offlineResult.shouldExecute) {
-      createTaskMutation.mutate(
-        {
-          ...taskData,
-          workspaceId: state.activeWorkspaceId,
-        },
-        {
-          onSuccess: () => {
-            setIsTaskModalOpen(false);
+      return new Promise((resolve, reject) => {
+        createTaskMutation.mutate(
+          {
+            ...taskData,
+            workspaceId: state.activeWorkspaceId,
           },
-        }
-      );
+          {
+            onSuccess: (data) => {
+              setIsTaskModalOpen(false);
+              resolve(data);
+            },
+            onError: (error) => {
+              reject(error);
+            },
+          }
+        );
+      });
     } else {
       setIsTaskModalOpen(false);
+      return {
+        ...taskData,
+        id: `offline-${Date.now()}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      } as Task;
     }
   };
 

@@ -101,7 +101,6 @@ export default function OfflineIndicator() {
           )}
         </div>
 
-        {/* Barra de progresso para sincronização */}
         {syncInProgress && (
           <motion.div
             initial={{ width: 0 }}
