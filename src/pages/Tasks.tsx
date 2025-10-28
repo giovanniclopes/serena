@@ -91,11 +91,75 @@ export default function Tasks() {
           title: result.data.title,
           description: result.data.description || undefined,
           projectId: result.data.projectName
-            ? projects?.find((p) =>
-                p.name
-                  .toLowerCase()
-                  .includes(result.data!.projectName!.toLowerCase())
-              )?.id || undefined
+            ? projects?.find((p) => {
+                const projectName = p.name.toLowerCase().trim();
+                const searchName = result
+                  .data!.projectName!.toLowerCase()
+                  .trim();
+
+                console.log("🔍 Buscando projeto:", {
+                  projectName,
+                  searchName,
+                  originalProjectName: p.name,
+                  originalSearchName: result.data!.projectName,
+                });
+
+                // Busca exata
+                if (projectName === searchName) return true;
+
+                // Busca por palavras-chave (remove artigos e preposições)
+                const projectWords = projectName
+                  .split(/\s+/)
+                  .filter(
+                    (word) =>
+                      ![
+                        "de",
+                        "da",
+                        "do",
+                        "das",
+                        "dos",
+                        "em",
+                        "na",
+                        "no",
+                        "nas",
+                        "nos",
+                      ].includes(word)
+                  );
+                const searchWords = searchName
+                  .split(/\s+/)
+                  .filter(
+                    (word) =>
+                      ![
+                        "de",
+                        "da",
+                        "do",
+                        "das",
+                        "dos",
+                        "em",
+                        "na",
+                        "no",
+                        "nas",
+                        "nos",
+                      ].includes(word)
+                  );
+
+                console.log("📝 Palavras extraídas:", {
+                  projectWords,
+                  searchWords,
+                });
+
+                // Verifica se todas as palavras de busca estão no nome do projeto
+                const match = searchWords.every((searchWord) =>
+                  projectWords.some(
+                    (projectWord) =>
+                      projectWord.includes(searchWord) ||
+                      searchWord.includes(projectWord)
+                  )
+                );
+
+                console.log("✅ Match encontrado:", match);
+                return match;
+              })?.id || undefined
             : undefined,
           dueDate: result.data.dueDate
             ? new Date(result.data.dueDate)

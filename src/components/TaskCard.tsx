@@ -337,7 +337,11 @@ export default function TaskCard({
           )}
 
           <div style={{ marginTop: spacing.sm }}>
-            <SubtaskManager taskId={task.id} workspaceId={task.workspaceId} />
+            <SubtaskManager
+              taskId={task.id}
+              workspaceId={task.workspaceId}
+              parentTask={task}
+            />
           </div>
         </div>
       </div>

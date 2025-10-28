@@ -48,6 +48,7 @@ import SubtaskModal from "./SubtaskModal";
 interface SubtaskManagerProps {
   taskId: string;
   workspaceId: string;
+  parentTask?: Task; // Adicionar dados da tarefa pai
 }
 
 interface SortableSubtaskItemProps {
@@ -233,6 +234,7 @@ function SortableSubtaskItem({
 export default function SubtaskManager({
   taskId,
   workspaceId,
+  parentTask,
 }: SubtaskManagerProps) {
   const { state } = useApp();
   const { subtasks, isLoading } = useSubtasks(taskId);
@@ -414,13 +416,17 @@ export default function SubtaskManager({
   };
 
   const handleSuggestSubtasks = async () => {
-    const parentTask = subtasks?.[0];
-    if (!parentTask) return;
+    if (!parentTask) {
+      console.error(
+        "Dados da tarefa pai não disponíveis para sugerir subtarefas"
+      );
+      return;
+    }
 
     try {
       await suggestSubtasksMutation.mutateAsync({
-        taskTitle: "Tarefa principal",
-        taskDescription: undefined,
+        taskTitle: parentTask.title,
+        taskDescription: parentTask.description,
         taskId,
         workspaceId,
       });

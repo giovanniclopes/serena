@@ -515,6 +515,7 @@ export default function TaskModal({
             <SubtaskManager
               taskId={task.id}
               workspaceId={state.activeWorkspaceId}
+              parentTask={task}
             />
           </div>
         )}

@@ -59,8 +59,18 @@ export async function parseTaskFromNaturalLanguage(
     };
   }
 
+  const currentDate = new Date();
+  const currentDateString = currentDate.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   const prompt = `
 Analise o seguinte texto em linguagem natural e extraia informações estruturadas para uma tarefa.
+
+Data atual: ${currentDateString} (${currentDate.toISOString().split("T")[0]})
 
 Texto: "${input}"
 
@@ -71,11 +81,26 @@ Retorne APENAS um JSON válido com os seguintes campos:
 - priority: string (opcional, "P1", "P2", "P3" ou "P4")
 - projectName: string (opcional, nome do projeto mencionado)
 
-Regras:
+Regras para datas:
+- "amanhã" = próxima data após hoje (${
+    new Date(currentDate.getTime() + 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split("T")[0]
+  })
+- "hoje" = data atual (${currentDate.toISOString().split("T")[0]})
+- "próxima semana" = data da próxima semana
+- Use sempre a data atual como referência para datas relativas
 - Se não houver data específica, omita dueDate
+
+Regras para projetos:
+- Extraia o nome do projeto exatamente como mencionado
+- Se mencionar "no projeto X" ou "projeto X", use "X" como projectName
+- Mantenha a capitalização original do nome do projeto
+- Se não mencionar projeto, omita projectName
+
+Regras gerais:
 - Prioridade: P1=urgente, P2=alta, P3=média, P4=baixa
 - Se não mencionar prioridade, omita o campo
-- Se não mencionar projeto, omita projectName
 - Seja conciso mas preciso
 - SEMPRE extraia pelo menos o título da tarefa
 
