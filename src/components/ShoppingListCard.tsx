@@ -38,7 +38,6 @@ export default function ShoppingListCard({
   const progressPercentage =
     totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
-  // Calcular total dos itens com preço
   const totalPrice = list.items.reduce((sum, item) => {
     return sum + (item.price || 0);
   }, 0);
@@ -60,7 +59,6 @@ export default function ShoppingListCard({
     price?: number;
   }) => {
     if (editingItem) {
-      // Atualizar item existente
       updateItemMutation.mutate({
         id: editingItem.id,
         updates: {
@@ -71,7 +69,6 @@ export default function ShoppingListCard({
         },
       });
     } else {
-      // Criar novo item
       createItemMutation.mutate({
         shoppingListId: list.id,
         name: itemData.name,

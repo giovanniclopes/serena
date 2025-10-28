@@ -7,7 +7,6 @@ export function useShoppingStatistics(
   return useMemo(() => {
     const completedLists = shoppingLists.filter((list) => list.isCompleted);
 
-    // Calcular total gasto (soma dos preços reais dos itens comprados)
     const totalSpent = shoppingLists.reduce((total, list) => {
       return (
         total +
@@ -20,11 +19,9 @@ export function useShoppingStatistics(
       );
     }, 0);
 
-    // Calcular valor médio por lista
     const averageListValue =
       completedLists.length > 0 ? totalSpent / completedLists.length : 0;
 
-    // Gastos por categoria
     const spendingByCategory = shoppingLists.reduce((acc, list) => {
       const listSpent = list.items.reduce((total, item) => {
         return (
@@ -46,7 +43,6 @@ export function useShoppingStatistics(
       return acc;
     }, [] as Array<{ category: string; amount: number; count: number }>);
 
-    // Itens mais comprados
     const itemCounts = new Map<string, { count: number; totalSpent: number }>();
     shoppingLists.forEach((list) => {
       list.items.forEach((item) => {
@@ -73,7 +69,6 @@ export function useShoppingStatistics(
       }))
       .sort((a, b) => b.count - a.count);
 
-    // Gastos por mês
     const spendingByMonth = shoppingLists.reduce((acc, list) => {
       if (list.completedAt) {
         const month = new Date(list.completedAt).toLocaleDateString("pt-BR", {
@@ -103,7 +98,6 @@ export function useShoppingStatistics(
       return acc;
     }, [] as Array<{ month: string; amount: number; count: number }>);
 
-    // Top localizações
     const locationCounts = new Map<string, { amount: number; count: number }>();
     shoppingLists.forEach((list) => {
       if (list.location && list.isCompleted) {

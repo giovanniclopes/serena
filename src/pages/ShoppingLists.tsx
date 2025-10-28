@@ -83,7 +83,6 @@ export default function ShoppingLists() {
     icon?: string;
   }) => {
     if (editingList) {
-      // TODO: Implementar update
       console.log("Update list:", editingList.id, listData);
     } else {
       createListMutation.mutate({

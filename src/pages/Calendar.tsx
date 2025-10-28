@@ -140,9 +140,7 @@ export default function Calendar() {
       toast.success("Tarefa recorrente marcada como não concluída!");
     }
 
-    // Forçar re-render do calendário
     setCurrentDate(new Date(currentDate));
-    // Se a data selecionada for a mesma da tarefa, forçar atualização
     if (selectedDate && isSameDay(selectedDate, date)) {
       setSelectedDate(new Date(selectedDate));
     }
@@ -171,35 +169,47 @@ export default function Calendar() {
     }
   };
 
-  const handleSaveTask = (
+  const handleSaveTask = async (
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
-  ) => {
+  ): Promise<Task> => {
     if (editingTask) {
-      updateTaskMutation.mutate(
-        {
-          ...editingTask,
-          ...taskData,
-          updatedAt: new Date(),
-        },
-        {
-          onSuccess: () => {
-            setIsTaskModalOpen(false);
-            setEditingTask(undefined);
+      return new Promise((resolve, reject) => {
+        updateTaskMutation.mutate(
+          {
+            ...editingTask,
+            ...taskData,
+            updatedAt: new Date(),
           },
-        }
-      );
+          {
+            onSuccess: (data) => {
+              setIsTaskModalOpen(false);
+              setEditingTask(undefined);
+              resolve(data);
+            },
+            onError: (error) => {
+              reject(error);
+            },
+          }
+        );
+      });
     } else {
-      createTaskMutation.mutate(
-        {
-          ...taskData,
-          workspaceId: state.activeWorkspaceId,
-        },
-        {
-          onSuccess: () => {
-            setIsTaskModalOpen(false);
+      return new Promise((resolve, reject) => {
+        createTaskMutation.mutate(
+          {
+            ...taskData,
+            workspaceId: state.activeWorkspaceId,
           },
-        }
-      );
+          {
+            onSuccess: (data) => {
+              setIsTaskModalOpen(false);
+              resolve(data);
+            },
+            onError: (error) => {
+              reject(error);
+            },
+          }
+        );
+      });
     }
   };
 

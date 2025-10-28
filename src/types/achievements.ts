@@ -29,7 +29,6 @@ export const ACHIEVEMENTS: Omit<
   Achievement,
   "currentProgress" | "isUnlocked" | "unlockedAt"
 >[] = [
-  // Conquistas de Tarefas
   {
     id: "first_task",
     title: "Primeiro Passo",
@@ -81,7 +80,6 @@ export const ACHIEVEMENTS: Omit<
     xpReward: 500,
   },
 
-  // Conquistas de Streaks
   {
     id: "streak_3",
     title: "Em Construção",
@@ -113,7 +111,6 @@ export const ACHIEVEMENTS: Omit<
     xpReward: 1000,
   },
 
-  // Conquistas de Hábitos
   {
     id: "habit_creator",
     title: "Criador de Hábitos",
@@ -135,7 +132,6 @@ export const ACHIEVEMENTS: Omit<
     xpReward: 75,
   },
 
-  // Conquistas de Marcos
   {
     id: "early_bird",
     title: "Madrugador",
@@ -187,7 +183,6 @@ export const ACHIEVEMENTS: Omit<
     xpReward: 80,
   },
 
-  // Conquistas de Projetos
   {
     id: "project_creator",
     title: "Arquiteto de Projetos",
@@ -229,7 +224,6 @@ export const ACHIEVEMENTS: Omit<
     xpReward: 120,
   },
 
-  // Conquistas Geek
   {
     id: "ill_be_back",
     title: "I'll be back",

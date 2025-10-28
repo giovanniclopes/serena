@@ -56,7 +56,6 @@ export default function Tasks() {
 
   const [refreshKey, setRefreshKey] = React.useState(0);
 
-  // Processar tarefas para incluir instâncias recorrentes
   const tasks = React.useMemo(() => {
     if (!rawTasks) return [];
 
@@ -178,22 +177,48 @@ export default function Tasks() {
     setIsBulkDeleteMode(false);
   };
 
-  const handleSaveTask = (
+  const handleSaveTask = async (
     taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
-  ) => {
+  ): Promise<Task> => {
     if (editingTask) {
-      updateTaskMutation.mutate({
-        ...editingTask,
-        ...taskData,
-        updatedAt: new Date(),
+      return new Promise((resolve, reject) => {
+        updateTaskMutation.mutate(
+          {
+            ...editingTask,
+            ...taskData,
+            updatedAt: new Date(),
+          },
+          {
+            onSuccess: (data) => {
+              setIsTaskModalOpen(false);
+              setEditingTask(undefined);
+              resolve(data);
+            },
+            onError: (error) => {
+              reject(error);
+            },
+          }
+        );
       });
     } else {
-      createTaskMutation.mutate({
-        ...taskData,
-        workspaceId: state.activeWorkspaceId,
+      return new Promise((resolve, reject) => {
+        createTaskMutation.mutate(
+          {
+            ...taskData,
+            workspaceId: state.activeWorkspaceId,
+          },
+          {
+            onSuccess: (data) => {
+              setIsTaskModalOpen(false);
+              resolve(data);
+            },
+            onError: (error) => {
+              reject(error);
+            },
+          }
+        );
       });
     }
-    setIsTaskModalOpen(false);
   };
 
   const handleCompleteAllTasks = () => {

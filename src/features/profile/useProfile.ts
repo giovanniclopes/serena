@@ -16,8 +16,8 @@ export function useProfile() {
   } = useQuery({
     queryKey: ["profile"],
     queryFn: getCurrentProfile,
-    staleTime: 1000 * 60 * 15, // 15 minutos (perfil muda pouco)
-    gcTime: 1000 * 60 * 30, // 30 minutos
+    staleTime: 1000 * 60 * 15,
+    gcTime: 1000 * 60 * 30,
     retry: (failureCount, error) => {
       if (error?.message?.includes("PGRST116")) {
         return false;

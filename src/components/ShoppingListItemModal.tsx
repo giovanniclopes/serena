@@ -29,7 +29,6 @@ export default function ShoppingListItemModal({
   const [price, setPrice] = useState("");
   const [priceDisplay, setPriceDisplay] = useState("");
 
-  // Preencher campos quando editando
   useEffect(() => {
     if (item) {
       setName(item.name);
@@ -37,7 +36,6 @@ export default function ShoppingListItemModal({
       setNotes(item.notes || "");
       if (item.price) {
         setPrice(item.price.toString());
-        // Formatar o preço existente para exibição
         const formatted = item.price.toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
@@ -57,21 +55,17 @@ export default function ShoppingListItemModal({
   }, [item, isOpen]);
 
   const handlePriceChange = (value: string) => {
-    // Remove tudo que não é dígito
     const numericValue = value.replace(/\D/g, "");
 
-    // Se não há dígitos, limpa o campo
     if (!numericValue) {
       setPriceDisplay("");
       setPrice("");
       return;
     }
 
-    // Converte para centavos e depois para reais
     const cents = parseInt(numericValue);
     const reais = cents / 100;
 
-    // Formata para exibição
     const formatted = reais.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
@@ -93,7 +87,6 @@ export default function ShoppingListItemModal({
       price: priceValue,
     });
 
-    // Reset form apenas se não estiver editando
     if (!item) {
       setName("");
       setQuantity("");
@@ -105,7 +98,6 @@ export default function ShoppingListItemModal({
 
   const handleClose = () => {
     onClose();
-    // Reset form apenas se não estiver editando
     if (!item) {
       setName("");
       setQuantity("");
@@ -123,7 +115,6 @@ export default function ShoppingListItemModal({
         className="bg-white rounded-lg w-full max-w-md"
         style={{ backgroundColor: state.currentTheme.colors.surface }}
       >
-        {/* Header */}
         <div
           className="flex items-center justify-between p-4 border-b"
           style={{ borderColor: state.currentTheme.colors.border }}
@@ -146,9 +137,7 @@ export default function ShoppingListItemModal({
           </button>
         </div>
 
-        {/* Form */}
         <div className="p-4 space-y-4">
-          {/* Nome do Item */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -173,7 +162,6 @@ export default function ShoppingListItemModal({
             />
           </div>
 
-          {/* Quantidade */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -198,7 +186,6 @@ export default function ShoppingListItemModal({
             />
           </div>
 
-          {/* Preço */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -223,7 +210,6 @@ export default function ShoppingListItemModal({
             />
           </div>
 
-          {/* Notas */}
           <div>
             <label
               className="block text-sm font-medium mb-2"
@@ -248,8 +234,7 @@ export default function ShoppingListItemModal({
             />
           </div>
         </div>
-
-        {/* Footer */}
+              
         <div
           className="flex space-x-3 p-4 border-t"
           style={{ borderColor: state.currentTheme.colors.border }}
