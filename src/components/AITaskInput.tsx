@@ -1,5 +1,4 @@
 import { Sparkles, X } from "lucide-react";
-import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import InlineLoadingSpinner from "./InlineLoadingSpinner";
 import { Button } from "./ui/button";
@@ -21,7 +20,6 @@ export default function AITaskInput({
   isProcessing,
 }: AITaskInputProps) {
   const { state } = useApp();
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
