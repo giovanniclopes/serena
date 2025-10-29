@@ -48,7 +48,8 @@ import SubtaskModal from "./SubtaskModal";
 interface SubtaskManagerProps {
   taskId: string;
   workspaceId: string;
-  parentTask?: Task; // Adicionar dados da tarefa pai
+  parentTask?: Task;
+  viewMode?: "list" | "grid";
 }
 
 interface SortableSubtaskItemProps {
@@ -235,6 +236,7 @@ export default function SubtaskManager({
   taskId,
   workspaceId,
   parentTask,
+  viewMode = "list",
 }: SubtaskManagerProps) {
   const { state } = useApp();
   const { subtasks, isLoading } = useSubtasks(taskId);
@@ -445,7 +447,11 @@ export default function SubtaskManager({
 
   return (
     <div className="mt-3 space-y-3 sm:space-y-2">
-      <div className="flex items-center justify-between">
+      <div
+        className={`flex ${viewMode === "grid" ? "flex-col" : "items-center"} ${
+          viewMode === "grid" ? "gap-2" : "justify-between"
+        }`}
+      >
         <h4
           className="text-sm font-medium"
           style={{ color: state.currentTheme.colors.text }}

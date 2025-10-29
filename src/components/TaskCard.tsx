@@ -40,6 +40,7 @@ interface TaskCardProps {
     date: Date,
     isCompleted: boolean
   ) => void;
+  viewMode?: "list" | "grid";
 }
 
 export default function TaskCard({
@@ -54,6 +55,7 @@ export default function TaskCard({
   isSelected = false,
   onSelectionChange,
   onRecurringToggle,
+  viewMode = "list",
 }: TaskCardProps) {
   const { state } = useApp();
   const { spacing, touchTarget, isMobile } = useMobileSpacing();
@@ -341,6 +343,7 @@ export default function TaskCard({
               taskId={task.id}
               workspaceId={task.workspaceId}
               parentTask={task}
+              viewMode={viewMode}
             />
           </div>
         </div>

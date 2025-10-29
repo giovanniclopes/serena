@@ -616,6 +616,7 @@ export default function Tasks() {
                 isBulkDeleteMode={isBulkDeleteMode}
                 isSelected={selectedTasks.has(task.id)}
                 onSelectionChange={handleTaskSelection}
+                viewMode={viewMode}
               />
             </div>
           ))}
