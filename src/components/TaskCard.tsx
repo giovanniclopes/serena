@@ -1,5 +1,6 @@
 import {
   Calendar,
+  Download,
   Edit,
   Paperclip,
   RotateCcw,
@@ -30,6 +31,7 @@ interface TaskCardProps {
   onUncomplete?: (taskId: string) => void;
   onEdit?: (task: Task) => void;
   onDelete?: (taskId: string) => void;
+  onExport?: (task: Task) => void;
   showProject?: boolean;
   showDate?: boolean;
   isBulkDeleteMode?: boolean;
@@ -49,6 +51,7 @@ export default function TaskCard({
   onUncomplete,
   onEdit,
   onDelete,
+  onExport,
   showProject = true,
   showDate = true,
   isBulkDeleteMode = false,
@@ -89,6 +92,12 @@ export default function TaskCard({
   const handleDelete = () => {
     if (onDelete) {
       onDelete(task.id);
+    }
+  };
+
+  const handleExport = () => {
+    if (onExport) {
+      onExport(task);
     }
   };
 
@@ -175,6 +184,21 @@ export default function TaskCard({
                     aria-label="Editar tarefa"
                   >
                     <Edit className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
+                  </MobileButton>
+                )}
+                {!isBulkDeleteMode && onExport && (
+                  <MobileButton
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleExport}
+                    style={{
+                      minWidth: touchTarget,
+                      minHeight: touchTarget,
+                      padding: 0,
+                    }}
+                    aria-label="Exportar tarefa"
+                  >
+                    <Download className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
                   </MobileButton>
                 )}
                 {!isBulkDeleteMode && onDelete && (

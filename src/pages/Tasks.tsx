@@ -11,6 +11,7 @@ import {
   TaskListSkeleton,
 } from "../components/skeletons/TaskSkeleton";
 import TaskCard from "../components/TaskCard";
+import TaskExportModal from "../components/TaskExportModal";
 import TaskModal from "../components/TaskModal";
 import { FEATURES } from "../config/features";
 import { useApp } from "../context/AppContext";
@@ -55,6 +56,8 @@ export default function Tasks() {
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(
     null
   );
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [taskToExport, setTaskToExport] = useState<Task | null>(null);
 
   const { tasks: rawTasks, isLoading, error } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
@@ -390,6 +393,11 @@ export default function Tasks() {
     setShowDeleteModal(true);
   };
 
+  const handleExportTask = (task: Task) => {
+    setTaskToExport(task);
+    setShowExportModal(true);
+  };
+
   const confirmDeleteTask = () => {
     if (taskToDelete) {
       deleteTaskMutation.mutate(taskToDelete);
@@ -610,6 +618,7 @@ export default function Tasks() {
                 onUncomplete={handleUncompleteTask}
                 onEdit={handleEditTask}
                 onDelete={handleDeleteTask}
+                onExport={handleExportTask}
                 onRecurringToggle={handleRecurringTaskToggle}
                 showProject={true}
                 showDate={true}
@@ -860,6 +869,15 @@ export default function Tasks() {
         }}
         task={createdTaskData}
         onEdit={handleConfirmAndEdit}
+      />
+
+      <TaskExportModal
+        isOpen={showExportModal}
+        onClose={() => {
+          setShowExportModal(false);
+          setTaskToExport(null);
+        }}
+        tasks={taskToExport ? [taskToExport] : []}
       />
 
       <FloatingActionButton
