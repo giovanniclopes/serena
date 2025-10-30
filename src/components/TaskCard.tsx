@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { useTaskShareCount } from "../hooks/useTaskShareCount";
 import type { Task } from "../types";
 import { formatDate, getPriorityColor, getPriorityLabel } from "../utils";
 import { extractOriginalTaskId } from "../utils/taskUtils";
@@ -60,6 +61,7 @@ export default function TaskCard({
 }: TaskCardProps) {
   const { state } = useApp();
   const { spacing, touchTarget, isMobile } = useMobileSpacing();
+  const { shareCount } = useTaskShareCount(task.id);
 
   const project = state.projects.find((p) => p.id === task.projectId);
   const taskTags = state.tags.filter((tag) => task.tags.includes(tag.id));
@@ -214,10 +216,34 @@ export default function TaskCard({
                       minWidth: touchTarget,
                       minHeight: touchTarget,
                       padding: 0,
+                      position: "relative",
                     }}
                     aria-label="Compartilhar tarefa"
                   >
                     <Share2 className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
+                    {shareCount > 0 && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: "-2px",
+                          right: "-2px",
+                          backgroundColor: state.currentTheme.colors.primary,
+                          color: "#fff",
+                          borderRadius: "50%",
+                          width: isMobile ? "16px" : "14px",
+                          height: isMobile ? "16px" : "14px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: isMobile ? "0.625rem" : "0.5625rem",
+                          fontWeight: "600",
+                          lineHeight: "1",
+                          minWidth: isMobile ? "16px" : "14px",
+                        }}
+                      >
+                        {shareCount}
+                      </span>
+                    )}
                   </MobileButton>
                 )}
                 {!isBulkDeleteMode && onDelete && (
