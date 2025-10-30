@@ -181,7 +181,12 @@ export default function ShareTaskModal({
                       : state.currentTheme.colors.border,
                     background: state.currentTheme.colors.surface,
                   }}
-                  onClick={() => setIsPreviewSelected(true)}
+                  onClick={() => {
+                    setIsPreviewSelected(true);
+                    if (previewUser.username) {
+                      setIdentifier(previewUser.username);
+                    }
+                  }}
                 >
                   <div className="flex items-center" style={{ gap: 12 }}>
                     {previewUser.avatarUrl ? (
