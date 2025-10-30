@@ -77,11 +77,28 @@ Data atual: ${currentDateString} (${currentDate.toISOString().split("T")[0]})
 Texto: "${input}"
 
 Retorne APENAS um JSON válido com os seguintes campos:
-- title: string (título da tarefa)
-- description: string (opcional, descrição detalhada)
+- title: string (título objetivo, curto, CLARO e descritivo da tarefa, com no máximo 60 caracteres. Não repita frases extensas ou informações excessivas aqui—apenas um resumo direto do objetivo principal.)
+- description: string (opcional, gerar apenas se necessário: inclua aqui informações adicionais, requisitos, contexto ou detalhes do prompt original que NÃO couberam no título. Sempre reescreva de modo mais conciso, SEM PERDER O SENTIDO E O OBJETIVO do usuário. Resuma sem modificar o contexto e nunca repita o título aqui)
 - dueDate: string (opcional, formato ISO 8601, ex: "2024-01-15T14:00:00")
 - priority: string (opcional, "P1", "P2", "P3" ou "P4")
 - projectName: string (opcional, nome do projeto mencionado)
+
+Regras para títulos e descrições:
+- O título NUNCA deve ultrapassar 60 caracteres, ser genérico ou repetitivo.
+- O texto inserido muito grande ou cheio de detalhes deve ser dividido: extraia o objetivo principal como título e transfira todas as outras orientações/contexto para a descrição.
+- Na descrição: Resuma o que for possível mantendo o significado. Melhore a clareza, nunca altere a intenção.
+- NUNCA coloque frases enormes no título.
+- Exemplo: Se o texto recebido for muito longo, produza um título enxuto e passe os detalhes para a descrição:
+
+Exemplo de entrada longa:
+"Escrever uma análise detalhada sobre o impacto das tecnologias verdes nos processos industriais e criar um checklist de ações sustentáveis para as operações da fábrica ABC até o final do trimestre. Não esquecer de citar cases reais e sugerir metas para redução de emissão de CO2."
+
+Exemplo de resposta:
+{
+  "title": "Análise do impacto de tecnologias verdes nas indústrias",
+  "description": "Criar checklist de ações sustentáveis para a fábrica ABC até o fim do trimestre, citar cases reais e sugerir metas de redução de CO2.",
+  "dueDate": "2024-03-31T23:59:00"
+}
 
 Regras para datas:
 - "amanhã" = próxima data após hoje (${
@@ -89,7 +106,6 @@ Regras para datas:
       .toISOString()
       .split("T")[0]
   })
-- "hoje" = data atual (${currentDate.toISOString().split("T")[0]})
 - "próxima semana" = data da próxima semana
 - Use sempre a data atual como referência para datas relativas
 - Se não houver data específica, omita dueDate
@@ -105,15 +121,6 @@ Regras gerais:
 - Se não mencionar prioridade, omita o campo
 - Seja conciso mas preciso
 - SEMPRE extraia pelo menos o título da tarefa
-
-Exemplo de resposta:
-{
-  "title": "Revisar design do onboarding",
-  "description": "Revisar e melhorar o fluxo de onboarding dos usuários",
-  "dueDate": "2024-01-15T15:00:00",
-  "priority": "P2",
-  "projectName": "App v2"
-}
 `;
 
   try {
