@@ -555,6 +555,7 @@ $$ LANGUAGE plpgsql;
 -- Função para criar workspace padrão para novos usuários
 CREATE OR REPLACE FUNCTION create_default_workspace() 
 RETURNS TRIGGER 
+SECURITY DEFINER
 SET search_path = public
 AS $$
 DECLARE
