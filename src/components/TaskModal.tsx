@@ -252,7 +252,7 @@ export default function TaskModal({
   };
 
   const handleSuggestSubtasks = async () => {
-    if (!formData.title.trim()) return;
+    if (!formData.title.trim() && !formData.description.trim()) return;
 
     try {
       if (!task) {
@@ -353,30 +353,32 @@ export default function TaskModal({
           />
         </div>
 
-        {FEATURES.AI_ENABLED && !task && formData.title.trim() && (
-          <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-            <Button
-              type="button"
-              onClick={handleSuggestSubtasks}
-              disabled={suggestSubtasksMutation.isPending}
-              variant="outline"
-              size="sm"
-              className="text-blue-700 border-blue-300 hover:bg-blue-100"
-            >
-              {suggestSubtasksMutation.isPending ? (
-                <InlineLoadingSpinner size={14} className="mr-1" />
-              ) : (
-                <Sparkles size={14} className="mr-1" />
-              )}
-              {suggestSubtasksMutation.isPending
-                ? "Gerando..."
-                : "Sugerir Subtarefas"}
-            </Button>
-            <span className="text-xs text-blue-600">
-              IA irá sugerir subtarefas baseadas no título
-            </span>
-          </div>
-        )}
+        {FEATURES.AI_ENABLED &&
+          !task &&
+          (formData.title.trim() || formData.description.trim()) && (
+            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <Button
+                type="button"
+                onClick={handleSuggestSubtasks}
+                disabled={suggestSubtasksMutation.isPending}
+                variant="outline"
+                size="sm"
+                className="text-blue-700 border-blue-300 hover:bg-blue-100"
+              >
+                {suggestSubtasksMutation.isPending ? (
+                  <InlineLoadingSpinner size={14} className="mr-1" />
+                ) : (
+                  <Sparkles size={14} className="mr-1" />
+                )}
+                {suggestSubtasksMutation.isPending
+                  ? "Gerando..."
+                  : "Sugerir Subtarefas"}
+              </Button>
+              <span className="text-xs text-blue-600">
+                IA irá sugerir subtarefas baseadas no título e na descrição
+              </span>
+            </div>
+          )}
 
         {suggestedSubtasks.length > 0 && (
           <div className="p-3 bg-green-50 rounded-lg border border-green-200">
