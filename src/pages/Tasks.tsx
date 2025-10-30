@@ -1,3 +1,4 @@
+import { startOfDay, subDays } from "date-fns";
 import { List, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -31,6 +32,11 @@ import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import { useTaskCompletionWithConfetti } from "../hooks/useTaskCompletionWithConfetti";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
+import {
+  getNextRecurringDate,
+  isRecurringTaskInstanceCompleted,
+  shouldTaskAppearOnDate,
+} from "../utils/recurrenceUtils";
 
 export default function Tasks() {
   const { state } = useApp();
@@ -71,11 +77,9 @@ export default function Tasks() {
   const deleteTaskMutation = useDeleteTask();
   const bulkDeleteTasksMutation = useBulkDeleteTasks();
   const completeAllTasksMutation = useCompleteAllTasks();
-  const { markInstanceComplete, getInstancesForDate } = useRecurringTasks();
+  const { markInstanceComplete } = useRecurringTasks();
   const { projects } = useProjects();
   const parseTaskMutation = useParseTaskInput({ availableProjects: projects });
-
-  const [refreshKey, setRefreshKey] = React.useState(0);
 
   useEffect(() => {
     const handleOpenAIInput = () => {
@@ -319,12 +323,67 @@ export default function Tasks() {
   const tasks = React.useMemo(() => {
     if (!rawTasks) return [];
 
-    const today = new Date();
-    const nonRecurringTasks = rawTasks.filter((task) => !task.recurrence);
-    const recurringInstances = getInstancesForDate(rawTasks, today);
+    const today = startOfDay(new Date());
 
-    return [...nonRecurringTasks, ...recurringInstances];
-  }, [rawTasks, getInstancesForDate, refreshKey]);
+    const nonRecurringTasks = rawTasks.filter((task) => !task.recurrence);
+    const recurringTasks = rawTasks.filter((task) => !!task.recurrence);
+
+    const selectedInstances = recurringTasks
+      .map((task) => {
+        const searchWindowDays = 60;
+        let overdueDate: Date | null = null;
+        for (let i = 0; i <= searchWindowDays; i++) {
+          const date = subDays(today, i);
+          if (shouldTaskAppearOnDate(task, date)) {
+            const completed = isRecurringTaskInstanceCompleted(task.id, date);
+            if (!completed) {
+              overdueDate = date;
+              break;
+            }
+          }
+        }
+
+        if (overdueDate) {
+          const instanceId = `${task.id}_${overdueDate.getFullYear()}-${String(
+            overdueDate.getMonth() + 1
+          ).padStart(2, "0")}-${String(overdueDate.getDate()).padStart(
+            2,
+            "0"
+          )}`;
+
+          return {
+            ...task,
+            id: instanceId,
+            dueDate: overdueDate,
+            isCompleted: false,
+            completedAt: undefined,
+            subtasks: task.subtasks || [],
+          } as Task;
+        }
+
+        const nextDate = getNextRecurringDate(task, today);
+        if (nextDate) {
+          const instanceId = `${task.id}_${nextDate.getFullYear()}-${String(
+            nextDate.getMonth() + 1
+          ).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
+          const completed = isRecurringTaskInstanceCompleted(task.id, nextDate);
+
+          return {
+            ...task,
+            id: instanceId,
+            dueDate: nextDate,
+            isCompleted: completed || false,
+            completedAt: completed ? new Date() : undefined,
+            subtasks: task.subtasks || [],
+          } as Task;
+        }
+
+        return null;
+      })
+      .filter((t): t is Task => t !== null);
+
+    return [...nonRecurringTasks, ...selectedInstances];
+  }, [rawTasks]);
 
   const sortTasks = (tasks: Task[]) => {
     return [...tasks].sort((a, b) => {
@@ -377,7 +436,6 @@ export default function Tasks() {
     isCompleted: boolean
   ) => {
     markInstanceComplete(taskId, date, isCompleted);
-    setRefreshKey((prev) => prev + 1);
 
     if (isCompleted) {
       toast.success("Tarefa recorrente concluída com sucesso!");
