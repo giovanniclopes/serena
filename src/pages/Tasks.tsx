@@ -6,6 +6,7 @@ import AITaskInput from "../components/AITaskInput";
 import ConfettiEffect from "../components/ConfettiEffect";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
+import ShareTaskModal from "../components/ShareTaskModal";
 import {
   TaskGridSkeleton,
   TaskListSkeleton,
@@ -58,6 +59,8 @@ export default function Tasks() {
   );
   const [showExportModal, setShowExportModal] = useState(false);
   const [taskToExport, setTaskToExport] = useState<Task | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [taskToShare, setTaskToShare] = useState<Task | null>(null);
 
   const { tasks: rawTasks, isLoading, error } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
@@ -398,6 +401,11 @@ export default function Tasks() {
     setShowExportModal(true);
   };
 
+  const handleShareTask = (task: Task) => {
+    setTaskToShare(task);
+    setShowShareModal(true);
+  };
+
   const confirmDeleteTask = () => {
     if (taskToDelete) {
       deleteTaskMutation.mutate(taskToDelete);
@@ -619,6 +627,7 @@ export default function Tasks() {
                 onEdit={handleEditTask}
                 onDelete={handleDeleteTask}
                 onExport={handleExportTask}
+                onShare={handleShareTask}
                 onRecurringToggle={handleRecurringTaskToggle}
                 showProject={true}
                 showDate={true}
@@ -878,6 +887,15 @@ export default function Tasks() {
           setTaskToExport(null);
         }}
         tasks={taskToExport ? [taskToExport] : []}
+      />
+
+      <ShareTaskModal
+        isOpen={showShareModal}
+        onClose={() => {
+          setShowShareModal(false);
+          setTaskToShare(null);
+        }}
+        task={taskToShare}
       />
 
       <FloatingActionButton

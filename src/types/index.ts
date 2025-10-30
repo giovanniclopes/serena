@@ -343,3 +343,13 @@ export interface ShoppingStatistics {
     count: number;
   }>;
 }
+
+export type ShareRole = "viewer" | "editor";
+
+export interface TaskShare {
+  id: string;
+  taskId: string;
+  sharedWithUserId: string;
+  role: ShareRole;
+  createdAt: Date;
+}
