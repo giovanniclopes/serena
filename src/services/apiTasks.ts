@@ -185,7 +185,7 @@ export async function updateTask(task: Task): Promise<Task> {
       current_session_start: formatDateForSupabase(task.currentSessionStart),
       updated_at: formatDateForSupabase(new Date()),
     })
-    .eq("id", task.id)
+    .eq("id", sanitizeTaskIdForAPI(task.id))
     .select()
     .single();
 
@@ -228,7 +228,10 @@ export async function updateTask(task: Task): Promise<Task> {
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
-  const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+  const { error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("id", sanitizeTaskIdForAPI(taskId));
 
   if (error) {
     console.error("Erro ao excluir tarefa:", error);
@@ -244,7 +247,7 @@ export async function completeTask(taskId: string): Promise<Task> {
       completed_at: formatDateForSupabase(new Date()),
       updated_at: formatDateForSupabase(new Date()),
     })
-    .eq("id", taskId)
+    .eq("id", sanitizeTaskIdForAPI(taskId))
     .select()
     .single();
 
@@ -294,7 +297,7 @@ export async function uncompleteTask(taskId: string): Promise<Task> {
       completed_at: null,
       updated_at: formatDateForSupabase(new Date()),
     })
-    .eq("id", taskId)
+    .eq("id", sanitizeTaskIdForAPI(taskId))
     .select()
     .single();
 
@@ -344,7 +347,10 @@ export async function completeAllTasks(taskIds: string[]): Promise<void> {
       completed_at: formatDateForSupabase(new Date()),
       updated_at: formatDateForSupabase(new Date()),
     })
-    .in("id", taskIds);
+    .in(
+      "id",
+      taskIds.map((id) => sanitizeTaskIdForAPI(id))
+    );
 
   if (error) {
     console.error("Erro ao completar todas as tarefas:", error);
@@ -360,7 +366,7 @@ export async function startTaskTimer(taskId: string): Promise<Task> {
       current_session_start: formatDateForSupabase(new Date()),
       updated_at: formatDateForSupabase(new Date()),
     })
-    .eq("id", taskId)
+    .eq("id", sanitizeTaskIdForAPI(taskId))
     .select()
     .single();
 
@@ -409,7 +415,7 @@ export async function stopTaskTimer(
   const { data: currentTask } = await supabase
     .from("tasks")
     .select("time_entries, total_time_spent")
-    .eq("id", taskId)
+    .eq("id", sanitizeTaskIdForAPI(taskId))
     .single();
 
   const existingEntries = currentTask?.time_entries || [];
@@ -426,7 +432,7 @@ export async function stopTaskTimer(
       total_time_spent: newTotalTime,
       updated_at: formatDateForSupabase(new Date()),
     })
-    .eq("id", taskId)
+    .eq("id", sanitizeTaskIdForAPI(taskId))
     .select()
     .single();
 

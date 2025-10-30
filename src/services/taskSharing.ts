@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabaseClient";
 import type { ShareRole } from "../types";
 import { findUserByEmailOrUsername } from "./users";
+import { sanitizeTaskIdForAPI } from "../utils/taskUtils";
 
 export async function shareTask(params: {
   taskId: string;
@@ -14,7 +15,7 @@ export async function shareTask(params: {
 
   const { error } = await supabase.from("task_shares").upsert(
     {
-      task_id: params.taskId,
+      task_id: sanitizeTaskIdForAPI(params.taskId),
       shared_with_user_id: user.id,
       role: params.role,
     },
@@ -45,7 +46,7 @@ export async function getTaskShares(taskId: string): Promise<
   const { data, error } = await supabase
     .from("task_shares")
     .select("id, role, created_at, shared_with_user_id")
-    .eq("task_id", taskId);
+    .eq("task_id", sanitizeTaskIdForAPI(taskId));
 
   if (error) {
     console.error("Erro ao listar compartilhamentos:", error);
@@ -96,7 +97,7 @@ export async function canEditTask(taskId: string): Promise<boolean> {
   const { data: taskRow } = await supabase
     .from("tasks")
     .select("user_id")
-    .eq("id", taskId)
+    .eq("id", sanitizeTaskIdForAPI(taskId))
     .maybeSingle();
 
   if (taskRow && taskRow.user_id) {
@@ -106,7 +107,7 @@ export async function canEditTask(taskId: string): Promise<boolean> {
   const { data: shares } = await supabase
     .from("task_shares")
     .select("role")
-    .eq("task_id", taskId)
+    .eq("task_id", sanitizeTaskIdForAPI(taskId))
     .eq(
       "shared_with_user_id",
       (await supabase.auth.getUser()).data.user?.id ?? ""
