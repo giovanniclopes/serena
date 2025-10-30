@@ -10,11 +10,7 @@ import {
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import type { Task } from "../types";
-import {
-  formatDate,
-  getPriorityColor,
-  getPriorityLabel,
-} from "../utils";
+import { formatDate, getPriorityColor, getPriorityLabel } from "../utils";
 import { extractOriginalTaskId } from "../utils/taskUtils";
 import SubtaskManager from "./SubtaskManager";
 import TaskTimer from "./TaskTimer";
@@ -295,24 +291,84 @@ export default function TaskCard({
             </div>
 
             {showDate && (task.dueDate || task.recurrence?.startDate) && (
-              <div className="flex items-center" style={{ gap: spacing.xs }}>
-                <Calendar
-                  className={isMobile ? "w-4 h-4" : "w-3 h-3"}
-                  style={{ color: state.currentTheme.colors.textSecondary }}
-                />
-                <ResponsiveText
-                  variant="caption"
-                  color="secondary"
-                  style={{ color: state.currentTheme.colors.textSecondary }}
-                >
-                  {(() => {
-                    const displayDate = task.recurrence?.startDate
-                      ? new Date(task.recurrence.startDate as unknown as string)
-                      : (task.dueDate as Date);
-                    return formatDate(displayDate);
-                  })()}
-                </ResponsiveText>
-              </div>
+              <>
+                {task.recurrence ? (
+                  <div
+                    className="flex items-center"
+                    style={{ gap: spacing.sm }}
+                  >
+                    <div
+                      className="flex items-center"
+                      style={{ gap: spacing.xs }}
+                    >
+                      <Calendar
+                        className={isMobile ? "w-4 h-4" : "w-3 h-3"}
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                      />
+                      <ResponsiveText
+                        variant="caption"
+                        color="secondary"
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                      >
+                        {`Início: ${formatDate(
+                          task.recurrence.startDate
+                            ? new Date(
+                                task.recurrence.startDate as unknown as string
+                              )
+                            : (task.dueDate as Date)
+                        )}`}
+                      </ResponsiveText>
+                    </div>
+                    {task.recurrence.endDate && (
+                      <div
+                        className="flex items-center"
+                        style={{ gap: spacing.xs }}
+                      >
+                        <Calendar
+                          className={isMobile ? "w-4 h-4" : "w-3 h-3"}
+                          style={{
+                            color: state.currentTheme.colors.textSecondary,
+                          }}
+                        />
+                        <ResponsiveText
+                          variant="caption"
+                          color="secondary"
+                          style={{
+                            color: state.currentTheme.colors.textSecondary,
+                          }}
+                        >
+                          {`Fim: ${formatDate(
+                            new Date(
+                              task.recurrence.endDate as unknown as string
+                            )
+                          )}`}
+                        </ResponsiveText>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div
+                    className="flex items-center"
+                    style={{ gap: spacing.xs }}
+                  >
+                    <Calendar
+                      className={isMobile ? "w-4 h-4" : "w-3 h-3"}
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    />
+                    <ResponsiveText
+                      variant="caption"
+                      color="secondary"
+                      style={{ color: state.currentTheme.colors.textSecondary }}
+                    >
+                      {formatDate(task.dueDate as Date)}
+                    </ResponsiveText>
+                  </div>
+                )}
+              </>
             )}
 
             {taskTags.length > 0 && (
