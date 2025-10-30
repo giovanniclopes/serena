@@ -86,6 +86,10 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
   const originalDate = startOfDay(task.dueDate);
   const target = startOfDay(targetDate);
 
+  if (recurrence.excludeWeekends && (target.getDay() === 0 || target.getDay() === 6)) {
+    return false;
+  }
+
   if (isBefore(target, originalDate)) {
     return false;
   }
@@ -331,6 +335,10 @@ export function getRecurrenceDescription(recurrence: Recurrence): string {
     description += ` até ${format(endDate, "dd/MM/yyyy")}`;
   } else if (endType === "count") {
     description += ` (${endCount} ocorrências)`;
+  }
+
+  if (recurrence.excludeWeekends) {
+    description += " (sem finais de semana)";
   }
 
   return description;

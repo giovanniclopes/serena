@@ -61,6 +61,7 @@ export default function RecurrenceManager({
     endType: recurrence?.endType || "never",
     endDate: recurrence?.endDate ? new Date(recurrence.endDate) : undefined,
     endCount: recurrence?.endCount || 1,
+    excludeWeekends: recurrence?.excludeWeekends || false,
   });
 
   useEffect(() => {
@@ -73,6 +74,7 @@ export default function RecurrenceManager({
         endType: recurrence.endType || "never",
         endDate: recurrence.endDate ? new Date(recurrence.endDate) : undefined,
         endCount: recurrence.endCount || 1,
+        excludeWeekends: recurrence.excludeWeekends || false,
       });
       setIsEnabled(true);
     } else {
@@ -84,6 +86,7 @@ export default function RecurrenceManager({
         endType: "never",
         endDate: undefined,
         endCount: 1,
+        excludeWeekends: false,
       });
       setIsEnabled(false);
     }
@@ -307,6 +310,23 @@ export default function RecurrenceManager({
                 />
               </div>
             )}
+
+            <div>
+              <Label className="text-xs font-medium mb-2 block">
+                Opções
+              </Label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="exclude-weekends"
+                  type="checkbox"
+                  checked={!!formData.excludeWeekends}
+                  onChange={(e) => handleChange("excludeWeekends", e.target.checked)}
+                />
+                <label htmlFor="exclude-weekends" className="text-sm">
+                  Ignorar finais de semana (não mostrar sábados e domingos)
+                </label>
+              </div>
+            </div>
 
             <div
               className="p-3 rounded-lg"
