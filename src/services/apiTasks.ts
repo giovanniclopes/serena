@@ -104,6 +104,13 @@ export async function createTask(
     throw new Error("Usuário não autenticado");
   }
 
+  const validPriorities = ["P1", "P2", "P3", "P4"] as const;
+  const sanitizedPriority =
+    task.priority &&
+    validPriorities.includes(task.priority as "P1" | "P2" | "P3" | "P4")
+      ? task.priority
+      : "P3";
+
   const { data, error } = await supabase
     .from("tasks")
     .insert({
@@ -114,7 +121,7 @@ export async function createTask(
         ? sanitizeTaskIdForAPI(task.parentTaskId)
         : null,
       due_date: formatDateForSupabase(task.dueDate),
-      priority: task.priority,
+      priority: sanitizedPriority,
       reminders: task.reminders,
       recurrence: task.recurrence,
       tags: task.tags,
@@ -160,6 +167,13 @@ export async function createTask(
 }
 
 export async function updateTask(task: Task): Promise<Task> {
+  const validPriorities = ["P1", "P2", "P3", "P4"] as const;
+  const sanitizedPriority =
+    task.priority &&
+    validPriorities.includes(task.priority as "P1" | "P2" | "P3" | "P4")
+      ? task.priority
+      : "P3";
+
   const { data, error } = await supabase
     .from("tasks")
     .update({
@@ -170,7 +184,7 @@ export async function updateTask(task: Task): Promise<Task> {
         ? sanitizeTaskIdForAPI(task.parentTaskId)
         : null,
       due_date: formatDateForSupabase(task.dueDate),
-      priority: task.priority,
+      priority: sanitizedPriority,
       reminders: task.reminders,
       recurrence: task.recurrence,
       tags: task.tags,
