@@ -61,57 +61,65 @@ export async function parseTaskFromNaturalLanguage(
     };
   }
 
+  const currentDate = new Date();
+  const currentDateISO = currentDate.toISOString();
+
   const prompt = `
-ANALISE o texto abaixo e converta em JSON estruturado para criação de tarefa. Siga ESTRITAMENTE as regras listadas.
+ ANALISE o texto abaixo e converta em JSON estruturado para criação de tarefa. Siga ESTRITAMENTE as regras listadas.
+ 
+ IMPORTANTE:
+ - SEMPRE retorne apenas o JSON, nunca adicione explicações, comentários, markdown ou texto fora do JSON!
+ - Nunca use aspas duplas ("") dentro dos valores do JSON (em title, projectName, description, etc.). Se houver aspas duplas no texto de entrada, troque por aspas simples ou remova-as.
+ 
+ DATA/HORA ATUAL (referência para datas relativas): ${currentDateISO}
 
-IMPORTANTE:
-- SEMPRE retorne apenas o JSON, nunca adicione explicações, comentários, markdown ou texto fora do JSON!
-- Nunca use aspas duplas ("") dentro dos valores do JSON (em title, projectName, description, etc.). Se houver aspas duplas no texto de entrada, troque por aspas simples ou remova-as.
+ ENTRADA (real):
+ "${input}"
 
-ENTRADA (exemplo 1):
-"Preciso criar uma apresentação para o board sobre vendas Q3 incluindo análise de receita, CAC, LTV, churn, metas Q4 e envio final até quinta. Anexar planilha de resultados e compartilhar link."
-
-SAÍDA (formato):
-{
-  "title": "Apresentação de vendas Q3 para o board",
-  "description": "Incluir análise de receita, CAC, LTV, churn e metas Q4. Anexar planilha de resultados, compartilhar link e enviar até quinta.",
-  "dueDate": "2025-10-30T23:59:00"
-}
-
-ENTRADA (exemplo 2 com aspas):
-"marcar reunião hoje às 14:00 com o Alê (Ponto Forte) para tratarmos sobre o projeto "Reembolso", onde preciso mostrar a ele a alteração feita no Select das empresas. Também preciso confirmar se foi feito o necessário ou precisa de mais alguma coisa"
-
-SAÍDA ESPERADA:
-{
-  "title": "Reunião projeto Reembolso com Alê (Ponto Forte)",
-  "description": "Apresentar alteração no Select das empresas. Confirmar se as pendências estão resolvidas ou se há mais algo a ser feito. Reunião hoje às 14:00.",
-  "dueDate": "2025-10-30T14:00:00",
-  "projectName": "Reembolso"
-}
-
-REGRAS PARA O JSON:
-- title: objetivo, CLARO, curto (máx. 60 caracteres), SEM frases longas, SEM repetições, SEM emojis. Preferir infinitivo ou resumo. Nunca duplique em description. Nunca use aspas duplas internas.
-- description: contexto adicional, requisitos ou etapas; caso lista (mais de um requisito), use bullets (* ou -). Remova fluff, PII e repetições. Resuma e deixe conciso, mantendo o sentido do usuário. Nunca use aspas duplas internas.
-- dueDate: formato ISO (AAAA-MM-DDTHH:MM:SS), baseado em instruções (hoje/próxima semana/etc.), sempre considerando o fuso do usuário brasileiro.
-- priority: infira se texto indicar urgência/bloqueio/impacto. P1=urgente, P2=alta, P3=média, P4=baixa. Omitir se não souber.
-- projectName: extraia e normalize, ignorando stopwords tipo "de", "da", etc. Nunca use aspas duplas internas; se houver aspas duplas cite só o nome.
-- tags: sugerir se explícitas ou se houver palavras-chave recorrentes (máx. 5), nunca inventar.
-- subtasks: só sugerir se a tarefa for composta e complexa, máximo 5, nunca repetir.
-- recurrence: se padrão recorrente explícito, crie campo (ex: toda segunda, mensalmente...).
-- reminders: extrair lembretes se citados, sugerir lembrete próximo ao vencimento se importante.
-- links/anexos: se houver, liste URLs no fim da descrição sob bloco "Links/Anexos: ...".
-
-REGRAS AVANÇADAS:
-- Nunca reescreva o título/descricao com frases do tipo "tarefa para" ou "realizar"
-- Normalize unidades, use português BR, sem jargões obscuros ou linguagem burocrática
-- Não invente informação, não duplique o significado em diferentes campos
-- Se texto for ambíguo, inclua campo suggestions com perguntas objetivas ao usuário, mas nunca bloqueie a criação
-- Caso já exista tarefa igual no workspace (identificada por título), recomende deduplicar (em suggestions)
-- Capitalize apropriadamente: só a primeira letra ou nomes próprios
-- Nunca exponha dados pessoais, cartões, senhas, documentos sensíveis—remova ou oculte
-
-Caso a entrada seja muito simples, retorne JSON só com o campo title obrigatório (sem description).
-`;
+ ENTRADA (exemplo 1):
+ "Preciso criar uma apresentação para o board sobre vendas Q3 incluindo análise de receita, CAC, LTV, churn, metas Q4 e envio final até quinta. Anexar planilha de resultados e compartilhar link."
+ 
+ SAÍDA (formato):
+ {
+   "title": "Apresentação de vendas Q3 para o board",
+   "description": "Incluir análise de receita, CAC, LTV, churn e metas Q4. Anexar planilha de resultados, compartilhar link e enviar até quinta.",
+   "dueDate": "2025-10-30T23:59:00"
+ }
+ 
+ ENTRADA (exemplo 2 com aspas):
+ "marcar reunião hoje às 14:00 com o Alê (Ponto Forte) para tratarmos sobre o projeto "Reembolso", onde preciso mostrar a ele a alteração feita no Select das empresas. Também preciso confirmar se foi feito o necessário ou precisa de mais alguma coisa"
+ 
+ SAÍDA ESPERADA:
+ {
+   "title": "Reunião projeto Reembolso com Alê (Ponto Forte)",
+   "description": "Apresentar alteração no Select das empresas. Confirmar se as pendências estão resolvidas ou se há mais algo a ser feito. Reunião hoje às 14:00.",
+   "dueDate": "${currentDateISO.split("T")[0]}T14:00:00",
+   "projectName": "Reembolso"
+ }
+ 
+ REGRAS PARA O JSON:
+ - title: objetivo, CLARO, curto (máx. 60 caracteres), SEM frases longas, SEM repetições, SEM emojis. Preferir infinitivo ou resumo. Nunca duplique em description. Nunca use aspas duplas internas.
+ - description: contexto adicional, requisitos ou etapas; caso lista (mais de um requisito), use bullets (* ou -). Remova fluff, PII e repetições. Resuma e deixe conciso, mantendo o sentido do usuário. Nunca use aspas duplas internas.
+ - dueDate: formato ISO (AAAA-MM-DDTHH:MM:SS), baseado em instruções (hoje/próxima semana/etc.), sempre considerando o fuso do usuário brasileiro.
+ - priority: infira se texto indicar urgência/bloqueio/impacto. P1=urgente, P2=alta, P3=média, P4=baixa. Omitir se não souber.
+ - projectName: extraia e normalize, ignorando stopwords tipo "de", "da", etc. Nunca use aspas duplas internas; se houver aspas duplas cite só o nome.
+ - tags: sugerir se explícitas ou se houver palavras-chave recorrentes (máx. 5), nunca inventar.
+ - subtasks: só sugerir se a tarefa for composta e complexa, máximo 5, nunca repetir.
+ - recurrence: se padrão recorrente explícito, crie campo (ex: toda segunda, mensalmente...).
+ - reminders: extrair lembretes se citados, sugerir lembrete próximo ao vencimento se importante.
+ - links/anexos: se houver, liste URLs no fim da descrição sob bloco "Links/Anexos: ...".
+ 
+ REGRAS AVANÇADAS:
+ - Nunca reescreva o título/descricao com frases do tipo "tarefa para" ou "realizar"
+ - Normalize unidades, use português BR, sem jargões obscuros ou linguagem burocrática
+ - Não invente informação, não duplique o significado em diferentes campos
+ - Se texto for ambíguo, inclua campo suggestions com perguntas objetivas ao usuário, mas nunca bloqueie a criação
+ - Caso já exista tarefa igual no workspace (identificada por título), recomende deduplicar (em suggestions)
+ - Capitalize apropriadamente: só a primeira letra ou nomes próprios
+ - Nunca exponha dados pessoais, cartões, senhas, documentos sensíveis—remova ou oculte
+ 
+ Caso a entrada seja muito simples, retorne JSON só com o campo title obrigatório (sem description).
+ `;
 
   try {
     const result = await geminiModel!.generateContent(prompt);
