@@ -1,4 +1,11 @@
+import { format } from "date-fns";
 import { useCallback, useEffect, useState } from "react";
+import { useApp } from "../context/AppContext";
+import { useAuth } from "../context/AuthContext";
+import {
+  listRecurringCompletions,
+  setRecurringCompletion,
+} from "../services/apiRecurringCompletions";
 import type { RecurringTaskCompletion, Task } from "../types";
 import {
   getRecurringTaskCompletions,
@@ -11,17 +18,36 @@ import {
 
 export function useRecurringTasks() {
   const [completions, setCompletions] = useState<RecurringTaskCompletion[]>([]);
+  const { user } = useAuth();
+  const { state } = useApp();
 
   useEffect(() => {
     setCompletions(getRecurringTaskCompletions());
   }, []);
 
   const markInstanceComplete = useCallback(
-    (taskId: string, date: Date, isCompleted: boolean = true) => {
+    async (taskId: string, date: Date, isCompleted: boolean = true) => {
       markRecurringTaskInstanceComplete(taskId, date, isCompleted);
       setCompletions(getRecurringTaskCompletions());
+
+      try {
+        if (user && state.activeWorkspaceId) {
+          const instanceDate = format(date, "yyyy-MM-dd");
+          await setRecurringCompletion(
+            taskId,
+            instanceDate,
+            isCompleted,
+            state.activeWorkspaceId
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Erro ao sincronizar conclusão recorrente no servidor:",
+          err
+        );
+      }
     },
-    []
+    [user, state.activeWorkspaceId]
   );
 
   const isInstanceCompleted = useCallback(
@@ -45,6 +71,36 @@ export function useRecurringTasks() {
     []
   );
 
+  const syncCompletionsForRange = useCallback(
+    async (taskIds: string[], startDate: Date, endDate: Date) => {
+      try {
+        if (!user) return;
+        const start = format(startDate, "yyyy-MM-dd");
+        const end = format(endDate, "yyyy-MM-dd");
+        const serverRows = await listRecurringCompletions(taskIds, start, end);
+
+        const local = getRecurringTaskCompletions();
+        const serverMapped: RecurringTaskCompletion[] = serverRows.map((r) => ({
+          taskId: r.task_id,
+          date: r.instance_date,
+          isCompleted: !!r.is_completed,
+          completedAt: r.completed_at ? new Date(r.completed_at) : undefined,
+        }));
+
+        const key = (c: RecurringTaskCompletion) => `${c.taskId}|${c.date}`;
+        const mergedMap = new Map<string, RecurringTaskCompletion>();
+        for (const c of local) mergedMap.set(key(c), c);
+        for (const c of serverMapped) mergedMap.set(key(c), c);
+        const merged = Array.from(mergedMap.values());
+        saveRecurringTaskCompletions(merged);
+        setCompletions(merged);
+      } catch (err) {
+        console.error("Erro ao sincronizar conclusões do servidor:", err);
+      }
+    },
+    [user]
+  );
+
   const clearAllCompletions = useCallback(() => {
     saveRecurringTaskCompletions([]);
     setCompletions([]);
@@ -65,6 +121,7 @@ export function useRecurringTasks() {
     isInstanceCompleted,
     getInstancesForDate,
     getInstancesForDateRange,
+    syncCompletionsForRange,
     clearAllCompletions,
     clearTaskCompletions,
   };

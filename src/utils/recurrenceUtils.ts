@@ -106,6 +106,61 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
     }
   }
 
+  if (recurrence.endType === "count" && recurrence.endCount && recurrence.endCount > 0) {
+    let occurrences = 0;
+    let current = startBase;
+    const safetyLimit = 10000;
+    let steps = 0;
+
+    while (steps < safetyLimit && !isAfter(current, target)) {
+      const appears = (() => {
+        switch (recurrence.type) {
+          case "daily":
+            return shouldAppearDaily(startBase, current, recurrence);
+          case "weekly":
+            return shouldAppearWeekly(startBase, current, recurrence);
+          case "monthly":
+            return shouldAppearMonthly(startBase, current, recurrence);
+          case "yearly":
+            return shouldAppearYearly(startBase, current, recurrence);
+          default:
+            return false;
+        }
+      })();
+
+      if (appears) {
+        occurrences++;
+        if (occurrences > recurrence.endCount) {
+          return false;
+        }
+        if (current.getTime() === target.getTime()) {
+          return true;
+        }
+      }
+
+      switch (recurrence.type) {
+        case "daily":
+          current = addDays(current, 1);
+          break;
+        case "weekly":
+          current = addDays(current, 1);
+          break;
+        case "monthly":
+          current = addDays(current, 1);
+          break;
+        case "yearly":
+          current = addDays(current, 1);
+          break;
+        default:
+          return false;
+      }
+
+      steps++;
+    }
+
+    return false;
+  }
+
   switch (recurrence.type) {
     case "daily":
       return shouldAppearDaily(startBase, target, recurrence);
@@ -249,9 +304,14 @@ export function getNextRecurringDate(
   let currentDate = isBefore(start, originalDate) ? originalDate : start;
   const maxIterations = 1000;
   let iterations = 0;
+  let occurrences = 0;
 
   while (iterations < maxIterations) {
     if (shouldTaskAppearOnDate(task, currentDate)) {
+      occurrences++;
+      if (recurrence.endType === "count" && recurrence.endCount && occurrences > recurrence.endCount) {
+        return null;
+      }
       return currentDate;
     }
 
