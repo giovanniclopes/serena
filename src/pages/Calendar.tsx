@@ -27,7 +27,7 @@ import {
   Sparkles,
   TrendingUp,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import AITaskConfirmModal from "../components/AITaskConfirmModal";
 import AITaskInput from "../components/AITaskInput";
@@ -68,7 +68,7 @@ export default function Calendar() {
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
-  const { markInstanceComplete } = useRecurringTasks();
+  const { markInstanceComplete, syncCompletionsForRange } = useRecurringTasks();
   const { projects } = useProjects();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
@@ -94,6 +94,18 @@ export default function Calendar() {
     start: calendarStart,
     end: calendarEnd,
   });
+
+  useEffect(() => {
+    const taskIds = (tasks || []).map((t) => t.id);
+    if (taskIds.length > 0) {
+      syncCompletionsForRange(taskIds, calendarStart, calendarEnd);
+    }
+  }, [
+    tasks,
+    calendarStart.getTime(),
+    calendarEnd.getTime(),
+    syncCompletionsForRange,
+  ]);
 
   const handlePrevMonth = () => {
     setCurrentDate(subMonths(currentDate, 1));

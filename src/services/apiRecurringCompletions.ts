@@ -72,6 +72,7 @@ export async function setRecurringCompletion(
       .from("task_recurring_completions")
       .delete()
       .eq("task_id", taskId)
+      .eq("user_id", user.id)
       .eq("instance_date", instanceDate);
     if (error) {
       console.error("Erro ao remover conclusão recorrente:", error);
