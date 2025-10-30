@@ -11,7 +11,7 @@ if (!apiKey) {
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
 export const geminiModel = genAI?.getGenerativeModel({
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash-lite",
 });
 
 export const isGeminiAvailable = () => {

@@ -34,12 +34,12 @@ VITE_ENABLE_AI_FEATURES=true
 - 60 requisições por minuto
 - 1 milhão de tokens por mês
 - Rate limiting implementado no código
-- Modelo utilizado: `gemini-2.0-flash`
+- Modelo utilizado: `gemini-2.5-flash-lite`
 
 ## Solução de Problemas:
 
 Se você receber erro 404 "models/gemini-pro is not found":
 
-- O modelo foi atualizado para `gemini-2.0-flash`
+- O modelo foi atualizado para `gemini-2.5-flash-lite`
 - Certifique-se de que sua chave de API está válida
 - Verifique se a API está habilitada no Google Cloud Console
