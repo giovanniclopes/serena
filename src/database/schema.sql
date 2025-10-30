@@ -206,6 +206,22 @@ CREATE TABLE public.shopping_list_items (
 
 COMMENT ON TABLE public.shopping_list_items IS 'Itens individuais dentro de uma lista de compras.';
 
+-- Tabela para compartilhamento de tarefas entre utilizadores.
+CREATE TABLE public.task_shares (
+  id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  task_id uuid NOT NULL REFERENCES public.tasks(id) ON DELETE CASCADE,
+  shared_with_user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  role text NOT NULL DEFAULT 'viewer' CHECK (role IN ('viewer', 'editor')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(task_id, shared_with_user_id)
+);
+
+COMMENT ON TABLE public.task_shares IS 'Armazena compartilhamentos de tarefas entre utilizadores.';
+
+COMMENT ON COLUMN public.task_shares.task_id IS 'ID da tarefa compartilhada';
+COMMENT ON COLUMN public.task_shares.shared_with_user_id IS 'ID do utilizador com quem a tarefa foi compartilhada';
+COMMENT ON COLUMN public.task_shares.role IS 'Papel do utilizador: viewer (visualizar) ou editor (editar)';
+
 -- =============================================================================
 -- 2. POLÍTICAS DE SEGURANÇA (ROW-LEVEL SECURITY - RLS)
 -- =============================================================================
@@ -277,6 +293,36 @@ ALTER TABLE
 
 CREATE POLICY "Utilizadores podem gerir os seus próprios itens de lista de compras." ON public.shopping_list_items FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
+-- Compartilhamentos de Tarefas
+ALTER TABLE
+  public.task_shares ENABLE ROW LEVEL SECURITY;
+
+-- Função para verificar se o usuário é dono da tarefa (usado nas políticas RLS de task_shares)
+-- Deve ser criada antes das políticas para evitar recursão
+CREATE OR REPLACE FUNCTION public.is_task_owner(task_id_param uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 
+    FROM public.tasks 
+    WHERE id = task_id_param 
+    AND user_id = auth.uid()
+  );
+END;
+$$;
+
+CREATE POLICY "Dono da tarefa pode compartilhar" ON public.task_shares FOR INSERT WITH CHECK (public.is_task_owner(task_id));
+
+CREATE POLICY "Dono e compartilhado podem ver compartilhamentos" ON public.task_shares FOR SELECT USING (public.is_task_owner(task_id) OR shared_with_user_id = (select auth.uid()));
+
+CREATE POLICY "Dono da tarefa pode atualizar compartilhamentos" ON public.task_shares FOR UPDATE USING (public.is_task_owner(task_id)) WITH CHECK (public.is_task_owner(task_id));
+
+CREATE POLICY "Dono ou compartilhado podem remover compartilhamento" ON public.task_shares FOR DELETE USING (public.is_task_owner(task_id) OR shared_with_user_id = (select auth.uid()));
+
 -- =============================================================================
 -- 3. ÍNDICES DE PERFORMANCE
 -- =============================================================================
@@ -333,6 +379,10 @@ CREATE INDEX idx_shopping_list_items_workspace_id ON public.shopping_list_items(
 CREATE INDEX idx_shopping_list_items_is_purchased ON public.shopping_list_items(is_purchased);
 
 CREATE INDEX idx_shopping_list_items_order_index ON public.shopping_list_items(order_index);
+
+CREATE INDEX idx_task_shares_task_id ON public.task_shares(task_id);
+
+CREATE INDEX idx_task_shares_shared_with_user_id ON public.task_shares(shared_with_user_id);
 
 -- =============================================================================
 -- 4. FUNÇÕES E TRIGGERS PARA MANTER CONTADORES ATUALIZADOS
