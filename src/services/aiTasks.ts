@@ -61,66 +61,56 @@ export async function parseTaskFromNaturalLanguage(
     };
   }
 
-  const currentDate = new Date();
-  const currentDateString = currentDate.toLocaleDateString("pt-BR", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-
   const prompt = `
-Analise o seguinte texto em linguagem natural e extraia informações estruturadas para uma tarefa.
+ANALISE o texto abaixo e converta em JSON estruturado para criação de tarefa. Siga ESTRITAMENTE as regras listadas.
 
-Data atual: ${currentDateString} (${currentDate.toISOString().split("T")[0]})
+IMPORTANTE:
+- SEMPRE retorne apenas o JSON, nunca adicione explicações, comentários, markdown ou texto fora do JSON!
+- Nunca use aspas duplas ("") dentro dos valores do JSON (em title, projectName, description, etc.). Se houver aspas duplas no texto de entrada, troque por aspas simples ou remova-as.
 
-Texto: "${input}"
+ENTRADA (exemplo 1):
+"Preciso criar uma apresentação para o board sobre vendas Q3 incluindo análise de receita, CAC, LTV, churn, metas Q4 e envio final até quinta. Anexar planilha de resultados e compartilhar link."
 
-Retorne APENAS um JSON válido com os seguintes campos:
-- title: string (título objetivo, curto, CLARO e descritivo da tarefa, com no máximo 60 caracteres. Não repita frases extensas ou informações excessivas aqui—apenas um resumo direto do objetivo principal.)
-- description: string (opcional, gerar apenas se necessário: inclua aqui informações adicionais, requisitos, contexto ou detalhes do prompt original que NÃO couberam no título. Sempre reescreva de modo mais conciso, SEM PERDER O SENTIDO E O OBJETIVO do usuário. Resuma sem modificar o contexto e nunca repita o título aqui)
-- dueDate: string (opcional, formato ISO 8601, ex: "2024-01-15T14:00:00")
-- priority: string (opcional, "P1", "P2", "P3" ou "P4")
-- projectName: string (opcional, nome do projeto mencionado)
-
-Regras para títulos e descrições:
-- O título NUNCA deve ultrapassar 60 caracteres, ser genérico ou repetitivo.
-- O texto inserido muito grande ou cheio de detalhes deve ser dividido: extraia o objetivo principal como título e transfira todas as outras orientações/contexto para a descrição.
-- Na descrição: Resuma o que for possível mantendo o significado. Melhore a clareza, nunca altere a intenção.
-- NUNCA coloque frases enormes no título.
-- Exemplo: Se o texto recebido for muito longo, produza um título enxuto e passe os detalhes para a descrição:
-
-Exemplo de entrada longa:
-"Escrever uma análise detalhada sobre o impacto das tecnologias verdes nos processos industriais e criar um checklist de ações sustentáveis para as operações da fábrica ABC até o final do trimestre. Não esquecer de citar cases reais e sugerir metas para redução de emissão de CO2."
-
-Exemplo de resposta:
+SAÍDA (formato):
 {
-  "title": "Análise do impacto de tecnologias verdes nas indústrias",
-  "description": "Criar checklist de ações sustentáveis para a fábrica ABC até o fim do trimestre, citar cases reais e sugerir metas de redução de CO2.",
-  "dueDate": "2024-03-31T23:59:00"
+  "title": "Apresentação de vendas Q3 para o board",
+  "description": "Incluir análise de receita, CAC, LTV, churn e metas Q4. Anexar planilha de resultados, compartilhar link e enviar até quinta.",
+  "dueDate": "2025-10-30T23:59:00"
 }
 
-Regras para datas:
-- "amanhã" = próxima data após hoje (${
-    new Date(currentDate.getTime() + 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split("T")[0]
-  })
-- "próxima semana" = data da próxima semana
-- Use sempre a data atual como referência para datas relativas
-- Se não houver data específica, omita dueDate
+ENTRADA (exemplo 2 com aspas):
+"marcar reunião hoje às 14:00 com o Alê (Ponto Forte) para tratarmos sobre o projeto "Reembolso", onde preciso mostrar a ele a alteração feita no Select das empresas. Também preciso confirmar se foi feito o necessário ou precisa de mais alguma coisa"
 
-Regras para projetos:
-- Extraia o nome do projeto exatamente como mencionado
-- Se mencionar "no projeto X" ou "projeto X", use "X" como projectName
-- Mantenha a capitalização original do nome do projeto
-- Se não mencionar projeto, omita projectName
+SAÍDA ESPERADA:
+{
+  "title": "Reunião projeto Reembolso com Alê (Ponto Forte)",
+  "description": "Apresentar alteração no Select das empresas. Confirmar se as pendências estão resolvidas ou se há mais algo a ser feito. Reunião hoje às 14:00.",
+  "dueDate": "2025-10-30T14:00:00",
+  "projectName": "Reembolso"
+}
 
-Regras gerais:
-- Prioridade: P1=urgente, P2=alta, P3=média, P4=baixa
-- Se não mencionar prioridade, omita o campo
-- Seja conciso mas preciso
-- SEMPRE extraia pelo menos o título da tarefa
+REGRAS PARA O JSON:
+- title: objetivo, CLARO, curto (máx. 60 caracteres), SEM frases longas, SEM repetições, SEM emojis. Preferir infinitivo ou resumo. Nunca duplique em description. Nunca use aspas duplas internas.
+- description: contexto adicional, requisitos ou etapas; caso lista (mais de um requisito), use bullets (* ou -). Remova fluff, PII e repetições. Resuma e deixe conciso, mantendo o sentido do usuário. Nunca use aspas duplas internas.
+- dueDate: formato ISO (AAAA-MM-DDTHH:MM:SS), baseado em instruções (hoje/próxima semana/etc.), sempre considerando o fuso do usuário brasileiro.
+- priority: infira se texto indicar urgência/bloqueio/impacto. P1=urgente, P2=alta, P3=média, P4=baixa. Omitir se não souber.
+- projectName: extraia e normalize, ignorando stopwords tipo "de", "da", etc. Nunca use aspas duplas internas; se houver aspas duplas cite só o nome.
+- tags: sugerir se explícitas ou se houver palavras-chave recorrentes (máx. 5), nunca inventar.
+- subtasks: só sugerir se a tarefa for composta e complexa, máximo 5, nunca repetir.
+- recurrence: se padrão recorrente explícito, crie campo (ex: toda segunda, mensalmente...).
+- reminders: extrair lembretes se citados, sugerir lembrete próximo ao vencimento se importante.
+- links/anexos: se houver, liste URLs no fim da descrição sob bloco "Links/Anexos: ...".
+
+REGRAS AVANÇADAS:
+- Nunca reescreva o título/descricao com frases do tipo "tarefa para" ou "realizar"
+- Normalize unidades, use português BR, sem jargões obscuros ou linguagem burocrática
+- Não invente informação, não duplique o significado em diferentes campos
+- Se texto for ambíguo, inclua campo suggestions com perguntas objetivas ao usuário, mas nunca bloqueie a criação
+- Caso já exista tarefa igual no workspace (identificada por título), recomende deduplicar (em suggestions)
+- Capitalize apropriadamente: só a primeira letra ou nomes próprios
+- Nunca exponha dados pessoais, cartões, senhas, documentos sensíveis—remova ou oculte
+
+Caso a entrada seja muito simples, retorne JSON só com o campo title obrigatório (sem description).
 `;
 
   try {
@@ -132,8 +122,11 @@ Regras gerais:
     if (!jsonMatch) {
       return {
         success: false,
-        error: "Resposta da IA não contém JSON válido",
-        suggestions: ["Tente ser mais específico na descrição da tarefa"],
+        error:
+          "Resposta da IA não contém JSON válido. Se usou aspas duplas em algum campo, remova ou troque por aspas simples.",
+        suggestions: [
+          'Edite a frase evitando uso de aspas duplas (") dentro do nome do projeto, título ou descrição. Ou use aspas simples.',
+        ],
       };
     }
 
