@@ -62,6 +62,7 @@ export default function RecurrenceManager({
     endDate: recurrence?.endDate ? new Date(recurrence.endDate) : undefined,
     endCount: recurrence?.endCount || 1,
     excludeWeekends: recurrence?.excludeWeekends || false,
+    startDate: recurrence?.startDate ? new Date(recurrence.startDate) : undefined,
   });
 
   useEffect(() => {
@@ -75,6 +76,7 @@ export default function RecurrenceManager({
         endDate: recurrence.endDate ? new Date(recurrence.endDate) : undefined,
         endCount: recurrence.endCount || 1,
         excludeWeekends: recurrence.excludeWeekends || false,
+        startDate: recurrence.startDate ? new Date(recurrence.startDate) : undefined,
       });
       setIsEnabled(true);
     } else {
@@ -87,6 +89,7 @@ export default function RecurrenceManager({
         endDate: undefined,
         endCount: 1,
         excludeWeekends: false,
+        startDate: undefined,
       });
       setIsEnabled(false);
     }
@@ -293,6 +296,45 @@ export default function RecurrenceManager({
                 />
               </div>
             )}
+
+            <div>
+              <Label className="text-xs font-medium mb-2 block">Data de início</Label>
+              <DateTimeInput
+                value={(() => {
+                  const d = formData.startDate;
+                  if (!d) return "";
+                  if (d instanceof Date) return d.toISOString().slice(0, 16);
+                  try {
+                    const parsed = new Date(d as unknown as string);
+                    return isNaN(parsed.getTime())
+                      ? ""
+                      : parsed.toISOString().slice(0, 16);
+                  } catch {
+                    return "";
+                  }
+                })()}
+                onChange={(value) => {
+                  if (value) {
+                    const date = new Date(value);
+                    const year = date.getFullYear();
+                    const month = date.getMonth();
+                    const day = date.getDate();
+                    const hours = date.getHours();
+                    const minutes = date.getMinutes();
+                    const brazilDateTime = createBrazilDateTime(
+                      new Date(year, month, day),
+                      hours,
+                      minutes
+                    );
+                    handleChange("startDate", brazilDateTime);
+                  } else {
+                    handleChange("startDate", undefined);
+                  }
+                }}
+                placeholder="DD/MM/AAAA HH:MM"
+                className="w-full"
+              />
+            </div>
 
             {formData.endType === "count" && (
               <div>

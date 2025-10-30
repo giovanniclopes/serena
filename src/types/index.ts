@@ -20,6 +20,7 @@ export interface Recurrence {
   endDate?: Date;
   endCount?: number;
   excludeWeekends?: boolean;
+  startDate?: Date;
 }
 
 export interface Reminder {

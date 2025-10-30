@@ -83,14 +83,19 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
   }
 
   const recurrence = task.recurrence;
-  const originalDate = startOfDay(task.dueDate);
+  const startBase = recurrence.startDate
+    ? startOfDay(new Date(recurrence.startDate))
+    : startOfDay(task.dueDate);
   const target = startOfDay(targetDate);
 
-  if (recurrence.excludeWeekends && (target.getDay() === 0 || target.getDay() === 6)) {
+  if (
+    recurrence.excludeWeekends &&
+    (target.getDay() === 0 || target.getDay() === 6)
+  ) {
     return false;
   }
 
-  if (isBefore(target, originalDate)) {
+  if (isBefore(target, startBase)) {
     return false;
   }
 
@@ -103,13 +108,13 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
 
   switch (recurrence.type) {
     case "daily":
-      return shouldAppearDaily(originalDate, target, recurrence);
+      return shouldAppearDaily(startBase, target, recurrence);
     case "weekly":
-      return shouldAppearWeekly(originalDate, target, recurrence);
+      return shouldAppearWeekly(startBase, target, recurrence);
     case "monthly":
-      return shouldAppearMonthly(originalDate, target, recurrence);
+      return shouldAppearMonthly(startBase, target, recurrence);
     case "yearly":
-      return shouldAppearYearly(originalDate, target, recurrence);
+      return shouldAppearYearly(startBase, target, recurrence);
     default:
       return false;
   }
@@ -229,7 +234,9 @@ export function getNextRecurringDate(
   }
 
   const recurrence = task.recurrence;
-  const originalDate = startOfDay(task.dueDate);
+  const originalDate = recurrence.startDate
+    ? startOfDay(new Date(recurrence.startDate))
+    : startOfDay(task.dueDate);
   const start = startOfDay(fromDate);
 
   if (recurrence.endType === "date" && recurrence.endDate) {

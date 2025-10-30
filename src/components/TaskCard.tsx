@@ -12,7 +12,6 @@ import { useApp } from "../context/AppContext";
 import type { Task } from "../types";
 import {
   formatDate,
-  formatTime,
   getPriorityColor,
   getPriorityLabel,
 } from "../utils";
@@ -295,7 +294,7 @@ export default function TaskCard({
               </Badge>
             </div>
 
-            {showDate && task.dueDate && (
+            {showDate && (task.dueDate || task.recurrence?.startDate) && (
               <div className="flex items-center" style={{ gap: spacing.xs }}>
                 <Calendar
                   className={isMobile ? "w-4 h-4" : "w-3 h-3"}
@@ -306,9 +305,12 @@ export default function TaskCard({
                   color="secondary"
                   style={{ color: state.currentTheme.colors.textSecondary }}
                 >
-                  {formatDate(task.dueDate)}
-                  {task.dueDate.getHours() !== 0 &&
-                    ` às ${formatTime(task.dueDate)}`}
+                  {(() => {
+                    const displayDate = task.recurrence?.startDate
+                      ? new Date(task.recurrence.startDate as unknown as string)
+                      : (task.dueDate as Date);
+                    return formatDate(displayDate);
+                  })()}
                 </ResponsiveText>
               </div>
             )}
