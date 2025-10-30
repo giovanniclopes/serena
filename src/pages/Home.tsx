@@ -4,6 +4,7 @@ import {
   Calendar,
   CheckCircle,
   Clock,
+  Sparkles,
   Target,
   Timer,
   Trophy,
@@ -11,6 +12,8 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import AchievementModal from "../components/AchievementModal";
+import AITaskConfirmModal from "../components/AITaskConfirmModal";
+import AITaskInput from "../components/AITaskInput";
 import ConfettiEffect from "../components/ConfettiEffect";
 import FloatingActionButton from "../components/FloatingActionButton";
 import NextEventAlert from "../components/NextEventAlert";
@@ -18,8 +21,10 @@ import PullToRefreshIndicator from "../components/PullToRefreshIndicator";
 import { HomeSkeleton } from "../components/skeletons/HomeSkeleton";
 import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/TaskModal";
+import { FEATURES } from "../config/features";
 import { useApp } from "../context/AppContext";
 import { useProfile } from "../features/profile/useProfile";
+import { useProjects } from "../features/projects/useProjects";
 import {
   useCreateTask,
   useTasks,
@@ -27,6 +32,7 @@ import {
 } from "../features/tasks/useTasks";
 import { useAchievements } from "../hooks/useAchievements";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
+import { useParseTaskInput } from "../hooks/useParseTaskInput";
 import { usePullToRefresh } from "../hooks/usePullToRefresh";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
@@ -51,6 +57,12 @@ export default function Home() {
     useTaskCompletionWithConfetti();
   const { markInstanceComplete } = useRecurringTasks();
   const { getUnlockedAchievements, getTotalXP } = useAchievements();
+  const { projects } = useProjects();
+  const [isAIInputOpen, setIsAIInputOpen] = useState(false);
+  const [aiInputValue, setAiInputValue] = useState("");
+  const [showAIConfirmModal, setShowAIConfirmModal] = useState(false);
+  const [createdTaskData, setCreatedTaskData] = useState<Task | null>(null);
+  const parseTaskMutation = useParseTaskInput({ availableProjects: projects });
 
   const { elementRef, isRefreshing, pullDistance, progress } = usePullToRefresh(
     {
@@ -135,6 +147,199 @@ export default function Home() {
     triggerHaptic("light");
     setEditingTask(task);
     setIsTaskModalOpen(true);
+  };
+
+  const handleAITaskCreation = async () => {
+    if (!aiInputValue.trim()) return;
+
+    try {
+      const result = await parseTaskMutation.mutateAsync(aiInputValue);
+
+      if (result.success && result.data) {
+        const taskData = {
+          title: result.data.title,
+          description: result.data.description || undefined,
+          projectId: result.data.projectName
+            ? projects?.find((p) => {
+                const projectName = p.name.toLowerCase().trim();
+                const searchName = result
+                  .data!.projectName!.toLowerCase()
+                  .trim();
+                if (projectName === searchName) return true;
+
+                const projectWords = projectName
+                  .split(/\s+/)
+                  .filter(
+                    (word) =>
+                      ![
+                        "de",
+                        "da",
+                        "do",
+                        "das",
+                        "dos",
+                        "em",
+                        "na",
+                        "no",
+                        "nas",
+                        "nos",
+                      ].includes(word)
+                  );
+                const searchWords = searchName
+                  .split(/\s+/)
+                  .filter(
+                    (word) =>
+                      ![
+                        "de",
+                        "da",
+                        "do",
+                        "das",
+                        "dos",
+                        "em",
+                        "na",
+                        "no",
+                        "nas",
+                        "nos",
+                      ].includes(word)
+                  );
+
+                return searchWords.every((searchWord) =>
+                  projectWords.some(
+                    (projectWord) =>
+                      projectWord.includes(searchWord) ||
+                      searchWord.includes(projectWord)
+                  )
+                );
+              })?.id || undefined
+            : undefined,
+          dueDate: result.data.dueDate
+            ? new Date(result.data.dueDate)
+            : undefined,
+          priority: result.data.priority || "P3",
+          tags: [],
+          attachments: [],
+          recurrence: undefined,
+          subtasks: [],
+          reminders: [],
+          isCompleted: false,
+          completedAt: undefined,
+          workspaceId: state.activeWorkspaceId,
+          order: 0,
+          timeEntries: [],
+          totalTimeSpent: 0,
+          isTimerRunning: false,
+          currentSessionStart: undefined,
+        } as Omit<Task, "id" | "createdAt" | "updatedAt">;
+
+        const createdTask = await createTaskMutation.mutateAsync(taskData);
+
+        setCreatedTaskData(createdTask);
+        setAiInputValue("");
+        setIsAIInputOpen(false);
+        setShowAIConfirmModal(true);
+        toast.success("Tarefa criada com sucesso!");
+      } else if (result.partialData) {
+        const taskData = {
+          title: result.partialData.title || aiInputValue,
+          description: result.partialData.description || undefined,
+          projectId: result.partialData.projectName
+            ? projects?.find((p) => {
+                const projectName = p.name.toLowerCase().trim();
+                const searchName = result
+                  .partialData!.projectName!.toLowerCase()
+                  .trim();
+                if (projectName === searchName) return true;
+
+                const projectWords = projectName
+                  .split(/\s+/)
+                  .filter(
+                    (word) =>
+                      ![
+                        "de",
+                        "da",
+                        "do",
+                        "das",
+                        "dos",
+                        "em",
+                        "na",
+                        "no",
+                        "nas",
+                        "nos",
+                      ].includes(word)
+                  );
+                const searchWords = searchName
+                  .split(/\s+/)
+                  .filter(
+                    (word) =>
+                      ![
+                        "de",
+                        "da",
+                        "do",
+                        "das",
+                        "dos",
+                        "em",
+                        "na",
+                        "no",
+                        "nas",
+                        "nos",
+                      ].includes(word)
+                  );
+
+                return searchWords.every((searchWord) =>
+                  projectWords.some(
+                    (projectWord) =>
+                      projectWord.includes(searchWord) ||
+                      searchWord.includes(projectWord)
+                  )
+                );
+              })?.id || undefined
+            : undefined,
+          dueDate: result.partialData.dueDate
+            ? new Date(result.partialData.dueDate)
+            : undefined,
+          priority: result.partialData.priority || "P3",
+          tags: [],
+          attachments: [],
+          recurrence: undefined,
+          subtasks: [],
+          reminders: [],
+          isCompleted: false,
+          completedAt: undefined,
+          workspaceId: state.activeWorkspaceId,
+          order: 0,
+          timeEntries: [],
+          totalTimeSpent: 0,
+          isTimerRunning: false,
+          currentSessionStart: undefined,
+        } as Omit<Task, "id" | "createdAt" | "updatedAt">;
+
+        const createdTask = await createTaskMutation.mutateAsync(taskData);
+
+        setCreatedTaskData(createdTask);
+        setAiInputValue("");
+        setIsAIInputOpen(false);
+        setShowAIConfirmModal(true);
+        toast.success("Tarefa criada com dados parciais!");
+        if (result.suggestions && result.suggestions.length > 0) {
+          toast.info(result.suggestions[0]);
+        }
+      } else {
+        if (result.error) toast.error(result.error);
+        if (result.suggestions && result.suggestions.length > 0) {
+          toast.info(result.suggestions[0]);
+        }
+      }
+    } catch {
+      toast.error("Falha ao criar tarefa. Tente novamente.");
+    }
+  };
+
+  const handleConfirmAndEdit = () => {
+    if (createdTaskData) {
+      setEditingTask(createdTaskData);
+      setIsTaskModalOpen(true);
+    }
+    setShowAIConfirmModal(false);
+    setCreatedTaskData(null);
   };
 
   const handleSaveTask = async (
@@ -436,6 +641,32 @@ export default function Home() {
 
       <FloatingActionButton onClick={() => setIsTaskModalOpen(true)} />
 
+      {FEATURES.AI_ENABLED && (
+        <button
+          onClick={() => setIsAIInputOpen(true)}
+          className="fixed bottom-32 right-4 z-50 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border-0 flex items-center justify-center"
+          style={{
+            border: `1px solid ${state.currentTheme.colors.primary}`,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor =
+              state.currentTheme.colors.primary + "60";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent";
+          }}
+          aria-label="Criar tarefa com IA"
+        >
+          <Sparkles
+            className="w-6 h-6 hover:text-white"
+            style={{
+              color: state.currentTheme.colors.primary,
+              transition: "color 0.2s ease-in-out",
+            }}
+          />
+        </button>
+      )}
+
       <TaskModal
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
@@ -448,6 +679,29 @@ export default function Home() {
           setEditingTask(undefined);
           setIsTaskModalOpen(true);
         }}
+      />
+
+      {isAIInputOpen && (
+        <AITaskInput
+          value={aiInputValue}
+          onChange={setAiInputValue}
+          onSubmit={handleAITaskCreation}
+          onClose={() => {
+            setIsAIInputOpen(false);
+            setAiInputValue("");
+          }}
+          isProcessing={parseTaskMutation.isPending}
+        />
+      )}
+
+      <AITaskConfirmModal
+        isOpen={showAIConfirmModal}
+        onClose={() => {
+          setShowAIConfirmModal(false);
+          setCreatedTaskData(null);
+        }}
+        task={createdTaskData}
+        onEdit={handleConfirmAndEdit}
       />
 
       <ConfettiEffect
