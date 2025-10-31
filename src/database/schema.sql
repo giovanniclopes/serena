@@ -249,7 +249,80 @@ CREATE POLICY "Utilizadores podem gerir os seus próprios projetos." ON public.p
 ALTER TABLE
   public.tasks ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir as suas próprias tarefas." ON public.tasks FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
+-- Funções para verificar propriedade e compartilhamento de tarefas (usadas nas políticas RLS)
+-- Devem ser criadas ANTES das políticas para evitar recursão
+-- SECURITY DEFINER permite que essas funções executem com privilégios elevados, bypassando RLS
+
+-- Função para verificar se tarefa está compartilhada com o usuário
+CREATE OR REPLACE FUNCTION public.is_task_shared_with_user(task_id_param uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 
+    FROM public.task_shares 
+    WHERE task_id = task_id_param 
+    AND shared_with_user_id = auth.uid()
+  );
+END;
+$$;
+
+-- Função para verificar se usuário tem role editor na tarefa compartilhada
+CREATE OR REPLACE FUNCTION public.is_task_shared_as_editor(task_id_param uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 
+    FROM public.task_shares 
+    WHERE task_id = task_id_param
+    AND shared_with_user_id = auth.uid()
+    AND role = 'editor'
+  );
+END;
+$$;
+
+DROP POLICY IF EXISTS "Utilizadores podem gerir as suas próprias tarefas." ON public.tasks;
+DROP POLICY IF EXISTS "Utilizadores podem ver suas próprias tarefas e compartilhadas" ON public.tasks;
+DROP POLICY IF EXISTS "Utilizadores podem editar suas próprias tarefas" ON public.tasks;
+DROP POLICY IF EXISTS "Utilizadores podem editar tarefas compartilhadas como editor" ON public.tasks;
+DROP POLICY IF EXISTS "Utilizadores podem deletar suas próprias tarefas" ON public.tasks;
+
+CREATE POLICY "Utilizadores podem ver suas próprias tarefas e compartilhadas" 
+ON public.tasks 
+FOR SELECT 
+USING (
+  (select auth.uid()) = user_id 
+  OR public.is_task_shared_with_user(tasks.id)
+);
+
+CREATE POLICY "Utilizadores podem inserir suas próprias tarefas" 
+ON public.tasks 
+FOR INSERT 
+WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Utilizadores podem editar suas próprias tarefas" 
+ON public.tasks 
+FOR UPDATE 
+USING ((select auth.uid()) = user_id)
+WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Utilizadores podem editar tarefas compartilhadas como editor" 
+ON public.tasks 
+FOR UPDATE 
+USING (public.is_task_shared_as_editor(tasks.id))
+WITH CHECK (public.is_task_shared_as_editor(tasks.id));
+
+CREATE POLICY "Utilizadores podem deletar suas próprias tarefas" 
+ON public.tasks 
+FOR DELETE 
+USING ((select auth.uid()) = user_id);
 
 -- Subtarefas
 ALTER TABLE
@@ -297,8 +370,8 @@ CREATE POLICY "Utilizadores podem gerir os seus próprios itens de lista de comp
 ALTER TABLE
   public.task_shares ENABLE ROW LEVEL SECURITY;
 
--- Função para verificar se o usuário é dono da tarefa (usado nas políticas RLS de task_shares)
--- Deve ser criada antes das políticas para evitar recursão
+-- Função para verificar se o usuário é dono da tarefa (usada nas políticas RLS de task_shares)
+-- SECURITY DEFINER permite que essa função execute com privilégios elevados, bypassando RLS
 CREATE OR REPLACE FUNCTION public.is_task_owner(task_id_param uuid)
 RETURNS boolean
 LANGUAGE plpgsql

@@ -137,13 +137,16 @@ export function sortTasksByPriority(tasks: Task[]): Task[] {
 export function filterTasks(
   tasks: Task[],
   filter: Filter,
-  applySorting: boolean = true
+  applySorting: boolean = true,
+  sharedTaskIds: string[] = []
 ): Task[] {
   let filtered = tasks;
 
   if (filter.workspaceId) {
     filtered = filtered.filter(
-      (task) => task.workspaceId === filter.workspaceId
+      (task) =>
+        task.workspaceId === filter.workspaceId ||
+        sharedTaskIds.includes(task.id)
     );
   }
 

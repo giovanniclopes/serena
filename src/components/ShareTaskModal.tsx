@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +24,7 @@ export default function ShareTaskModal({
   task,
 }: ShareTaskModalProps) {
   const { state } = useApp();
+  const queryClient = useQueryClient();
   const [identifier, setIdentifier] = useState("");
   const [role, setRole] = useState<ShareRole>("viewer");
   const [loading, setLoading] = useState(false);
@@ -104,6 +106,8 @@ export default function ShareTaskModal({
     setIdentifier("");
     const data = await getTaskShares(task.id);
     setShares(data);
+    queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    queryClient.invalidateQueries({ queryKey: ["sharedTaskIds"] });
   };
 
   const handleChangeRole = async (shareId: string, newRole: ShareRole) => {
@@ -112,6 +116,8 @@ export default function ShareTaskModal({
       toast.success("Permissão atualizada");
       const data = await getTaskShares(task.id);
       setShares(data);
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["sharedTaskIds"] });
     } catch (e) {
       console.error(e);
       toast.error("Erro ao atualizar permissão");
@@ -123,6 +129,8 @@ export default function ShareTaskModal({
       await revokeTaskShare(shareId);
       toast.success("Acesso revogado");
       setShares((prev) => prev.filter((s) => s.id !== shareId));
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["sharedTaskIds"] });
     } catch (e) {
       console.error(e);
       toast.error("Erro ao revogar acesso");

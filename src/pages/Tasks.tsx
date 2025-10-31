@@ -30,6 +30,7 @@ import { useParseTaskInput } from "../hooks/useParseTaskInput";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import { useTaskCompletionWithConfetti } from "../hooks/useTaskCompletionWithConfetti";
+import { useSharedTaskIds } from "../hooks/useSharedTaskIds";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
 import {
@@ -80,6 +81,7 @@ export default function Tasks() {
   const { markInstanceComplete } = useRecurringTasks();
   const { projects } = useProjects();
   const parseTaskMutation = useParseTaskInput({ availableProjects: projects });
+  const { sharedTaskIds } = useSharedTaskIds();
 
   useEffect(() => {
     const handleOpenAIInput = () => {
@@ -418,7 +420,8 @@ export default function Tasks() {
         priorities:
           selectedPriorities.length > 0 ? selectedPriorities : undefined,
       },
-      false
+      false,
+      sharedTaskIds
     )
   );
 

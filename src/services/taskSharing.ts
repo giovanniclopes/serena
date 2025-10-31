@@ -93,14 +93,44 @@ export async function revokeTaskShare(shareId: string) {
   }
 }
 
+export async function getSharedTaskIds(): Promise<string[]> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("task_shares")
+    .select("task_id")
+    .eq("shared_with_user_id", user.id);
+
+  if (error) {
+    console.error("Erro ao buscar tarefas compartilhadas:", error);
+    return [];
+  }
+
+  return (data || []).map((row) => row.task_id);
+}
+
 export async function canEditTask(taskId: string): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return false;
+  }
+
   const { data: taskRow } = await supabase
     .from("tasks")
     .select("user_id")
     .eq("id", sanitizeTaskIdForAPI(taskId))
     .maybeSingle();
 
-  if (taskRow && taskRow.user_id) {
+  if (taskRow && taskRow.user_id === user.id) {
     return true;
   }
 
@@ -108,10 +138,7 @@ export async function canEditTask(taskId: string): Promise<boolean> {
     .from("task_shares")
     .select("role")
     .eq("task_id", sanitizeTaskIdForAPI(taskId))
-    .eq(
-      "shared_with_user_id",
-      (await supabase.auth.getUser()).data.user?.id ?? ""
-    );
+    .eq("shared_with_user_id", user.id);
 
   return (shares ?? []).some((s) => s.role === "editor");
 }
