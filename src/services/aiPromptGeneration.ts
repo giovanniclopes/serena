@@ -67,7 +67,6 @@ INSTRUÇÕES PARA O PROMPT:
 Crie um prompt de implementação completo que siga as melhores práticas de:
 - Arquitetura de software (SOLID, Clean Architecture, Design Patterns)
 - Padrões de código (nomenclatura, organização, estrutura)
-- Testes (unitários, integração, E2E)
 - Documentação (código, APIs, README)
 - Acessibilidade (WCAG, ARIA, semântica HTML)
 - Performance (otimização, lazy loading, caching)
