@@ -7,6 +7,7 @@ import AITaskInput from "../components/AITaskInput";
 import ConfettiEffect from "../components/ConfettiEffect";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
+import PromptImplementationModal from "../components/PromptImplementationModal";
 import ShareTaskModal from "../components/ShareTaskModal";
 import {
   TaskGridSkeleton,
@@ -28,9 +29,9 @@ import {
 } from "../features/tasks/useTasks";
 import { useParseTaskInput } from "../hooks/useParseTaskInput";
 import { useRecurringTasks } from "../hooks/useRecurringTasks";
+import { useSharedTaskIds } from "../hooks/useSharedTaskIds";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import { useTaskCompletionWithConfetti } from "../hooks/useTaskCompletionWithConfetti";
-import { useSharedTaskIds } from "../hooks/useSharedTaskIds";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
 import {
@@ -68,6 +69,8 @@ export default function Tasks() {
   const [taskToExport, setTaskToExport] = useState<Task | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [taskToShare, setTaskToShare] = useState<Task | null>(null);
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [taskForPrompt, setTaskForPrompt] = useState<Task | null>(null);
 
   const { tasks: rawTasks, isLoading, error } = useTasks();
   const { showSkeleton } = useSkeletonLoading(isLoading);
@@ -467,6 +470,11 @@ export default function Tasks() {
     setShowShareModal(true);
   };
 
+  const handleGeneratePrompt = (task: Task) => {
+    setTaskForPrompt(task);
+    setShowPromptModal(true);
+  };
+
   const confirmDeleteTask = () => {
     if (taskToDelete) {
       deleteTaskMutation.mutate(taskToDelete);
@@ -689,6 +697,7 @@ export default function Tasks() {
                 onDelete={handleDeleteTask}
                 onExport={handleExportTask}
                 onShare={handleShareTask}
+                onGeneratePrompt={handleGeneratePrompt}
                 onRecurringToggle={handleRecurringTaskToggle}
                 showProject={true}
                 showDate={true}
@@ -957,6 +966,15 @@ export default function Tasks() {
           setTaskToShare(null);
         }}
         task={taskToShare}
+      />
+
+      <PromptImplementationModal
+        isOpen={showPromptModal}
+        onClose={() => {
+          setShowPromptModal(false);
+          setTaskForPrompt(null);
+        }}
+        task={taskForPrompt}
       />
 
       <FloatingActionButton

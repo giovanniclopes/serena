@@ -13,6 +13,7 @@ import { useTaskShareCount } from "../hooks/useTaskShareCount";
 import type { Task } from "../types";
 import { formatDate, getPriorityColor, getPriorityLabel } from "../utils";
 import { extractOriginalTaskId } from "../utils/taskUtils";
+import ShareMenu from "./ShareMenu";
 import SubtaskManager from "./SubtaskManager";
 import TaskTimer from "./TaskTimer";
 import { Badge } from "./ui/badge";
@@ -30,6 +31,7 @@ interface TaskCardProps {
   onDelete?: (taskId: string) => void;
   onExport?: (task: Task) => void;
   onShare?: (task: Task) => void;
+  onGeneratePrompt?: (task: Task) => void;
   showProject?: boolean;
   showDate?: boolean;
   isBulkDeleteMode?: boolean;
@@ -51,6 +53,7 @@ export default function TaskCard({
   onDelete,
   onExport,
   onShare,
+  onGeneratePrompt,
   showProject = true,
   showDate = true,
   isBulkDeleteMode = false,
@@ -104,6 +107,12 @@ export default function TaskCard({
   const handleShare = () => {
     if (onShare) {
       onShare(task);
+    }
+  };
+
+  const handleGeneratePrompt = () => {
+    if (onGeneratePrompt) {
+      onGeneratePrompt(task);
     }
   };
 
@@ -208,43 +217,48 @@ export default function TaskCard({
                   </MobileButton>
                 )}
                 {!isBulkDeleteMode && onShare && (
-                  <MobileButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleShare}
-                    style={{
-                      minWidth: touchTarget,
-                      minHeight: touchTarget,
-                      padding: 0,
-                      position: "relative",
-                    }}
-                    aria-label="Compartilhar tarefa"
+                  <ShareMenu
+                    task={task}
+                    onShare={handleShare}
+                    onGeneratePrompt={handleGeneratePrompt}
                   >
-                    <Share2 className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
-                    {shareCount > 0 && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          top: "-2px",
-                          right: "-2px",
-                          backgroundColor: state.currentTheme.colors.primary,
-                          color: "#fff",
-                          borderRadius: "50%",
-                          width: isMobile ? "16px" : "14px",
-                          height: isMobile ? "16px" : "14px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: isMobile ? "0.625rem" : "0.5625rem",
-                          fontWeight: "600",
-                          lineHeight: "1",
-                          minWidth: isMobile ? "16px" : "14px",
-                        }}
-                      >
-                        {shareCount}
-                      </span>
-                    )}
-                  </MobileButton>
+                    <MobileButton
+                      variant="ghost"
+                      size="sm"
+                      style={{
+                        minWidth: touchTarget,
+                        minHeight: touchTarget,
+                        padding: 0,
+                        position: "relative",
+                      }}
+                      aria-label="Compartilhar tarefa"
+                    >
+                      <Share2 className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
+                      {shareCount > 0 && (
+                        <span
+                          style={{
+                            position: "absolute",
+                            top: "-2px",
+                            right: "-2px",
+                            backgroundColor: state.currentTheme.colors.primary,
+                            color: "#fff",
+                            borderRadius: "50%",
+                            width: isMobile ? "16px" : "14px",
+                            height: isMobile ? "16px" : "14px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: isMobile ? "0.625rem" : "0.5625rem",
+                            fontWeight: "600",
+                            lineHeight: "1",
+                            minWidth: isMobile ? "16px" : "14px",
+                          }}
+                        >
+                          {shareCount}
+                        </span>
+                      )}
+                    </MobileButton>
+                  </ShareMenu>
                 )}
                 {!isBulkDeleteMode && onDelete && (
                   <MobileButton
