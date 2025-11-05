@@ -464,6 +464,8 @@ export default function TaskCard({
               workspaceId={task.workspaceId}
               parentTask={task}
               viewMode={viewMode}
+              collapsible={true}
+              defaultExpanded={true}
             />
           </div>
         </div>

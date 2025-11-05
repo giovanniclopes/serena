@@ -79,7 +79,6 @@ O prompt deve ser:
 3. Incluir considerações de UI/UX
 4. Mencionar boas práticas relevantes
 5. Incluir requisitos de acessibilidade
-7. Mencionar testes necessários
 
 FORMATO DE SAÍDA:
 Retorne APENAS o prompt de implementação, sem explicações adicionais, sem markdown, sem código. O prompt deve ser direto e pronto para uso. Não deve conter nenhum comentário ou explicação adicional.

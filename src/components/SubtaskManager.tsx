@@ -44,12 +44,15 @@ import type { Task, Theme } from "../types";
 import { formatDate, formatTime } from "../utils";
 import InlineLoadingSpinner from "./InlineLoadingSpinner";
 import SubtaskModal from "./SubtaskModal";
+import Accordion from "./ui/accordion";
 
 interface SubtaskManagerProps {
   taskId: string;
   workspaceId: string;
   parentTask?: Task;
   viewMode?: "list" | "grid";
+  collapsible?: boolean;
+  defaultExpanded?: boolean;
 }
 
 interface SortableSubtaskItemProps {
@@ -237,6 +240,8 @@ export default function SubtaskManager({
   workspaceId,
   parentTask,
   viewMode = "list",
+  collapsible = false,
+  defaultExpanded = true,
 }: SubtaskManagerProps) {
   const { state } = useApp();
   const { subtasks, isLoading } = useSubtasks(taskId);
@@ -447,151 +452,323 @@ export default function SubtaskManager({
 
   return (
     <div className="mt-3 space-y-3 sm:space-y-2">
-      <div
-        className={`flex ${viewMode === "grid" ? "flex-col" : "items-center"} ${
-          viewMode === "grid" ? "gap-2" : "justify-between"
-        }`}
-      >
-        <h4
-          className="text-sm font-medium"
-          style={{ color: state.currentTheme.colors.text }}
+      {collapsible ? (
+        <Accordion
+          title="Subtarefas"
+          badge={subtasks?.length || 0}
+          defaultExpanded={defaultExpanded}
+          theme={state.currentTheme}
         >
-          <span
-            style={{
-              border: `1px solid ${state.currentTheme.colors.text}`,
-              borderRadius: "6px",
-              padding: "2px 8px",
-              display: "inline-block",
-              marginRight: 8,
-              color: state.currentTheme.colors.text,
-            }}
+          <div
+            className={`flex ${
+              viewMode === "grid" ? "flex-col" : "items-center"
+            } ${viewMode === "grid" ? "gap-2" : "justify-between"}`}
           >
-            Subtarefas: {subtasks?.length || 0} (
-            {subtasks?.filter((subtask) => !subtask.isCompleted).length || 0}{" "}
-            não completadas)
-          </span>
-        </h4>
-        {!isAddingSubtask && (
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsAddingSubtask(true)}
-              className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
-              style={{ color: state.currentTheme.colors.textSecondary }}
+            <h4
+              className="text-sm font-medium"
+              style={{ color: state.currentTheme.colors.text }}
             >
-              <Plus size={14} className="sm:w-3 sm:h-3" />
-              Rápido
-            </button>
-            <button
-              onClick={() => {
-                setEditingSubtask(undefined);
-                setIsSubtaskModalOpen(true);
-              }}
-              className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
-              style={{ color: state.currentTheme.colors.textSecondary }}
-            >
-              <Settings size={14} className="sm:w-3 sm:h-3" />
-              Detalhado
-            </button>
-            {FEATURES.AI_ENABLED && (
-              <button
-                onClick={handleSuggestSubtasks}
-                disabled={suggestSubtasksMutation.isPending}
-                className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-purple-100 transition-colors min-h-[44px] sm:min-h-0 disabled:opacity-50"
+              <span
                 style={{
-                  color: suggestSubtasksMutation.isPending
-                    ? state.currentTheme.colors.textSecondary
-                    : "#7c3aed",
+                  border: `1px solid ${state.currentTheme.colors.text}`,
+                  borderRadius: "6px",
+                  padding: "2px 8px",
+                  display: "inline-block",
+                  marginRight: 8,
+                  color: state.currentTheme.colors.text,
                 }}
               >
-                {suggestSubtasksMutation.isPending ? (
-                  <InlineLoadingSpinner size={14} className="sm:w-3 sm:h-3" />
-                ) : (
-                  <Sparkles size={14} className="sm:w-3 sm:h-3" />
+                {subtasks?.length || 0} subtarefa
+                {subtasks?.length !== 1 ? "s" : ""} (
+                {subtasks?.filter((subtask) => !subtask.isCompleted).length ||
+                  0}{" "}
+                não completada
+                {subtasks?.filter((subtask) => !subtask.isCompleted).length !==
+                1
+                  ? "s"
+                  : ""}
+                )
+              </span>
+            </h4>
+            {!isAddingSubtask && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsAddingSubtask(true)}
+                  className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  <Plus size={14} className="sm:w-3 sm:h-3" />
+                  Rápido
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingSubtask(undefined);
+                    setIsSubtaskModalOpen(true);
+                  }}
+                  className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  <Settings size={14} className="sm:w-3 sm:h-3" />
+                  Detalhado
+                </button>
+                {FEATURES.AI_ENABLED && (
+                  <button
+                    onClick={handleSuggestSubtasks}
+                    disabled={suggestSubtasksMutation.isPending}
+                    className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-purple-100 transition-colors min-h-[44px] sm:min-h-0 disabled:opacity-50"
+                    style={{
+                      color: suggestSubtasksMutation.isPending
+                        ? state.currentTheme.colors.textSecondary
+                        : "#7c3aed",
+                    }}
+                  >
+                    {suggestSubtasksMutation.isPending ? (
+                      <InlineLoadingSpinner
+                        size={14}
+                        className="sm:w-3 sm:h-3"
+                      />
+                    ) : (
+                      <Sparkles size={14} className="sm:w-3 sm:h-3" />
+                    )}
+                    {suggestSubtasksMutation.isPending
+                      ? "Gerando..."
+                      : "Sugerir com IA"}
+                  </button>
                 )}
-                {suggestSubtasksMutation.isPending
-                  ? "Gerando..."
-                  : "Sugerir com IA"}
-              </button>
+              </div>
             )}
           </div>
-        )}
-      </div>
 
-      {isAddingSubtask && (
-        <div className="flex items-center gap-2 p-3 sm:p-2 bg-gray-50 rounded-md">
-          <input
-            type="text"
-            value={newSubtaskTitle}
-            onChange={(e) => setNewSubtaskTitle(e.target.value)}
-            placeholder="Nova subtarefa..."
-            className="flex-1 text-sm px-3 py-2 sm:px-2 sm:py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[44px] sm:min-h-0"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleAddSubtask();
-              if (e.key === "Escape") setIsAddingSubtask(false);
-            }}
-          />
-          <button
-            onClick={handleAddSubtask}
-            disabled={
-              !newSubtaskTitle.trim() || createSubtaskMutation.isPending
-            }
-            className="p-2 sm:p-1 text-green-600 hover:bg-green-100 rounded disabled:opacity-50 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
-            aria-label="Adicionar subtarefa"
-          >
-            <Check size={16} className="sm:w-3.5 sm:h-3.5" />
-          </button>
-          <button
-            onClick={() => setIsAddingSubtask(false)}
-            className="p-2 sm:p-1 text-gray-600 hover:bg-gray-200 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
-            aria-label="Cancelar adição de subtarefa"
-          >
-            <X size={16} className="sm:w-3.5 sm:h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {subtasks && subtasks.length > 0 && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={subtasks.map((subtask) => subtask.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div
-              className="space-y-2 sm:space-y-1"
-              style={{ touchAction: "pan-y" }}
-            >
-              {subtasks
-                .sort((a, b) => (a.order || 0) - (b.order || 0))
-                .map((subtask) => (
-                  <SortableSubtaskItem
-                    key={subtask.id}
-                    subtask={subtask}
-                    isEditing={editingSubtaskId === subtask.id}
-                    editingTitle={editingTitle}
-                    onStartEditing={startEditing}
-                    onUpdateSubtask={handleUpdateSubtask}
-                    onDeleteSubtask={handleDeleteSubtask}
-                    onToggleSubtask={handleToggleSubtask}
-                    onCancelEditing={cancelEditing}
-                    onEditingTitleChange={setEditingTitle}
-                    onOpenAdvancedEdit={openAdvancedEdit}
-                    isUpdating={updateSubtaskMutation.isPending}
-                    isDeleting={deleteSubtaskMutation.isPending}
-                    isToggling={
-                      completeSubtaskMutation.isPending ||
-                      uncompleteSubtaskMutation.isPending
-                    }
-                    theme={state.currentTheme}
-                  />
-                ))}
+          {isAddingSubtask && (
+            <div className="flex items-center gap-2 p-3 sm:p-2 bg-gray-50 rounded-md mt-2">
+              <input
+                type="text"
+                value={newSubtaskTitle}
+                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                placeholder="Nova subtarefa..."
+                className="flex-1 text-sm px-3 py-2 sm:px-2 sm:py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[44px] sm:min-h-0"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAddSubtask();
+                  if (e.key === "Escape") setIsAddingSubtask(false);
+                }}
+              />
+              <button
+                onClick={handleAddSubtask}
+                disabled={
+                  !newSubtaskTitle.trim() || createSubtaskMutation.isPending
+                }
+                className="p-2 sm:p-1 text-green-600 hover:bg-green-100 rounded disabled:opacity-50 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                aria-label="Adicionar subtarefa"
+              >
+                <Check size={16} className="sm:w-3.5 sm:h-3.5" />
+              </button>
+              <button
+                onClick={() => setIsAddingSubtask(false)}
+                className="p-2 sm:p-1 text-gray-600 hover:bg-gray-200 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                aria-label="Cancelar adição de subtarefa"
+              >
+                <X size={16} className="sm:w-3.5 sm:h-3.5" />
+              </button>
             </div>
-          </SortableContext>
-        </DndContext>
+          )}
+
+          {subtasks && subtasks.length > 0 && (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={subtasks.map((subtask) => subtask.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div
+                  className="space-y-2 sm:space-y-1 mt-2"
+                  style={{ touchAction: "pan-y" }}
+                >
+                  {subtasks
+                    .sort((a, b) => (a.order || 0) - (b.order || 0))
+                    .map((subtask) => (
+                      <SortableSubtaskItem
+                        key={subtask.id}
+                        subtask={subtask}
+                        isEditing={editingSubtaskId === subtask.id}
+                        editingTitle={editingTitle}
+                        onStartEditing={startEditing}
+                        onUpdateSubtask={handleUpdateSubtask}
+                        onDeleteSubtask={handleDeleteSubtask}
+                        onToggleSubtask={handleToggleSubtask}
+                        onCancelEditing={cancelEditing}
+                        onEditingTitleChange={setEditingTitle}
+                        onOpenAdvancedEdit={openAdvancedEdit}
+                        isUpdating={updateSubtaskMutation.isPending}
+                        isDeleting={deleteSubtaskMutation.isPending}
+                        isToggling={
+                          completeSubtaskMutation.isPending ||
+                          uncompleteSubtaskMutation.isPending
+                        }
+                        theme={state.currentTheme}
+                      />
+                    ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </Accordion>
+      ) : (
+        <>
+          <div
+            className={`flex ${
+              viewMode === "grid" ? "flex-col" : "items-center"
+            } ${viewMode === "grid" ? "gap-2" : "justify-between"}`}
+          >
+            <h4
+              className="text-sm font-medium"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              <span
+                style={{
+                  border: `1px solid ${state.currentTheme.colors.text}`,
+                  borderRadius: "6px",
+                  padding: "2px 8px",
+                  display: "inline-block",
+                  marginRight: 8,
+                  color: state.currentTheme.colors.text,
+                }}
+              >
+                Subtarefas: {subtasks?.length || 0} (
+                {subtasks?.filter((subtask) => !subtask.isCompleted).length ||
+                  0}{" "}
+                não completadas)
+              </span>
+            </h4>
+            {!isAddingSubtask && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsAddingSubtask(true)}
+                  className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  <Plus size={14} className="sm:w-3 sm:h-3" />
+                  Rápido
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingSubtask(undefined);
+                    setIsSubtaskModalOpen(true);
+                  }}
+                  className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  <Settings size={14} className="sm:w-3 sm:h-3" />
+                  Detalhado
+                </button>
+                {FEATURES.AI_ENABLED && (
+                  <button
+                    onClick={handleSuggestSubtasks}
+                    disabled={suggestSubtasksMutation.isPending}
+                    className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-purple-100 transition-colors min-h-[44px] sm:min-h-0 disabled:opacity-50"
+                    style={{
+                      color: suggestSubtasksMutation.isPending
+                        ? state.currentTheme.colors.textSecondary
+                        : "#7c3aed",
+                    }}
+                  >
+                    {suggestSubtasksMutation.isPending ? (
+                      <InlineLoadingSpinner
+                        size={14}
+                        className="sm:w-3 sm:h-3"
+                      />
+                    ) : (
+                      <Sparkles size={14} className="sm:w-3 sm:h-3" />
+                    )}
+                    {suggestSubtasksMutation.isPending
+                      ? "Gerando..."
+                      : "Sugerir com IA"}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          {isAddingSubtask && (
+            <div className="flex items-center gap-2 p-3 sm:p-2 bg-gray-50 rounded-md">
+              <input
+                type="text"
+                value={newSubtaskTitle}
+                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                placeholder="Nova subtarefa..."
+                className="flex-1 text-sm px-3 py-2 sm:px-2 sm:py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[44px] sm:min-h-0"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAddSubtask();
+                  if (e.key === "Escape") setIsAddingSubtask(false);
+                }}
+              />
+              <button
+                onClick={handleAddSubtask}
+                disabled={
+                  !newSubtaskTitle.trim() || createSubtaskMutation.isPending
+                }
+                className="p-2 sm:p-1 text-green-600 hover:bg-green-100 rounded disabled:opacity-50 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                aria-label="Adicionar subtarefa"
+              >
+                <Check size={16} className="sm:w-3.5 sm:h-3.5" />
+              </button>
+              <button
+                onClick={() => setIsAddingSubtask(false)}
+                className="p-2 sm:p-1 text-gray-600 hover:bg-gray-200 rounded min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                aria-label="Cancelar adição de subtarefa"
+              >
+                <X size={16} className="sm:w-3.5 sm:h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {subtasks && subtasks.length > 0 && (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={subtasks.map((subtask) => subtask.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div
+                  className="space-y-2 sm:space-y-1"
+                  style={{ touchAction: "pan-y" }}
+                >
+                  {subtasks
+                    .sort((a, b) => (a.order || 0) - (b.order || 0))
+                    .map((subtask) => (
+                      <SortableSubtaskItem
+                        key={subtask.id}
+                        subtask={subtask}
+                        isEditing={editingSubtaskId === subtask.id}
+                        editingTitle={editingTitle}
+                        onStartEditing={startEditing}
+                        onUpdateSubtask={handleUpdateSubtask}
+                        onDeleteSubtask={handleDeleteSubtask}
+                        onToggleSubtask={handleToggleSubtask}
+                        onCancelEditing={cancelEditing}
+                        onEditingTitleChange={setEditingTitle}
+                        onOpenAdvancedEdit={openAdvancedEdit}
+                        isUpdating={updateSubtaskMutation.isPending}
+                        isDeleting={deleteSubtaskMutation.isPending}
+                        isToggling={
+                          completeSubtaskMutation.isPending ||
+                          uncompleteSubtaskMutation.isPending
+                        }
+                        theme={state.currentTheme}
+                      />
+                    ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          )}
+        </>
       )}
 
       <SubtaskModal
