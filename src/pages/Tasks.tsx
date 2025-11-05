@@ -32,6 +32,7 @@ import { useRecurringTasks } from "../hooks/useRecurringTasks";
 import { useSharedTaskIds } from "../hooks/useSharedTaskIds";
 import { useSkeletonLoading } from "../hooks/useSkeletonLoading";
 import { useTaskCompletionWithConfetti } from "../hooks/useTaskCompletionWithConfetti";
+import { addTaskToGoogleCalendar } from "../services/googleCalendar";
 import type { Priority, Task } from "../types";
 import { filterTasks, searchTasks } from "../utils";
 import {
@@ -475,6 +476,21 @@ export default function Tasks() {
     setShowPromptModal(true);
   };
 
+  const handleAddToGoogleCalendar = async (task: Task) => {
+    try {
+      const result = await addTaskToGoogleCalendar(task);
+      if (result.success && result.url) {
+        window.open(result.url, "_blank");
+        toast.success("Abrindo Google Agenda...");
+      } else {
+        toast.error(result.error || "Erro ao adicionar ao Google Agenda");
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar ao Google Agenda:", error);
+      toast.error("Erro ao adicionar ao Google Agenda");
+    }
+  };
+
   const confirmDeleteTask = () => {
     if (taskToDelete) {
       deleteTaskMutation.mutate(taskToDelete);
@@ -698,6 +714,7 @@ export default function Tasks() {
                 onExport={handleExportTask}
                 onShare={handleShareTask}
                 onGeneratePrompt={handleGeneratePrompt}
+                onAddToGoogleCalendar={handleAddToGoogleCalendar}
                 onRecurringToggle={handleRecurringTaskToggle}
                 showProject={true}
                 showDate={true}

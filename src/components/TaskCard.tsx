@@ -1,19 +1,17 @@
 import {
   Calendar,
-  Download,
   Edit,
+  MoreVertical,
   Paperclip,
   RotateCcw,
-  Share2,
   Tag,
   Trash2,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
-import { useTaskShareCount } from "../hooks/useTaskShareCount";
 import type { Task } from "../types";
 import { formatDate, getPriorityColor, getPriorityLabel } from "../utils";
 import { extractOriginalTaskId } from "../utils/taskUtils";
-import ShareMenu from "./ShareMenu";
+import ActionsMenu from "./ActionsMenu";
 import SubtaskManager from "./SubtaskManager";
 import TaskTimer from "./TaskTimer";
 import { Badge } from "./ui/badge";
@@ -32,6 +30,7 @@ interface TaskCardProps {
   onExport?: (task: Task) => void;
   onShare?: (task: Task) => void;
   onGeneratePrompt?: (task: Task) => void;
+  onAddToGoogleCalendar?: (task: Task) => void;
   showProject?: boolean;
   showDate?: boolean;
   isBulkDeleteMode?: boolean;
@@ -54,6 +53,7 @@ export default function TaskCard({
   onExport,
   onShare,
   onGeneratePrompt,
+  onAddToGoogleCalendar,
   showProject = true,
   showDate = true,
   isBulkDeleteMode = false,
@@ -64,7 +64,6 @@ export default function TaskCard({
 }: TaskCardProps) {
   const { state } = useApp();
   const { spacing, touchTarget, isMobile } = useMobileSpacing();
-  const { shareCount } = useTaskShareCount(task.id);
 
   const project = state.projects.find((p) => p.id === task.projectId);
   const taskTags = state.tags.filter((tag) => task.tags.includes(tag.id));
@@ -113,6 +112,12 @@ export default function TaskCard({
   const handleGeneratePrompt = () => {
     if (onGeneratePrompt) {
       onGeneratePrompt(task);
+    }
+  };
+
+  const handleAddToGoogleCalendar = () => {
+    if (onAddToGoogleCalendar) {
+      onAddToGoogleCalendar(task);
     }
   };
 
@@ -201,65 +206,34 @@ export default function TaskCard({
                     <Edit className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
                   </MobileButton>
                 )}
-                {!isBulkDeleteMode && onExport && (
-                  <MobileButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleExport}
-                    style={{
-                      minWidth: touchTarget,
-                      minHeight: touchTarget,
-                      padding: 0,
-                    }}
-                    aria-label="Exportar tarefa"
-                  >
-                    <Download className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
-                  </MobileButton>
-                )}
-                {!isBulkDeleteMode && onShare && (
-                  <ShareMenu
-                    task={task}
-                    onShare={handleShare}
-                    onGeneratePrompt={handleGeneratePrompt}
-                  >
-                    <MobileButton
-                      variant="ghost"
-                      size="sm"
-                      style={{
-                        minWidth: touchTarget,
-                        minHeight: touchTarget,
-                        padding: 0,
-                        position: "relative",
-                      }}
-                      aria-label="Compartilhar tarefa"
+                {!isBulkDeleteMode &&
+                  (onExport || onShare || onAddToGoogleCalendar) && (
+                    <ActionsMenu
+                      task={task}
+                      onExport={handleExport}
+                      onShare={handleShare}
+                      onGeneratePrompt={
+                        onGeneratePrompt ? handleGeneratePrompt : undefined
+                      }
+                      onAddToGoogleCalendar={handleAddToGoogleCalendar}
                     >
-                      <Share2 className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
-                      {shareCount > 0 && (
-                        <span
-                          style={{
-                            position: "absolute",
-                            top: "-2px",
-                            right: "-2px",
-                            backgroundColor: state.currentTheme.colors.primary,
-                            color: "#fff",
-                            borderRadius: "50%",
-                            width: isMobile ? "16px" : "14px",
-                            height: isMobile ? "16px" : "14px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: isMobile ? "0.625rem" : "0.5625rem",
-                            fontWeight: "600",
-                            lineHeight: "1",
-                            minWidth: isMobile ? "16px" : "14px",
-                          }}
-                        >
-                          {shareCount}
-                        </span>
-                      )}
-                    </MobileButton>
-                  </ShareMenu>
-                )}
+                      <MobileButton
+                        variant="ghost"
+                        size="sm"
+                        style={{
+                          minWidth: touchTarget,
+                          minHeight: touchTarget,
+                          padding: 0,
+                        }}
+                        aria-label="Ações"
+                        aria-haspopup="menu"
+                      >
+                        <MoreVertical
+                          className={isMobile ? "w-4 h-4" : "w-5 h-5"}
+                        />
+                      </MobileButton>
+                    </ActionsMenu>
+                  )}
                 {!isBulkDeleteMode && onDelete && (
                   <MobileButton
                     variant="ghost"
