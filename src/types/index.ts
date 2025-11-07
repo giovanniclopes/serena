@@ -278,6 +278,7 @@ export interface ShoppingListItem {
   actualPrice?: number;
   orderIndex: number;
   workspaceId: string;
+  links?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -307,6 +308,7 @@ export interface CreateShoppingListItemData {
   price?: number;
   orderIndex?: number;
   workspaceId: string;
+  links?: string[];
 }
 
 export interface UpdateShoppingListItemData {
@@ -317,6 +319,7 @@ export interface UpdateShoppingListItemData {
   isPurchased?: boolean;
   actualPrice?: number;
   orderIndex?: number;
+  links?: string[];
 }
 
 export interface ShoppingStatistics {

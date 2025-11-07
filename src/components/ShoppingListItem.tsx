@@ -1,4 +1,4 @@
-import { Check, Edit, Trash2 } from "lucide-react";
+import { Check, Edit, ExternalLink, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import {
@@ -121,6 +121,27 @@ export default function ShoppingListItem({
             </span>
           )}
         </div>
+        {item.links && item.links.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {item.links.map((link, index) => (
+              <a
+                key={index}
+                href={link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors hover:bg-opacity-10"
+                style={{
+                  color: state.currentTheme.colors.primary,
+                  backgroundColor: state.currentTheme.colors.primary + "10",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ExternalLink className="w-3 h-3" />
+                <span className="truncate max-w-[150px]">{link}</span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
 
       {showActions && canEdit && (

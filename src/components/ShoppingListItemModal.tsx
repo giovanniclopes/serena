@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { ExternalLink, Plus, Trash2, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import type { ShoppingListItem } from "../types";
@@ -11,6 +11,7 @@ interface ShoppingListItemModalProps {
     quantity?: string;
     notes?: string;
     price?: number;
+    links?: string[];
   }) => void;
   listId: string;
   item?: ShoppingListItem;
@@ -28,12 +29,15 @@ export default function ShoppingListItemModal({
   const [notes, setNotes] = useState("");
   const [price, setPrice] = useState("");
   const [priceDisplay, setPriceDisplay] = useState("");
+  const [links, setLinks] = useState<string[]>([]);
+  const [newLink, setNewLink] = useState("");
 
   useEffect(() => {
     if (item) {
       setName(item.name);
       setQuantity(item.quantity || "");
       setNotes(item.notes || "");
+      setLinks(item.links || []);
       if (item.price) {
         setPrice(item.price.toString());
         const formatted = item.price.toLocaleString("pt-BR", {
@@ -51,7 +55,9 @@ export default function ShoppingListItemModal({
       setNotes("");
       setPrice("");
       setPriceDisplay("");
+      setLinks([]);
     }
+    setNewLink("");
   }, [item, isOpen]);
 
   const handlePriceChange = (value: string) => {
@@ -75,6 +81,21 @@ export default function ShoppingListItemModal({
     setPrice(reais.toString());
   };
 
+  const handleAddLink = () => {
+    if (!newLink.trim()) return;
+    const url = newLink.trim();
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      setLinks([...links, `https://${url}`]);
+    } else {
+      setLinks([...links, url]);
+    }
+    setNewLink("");
+  };
+
+  const handleRemoveLink = (index: number) => {
+    setLinks(links.filter((_, i) => i !== index));
+  };
+
   const handleSave = () => {
     if (!name.trim()) return;
 
@@ -85,6 +106,7 @@ export default function ShoppingListItemModal({
       quantity: quantity.trim() || undefined,
       notes: notes.trim() || undefined,
       price: priceValue,
+      links: links.length > 0 ? links : undefined,
     });
 
     if (!item) {
@@ -93,6 +115,7 @@ export default function ShoppingListItemModal({
       setNotes("");
       setPrice("");
       setPriceDisplay("");
+      setLinks([]);
     }
   };
 
@@ -104,7 +127,9 @@ export default function ShoppingListItemModal({
       setNotes("");
       setPrice("");
       setPriceDisplay("");
+      setLinks([]);
     }
+    setNewLink("");
   };
 
   if (!isOpen) return null;
@@ -232,6 +257,91 @@ export default function ShoppingListItemModal({
                 } as React.CSSProperties
               }
             />
+          </div>
+
+          <div>
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: state.currentTheme.colors.text }}
+            >
+              Links
+            </label>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newLink}
+                  onChange={(e) => setNewLink(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddLink();
+                    }
+                  }}
+                  placeholder="https://exemplo.com"
+                  className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors"
+                  style={
+                    {
+                      backgroundColor: state.currentTheme.colors.background,
+                      borderColor: state.currentTheme.colors.border,
+                      color: state.currentTheme.colors.text,
+                      "--tw-ring-color": state.currentTheme.colors.primary,
+                    } as React.CSSProperties
+                  }
+                />
+                <button
+                  onClick={handleAddLink}
+                  disabled={!newLink.trim()}
+                  className="px-3 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  style={{
+                    backgroundColor: state.currentTheme.colors.primary,
+                    color: "white",
+                  }}
+                  aria-label="Adicionar link"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              {links.length > 0 && (
+                <div className="space-y-2">
+                  {links.map((link, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-2 rounded-lg border"
+                      style={{
+                        backgroundColor: state.currentTheme.colors.background,
+                        borderColor: state.currentTheme.colors.border,
+                      }}
+                    >
+                      <ExternalLink
+                        className="w-4 h-4 flex-shrink-0"
+                        style={{ color: state.currentTheme.colors.primary }}
+                      />
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 text-sm truncate hover:underline"
+                        style={{ color: state.currentTheme.colors.primary }}
+                      >
+                        {link}
+                      </a>
+                      <button
+                        onClick={() => handleRemoveLink(index)}
+                        className="p-1 rounded transition-colors hover:bg-opacity-10"
+                        style={{
+                          color: state.currentTheme.colors.error,
+                          backgroundColor: state.currentTheme.colors.error + "10",
+                        }}
+                        aria-label="Remover link"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
               

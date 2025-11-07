@@ -38,6 +38,7 @@ export async function getShoppingLists(
         purchased_at,
         order_index,
         workspace_id,
+        links,
         created_at,
         updated_at
       )
@@ -133,6 +134,7 @@ export async function getShoppingLists(
             : undefined,
           orderIndex: item.order_index,
           workspaceId: item.workspace_id,
+          links: (item.links as string[]) || [],
           createdAt: new Date(item.created_at),
           updatedAt: new Date(item.updated_at),
         })) || [],
@@ -299,6 +301,7 @@ export async function createShoppingListItem(
       order_index: item.orderIndex || 0,
       workspace_id: item.workspaceId,
       user_id: user.id,
+      links: item.links || [],
     })
     .select()
     .single();
@@ -369,6 +372,10 @@ export async function updateShoppingListItem(
       : null;
   }
 
+  if (updates.links !== undefined) {
+    updateData.links = updates.links;
+  }
+
   const { data, error } = await supabase
     .from("shopping_list_items")
     .update(updateData)
@@ -392,6 +399,7 @@ export async function updateShoppingListItem(
     purchasedAt: data.purchased_at ? new Date(data.purchased_at) : undefined,
     orderIndex: data.order_index,
     workspaceId: data.workspace_id,
+    links: (data.links as string[]) || [],
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
   };

@@ -200,11 +200,13 @@ CREATE TABLE public.shopping_list_items (
   is_purchased boolean NOT NULL DEFAULT false,
   purchased_at timestamptz,
   order_index integer NOT NULL DEFAULT 0,
+  links jsonb DEFAULT '[]'::jsonb,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 COMMENT ON TABLE public.shopping_list_items IS 'Itens individuais dentro de uma lista de compras.';
+COMMENT ON COLUMN public.shopping_list_items.links IS 'Array de links relacionados ao item (URLs)';
 
 -- Tabela para compartilhamento de tarefas entre utilizadores.
 CREATE TABLE public.task_shares (

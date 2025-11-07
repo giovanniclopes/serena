@@ -173,6 +173,7 @@ export default function ShoppingListCard({
     quantity?: string;
     notes?: string;
     price?: number;
+    links?: string[];
   }) => {
     if (editingItem) {
       updateItemMutation.mutate({
@@ -182,6 +183,7 @@ export default function ShoppingListCard({
           quantity: itemData.quantity,
           notes: itemData.notes,
           price: itemData.price,
+          links: itemData.links,
         },
       });
     } else {
@@ -192,6 +194,7 @@ export default function ShoppingListCard({
         notes: itemData.notes,
         price: itemData.price,
         workspaceId: list.workspaceId,
+        links: itemData.links,
       });
     }
     setIsItemModalOpen(false);
