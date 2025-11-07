@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { WORKSPACE_COLORS } from "../constants/workspaceColors";
 import {
   projectTemplates,
   type ProjectTemplate,
 } from "../constants/projectTemplates";
 import { useApp } from "../context/AppContext";
 import type { Project } from "../types";
+import ColorPicker from "./ColorPicker";
 import ResponsiveModal from "./ResponsiveModal";
 
 interface ProjectModalProps {
@@ -18,19 +20,6 @@ interface ProjectModalProps {
   ) => void;
 }
 
-const colors = [
-  "#ec4899",
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#06b6d4",
-  "#84cc16",
-  "#f97316",
-  "#6366f1",
-];
-
 export default function ProjectModal({
   isOpen,
   onClose,
@@ -42,7 +31,7 @@ export default function ProjectModal({
   const [formData, setFormData] = useState({
     name: project?.name || "",
     description: project?.description || "",
-    color: project?.color || colors[0],
+    color: project?.color || WORKSPACE_COLORS[0],
   });
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [showTemplates, setShowTemplates] = useState(!project);
@@ -53,14 +42,14 @@ export default function ProjectModal({
         setFormData({
           name: project.name || "",
           description: project.description || "",
-          color: project.color || colors[0],
+          color: project.color || WORKSPACE_COLORS[0],
         });
         setShowTemplates(false);
       } else {
         setFormData({
           name: "",
           description: "",
-          color: colors[0],
+          color: WORKSPACE_COLORS[0],
         });
         setShowTemplates(true);
       }
@@ -72,7 +61,7 @@ export default function ProjectModal({
       setFormData({
         name: "",
         description: "",
-        color: colors[0],
+        color: WORKSPACE_COLORS[0],
       });
       setSelectedTemplate("");
       setShowTemplates(true);
@@ -227,33 +216,12 @@ export default function ProjectModal({
             />
           </div>
 
-          <div>
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: state.currentTheme.colors.text }}
-            >
-              Cor
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setFormData((prev) => ({ ...prev, color }))}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
-                    formData.color === color ? "scale-110" : ""
-                  }`}
-                  style={{
-                    backgroundColor: color,
-                    borderColor:
-                      formData.color === color
-                        ? state.currentTheme.colors.text
-                        : "transparent",
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+          <ColorPicker
+            value={formData.color}
+            onChange={(color) => setFormData((prev) => ({ ...prev, color }))}
+            predefinedColors={WORKSPACE_COLORS}
+            label="Cor"
+          />
 
           <div className="flex flex-col sm:flex-row justify-between gap-3 pt-3 sm:pt-4">
             {!project && (

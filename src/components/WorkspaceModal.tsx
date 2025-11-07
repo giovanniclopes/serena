@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
+import { WORKSPACE_COLORS } from "../constants/workspaceColors";
 import { useApp } from "../context/AppContext";
 import type { Workspace } from "../types";
+import ColorPicker from "./ColorPicker";
 import ResponsiveModal from "./ResponsiveModal";
+
+interface FormData {
+  name: string;
+  description: string;
+  color: string;
+}
 
 interface WorkspaceModalProps {
   isOpen: boolean;
@@ -12,19 +20,6 @@ interface WorkspaceModalProps {
   ) => void;
 }
 
-const colors = [
-  "#ec4899",
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#ef4444",
-  "#8b5cf6",
-  "#06b6d4",
-  "#84cc16",
-  "#f97316",
-  "#6366f1",
-];
-
 export default function WorkspaceModal({
   isOpen,
   onClose,
@@ -32,10 +27,10 @@ export default function WorkspaceModal({
   onSave,
 }: WorkspaceModalProps) {
   const { state } = useApp();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     description: "",
-    color: colors[0],
+    color: WORKSPACE_COLORS[0],
   });
 
   useEffect(() => {
@@ -43,13 +38,13 @@ export default function WorkspaceModal({
       setFormData({
         name: workspace.name || "",
         description: workspace.description || "",
-        color: workspace.color || colors[0],
+        color: workspace.color || WORKSPACE_COLORS[0],
       });
     } else {
       setFormData({
         name: "",
         description: "",
-        color: colors[0],
+        color: WORKSPACE_COLORS[0],
       });
     }
   }, [workspace]);
@@ -59,7 +54,7 @@ export default function WorkspaceModal({
       setFormData({
         name: "",
         description: "",
-        color: colors[0],
+        color: WORKSPACE_COLORS[0],
       });
     }
   }, [isOpen]);
@@ -136,33 +131,12 @@ export default function WorkspaceModal({
           />
         </div>
 
-        <div>
-          <label
-            className="block text-sm font-medium mb-2"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Cor
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {colors.map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setFormData((prev) => ({ ...prev, color }))}
-                className={`w-8 h-8 rounded-full border-2 transition-all ${
-                  formData.color === color ? "scale-110" : ""
-                }`}
-                style={{
-                  backgroundColor: color,
-                  borderColor:
-                    formData.color === color
-                      ? state.currentTheme.colors.text
-                      : "transparent",
-                }}
-              />
-            ))}
-          </div>
-        </div>
+        <ColorPicker
+          value={formData.color}
+          onChange={(color) => setFormData((prev) => ({ ...prev, color }))}
+          predefinedColors={WORKSPACE_COLORS}
+          label="Cor"
+        />
 
         <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4">
           <button

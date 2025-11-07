@@ -1,4 +1,4 @@
-import { Check, Palette, Tag, X } from "lucide-react";
+import { Check, Tag, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   SHOPPING_LIST_COLORS,
@@ -6,6 +6,7 @@ import {
 } from "../constants/shoppingCategories";
 import { useApp } from "../context/AppContext";
 import type { ShoppingList } from "../types";
+import ColorPicker from "./ColorPicker";
 
 interface ShoppingListModalProps {
   isOpen: boolean;
@@ -34,7 +35,6 @@ export default function ShoppingListModal({
   const [category, setCategory] = useState("geral");
   const [color, setColor] = useState("#ec4899");
   const [icon, setIcon] = useState("🛒");
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
 
   useEffect(() => {
@@ -285,75 +285,12 @@ export default function ShoppingListModal({
             </div>
           </div>
 
-          <div>
-            <label
-              className="block text-sm font-medium mb-3"
-              style={{ color: state.currentTheme.colors.text }}
-            >
-              Cor
-            </label>
-            <div className="space-y-3">
-              <button
-                onClick={() => setShowColorPicker(!showColorPicker)}
-                className="w-full flex items-center justify-between px-4 py-3 border rounded-lg transition-all hover:shadow-md"
-                style={{
-                  backgroundColor: state.currentTheme.colors.background,
-                  borderColor: showColorPicker
-                    ? state.currentTheme.colors.primary
-                    : state.currentTheme.colors.border,
-                  color: state.currentTheme.colors.text,
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-6 h-6 rounded-full shadow-sm border-2"
-                    style={{
-                      backgroundColor: color,
-                      borderColor: state.currentTheme.colors.surface,
-                    }}
-                  />
-                  <span className="text-sm font-medium">Selecionar cor</span>
-                </div>
-                <Palette className="w-4 h-4" />
-              </button>
-
-              {showColorPicker && (
-                <div className="p-4 rounded-lg border grid grid-cols-6 gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                  {SHOPPING_LIST_COLORS.map((colorOption) => (
-                    <button
-                      key={colorOption}
-                      onClick={() => {
-                        setColor(colorOption);
-                        setShowColorPicker(false);
-                      }}
-                      className={`relative w-10 h-10 rounded-full border-2 transition-all hover:scale-110 ${
-                        color === colorOption ? "scale-110 ring-2" : ""
-                      }`}
-                      style={{
-                        backgroundColor: colorOption,
-                        borderColor:
-                          color === colorOption
-                            ? state.currentTheme.colors.text
-                            : state.currentTheme.colors.border,
-                      }}
-                      aria-label={`Selecionar cor ${colorOption}`}
-                    >
-                      {color === colorOption && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Check
-                            className="w-4 h-4 text-white drop-shadow-md"
-                            style={{
-                              filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
-                            }}
-                          />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+          <ColorPicker
+            value={color}
+            onChange={setColor}
+            predefinedColors={SHOPPING_LIST_COLORS}
+            label="Cor"
+          />
         </div>
 
         <div
