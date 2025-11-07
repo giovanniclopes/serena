@@ -10,6 +10,7 @@ interface MobileCardProps {
   className?: string;
   color?: string;
   onClick?: () => void;
+  onDoubleClick?: (e: React.MouseEvent) => void;
   hover?: boolean;
   padding?: "sm" | "md" | "lg";
 }
@@ -19,6 +20,7 @@ export function MobileCard({
   className = "",
   color,
   onClick,
+  onDoubleClick,
   hover = true,
   padding = "md",
 }: MobileCardProps) {
@@ -49,6 +51,7 @@ export function MobileCard({
         borderColor: state.currentTheme.colors.border,
       }}
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
     >
       {color && (
         <div

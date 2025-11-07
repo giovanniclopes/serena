@@ -133,6 +133,18 @@ export default function TaskCard({
         task.isCompleted ? "opacity-60" : "hover:shadow-md"
       } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
       padding="md"
+      onDoubleClick={(e) => {
+        if (
+          (e.target as HTMLElement).closest("button") ||
+          (e.target as HTMLElement).closest("input") ||
+          (e.target as HTMLElement).closest('[role="button"]')
+        ) {
+          return;
+        }
+        if (!isBulkDeleteMode && onEdit) {
+          handleEdit();
+        }
+      }}
     >
       <div
         className="flex flex-col md:items-start md:flex-row"

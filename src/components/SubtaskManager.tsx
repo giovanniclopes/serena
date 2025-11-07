@@ -177,10 +177,14 @@ function SortableSubtaskItem({
         <>
           <div className="flex-1 min-w-0">
             <span
-              className={`text-sm sm:text-sm py-1 block break-words ${
+              className={`text-sm sm:text-sm py-1 block break-words cursor-pointer select-none ${
                 subtask.isCompleted ? "line-through text-gray-600" : ""
               }`}
               style={{ color: theme.colors.text }}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                onOpenAdvancedEdit(subtask);
+              }}
             >
               {subtask.title}
             </span>

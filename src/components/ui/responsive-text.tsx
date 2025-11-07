@@ -12,6 +12,7 @@ interface ResponsiveTextProps {
   weight?: "light" | "normal" | "medium" | "semibold" | "bold";
   color?: "primary" | "secondary" | "muted" | "accent";
   style?: React.CSSProperties;
+  onDoubleClick?: (e: React.MouseEvent) => void;
 }
 
 export function ResponsiveText({
@@ -22,6 +23,7 @@ export function ResponsiveText({
   weight = "normal",
   color = "primary",
   style,
+  onDoubleClick,
 }: ResponsiveTextProps) {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
@@ -62,6 +64,7 @@ export function ResponsiveText({
         className
       ),
       style,
+      onDoubleClick,
     },
     children
   );
