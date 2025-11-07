@@ -8,6 +8,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, Clock } from "lucide-react";
 import { useState } from "react";
 import CountdownModal from "../components/CountdownModal";
+import EmptyState from "../components/EmptyState";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import StandardCard from "../components/StandardCard";
@@ -329,45 +330,33 @@ export default function Countdowns() {
           )}
         </div>
       ) : (
-        <div
-          className="text-center py-8 rounded-lg"
-          style={{ backgroundColor: state.currentTheme.colors.surface }}
-        >
-          <div
-            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary + "20",
-            }}
-          >
-            <Clock
-              className="w-6 h-6"
-              style={{ color: state.currentTheme.colors.primary }}
-            />
-          </div>
-          <h3
-            className="text-lg font-semibold mb-1"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Nenhuma contagem regressiva
-          </h3>
-          <p
-            className="text-sm mb-3"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            Crie contagens regressivas para eventos importantes e acompanhe o
-            tempo restante
-          </p>
-          <button
-            onClick={handleCreateCountdown}
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary,
-              color: "white",
-            }}
-          >
-            Criar Primeira Contagem
-          </button>
-        </div>
+        <EmptyState
+          icon={Clock}
+          title={
+            searchQuery
+              ? "Nenhuma contagem encontrada"
+              : showCompleted
+              ? "Nenhuma contagem concluída"
+              : "Nenhuma contagem regressiva"
+          }
+          description={
+            searchQuery
+              ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
+              : showCompleted
+              ? "Você ainda não concluiu nenhuma contagem regressiva. Continue acompanhando seus eventos!"
+              : "Crie contagens regressivas para eventos importantes e acompanhe o tempo restante. Nunca mais perca uma data especial!"
+          }
+          actionLabel={
+            searchQuery || showCompleted
+              ? undefined
+              : "Criar Primeira Contagem"
+          }
+          onAction={
+            searchQuery || showCompleted
+              ? undefined
+              : handleCreateCountdown
+          }
+        />
       )}
 
       <CountdownModal

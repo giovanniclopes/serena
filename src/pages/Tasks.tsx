@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import AITaskConfirmModal from "../components/AITaskConfirmModal";
 import AITaskInput from "../components/AITaskInput";
 import ConfettiEffect from "../components/ConfettiEffect";
+import EmptyState from "../components/EmptyState";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import PromptImplementationModal from "../components/PromptImplementationModal";
@@ -727,36 +728,40 @@ export default function Tasks() {
           ))}
         </div>
       ) : (
-        <div
-          className="text-center py-8 rounded-lg"
-          style={{ backgroundColor: state.currentTheme.colors.surface }}
-        >
-          <div
-            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary + "20",
-            }}
-          >
-            <List
-              className="w-6 h-6"
-              style={{ color: state.currentTheme.colors.primary }}
-            />
-          </div>
-          <h3
-            className="text-lg font-semibold mb-1"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Nenhuma tarefa encontrada
-          </h3>
-          <p
-            className="text-sm"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            {searchQuery
-              ? "Tente ajustar sua busca ou filtros"
-              : "Que tal criar sua primeira tarefa?"}
-          </p>
-        </div>
+        <EmptyState
+          icon={List}
+          title={
+            searchQuery
+              ? "Nenhuma tarefa encontrada"
+              : showCompleted
+              ? "Nenhuma tarefa concluída"
+              : selectedPriorities.length > 0
+              ? "Nenhuma tarefa com essas prioridades"
+              : "Nenhuma tarefa criada"
+          }
+          description={
+            searchQuery
+              ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
+              : showCompleted
+              ? "Você ainda não concluiu nenhuma tarefa. Continue trabalhando!"
+              : selectedPriorities.length > 0
+              ? "Não há tarefas com as prioridades selecionadas. Tente ajustar os filtros."
+              : "Crie tarefas para organizar seu trabalho e acompanhar seu progresso. Comece criando sua primeira tarefa!"
+          }
+          actionLabel={
+            searchQuery || showCompleted || selectedPriorities.length > 0
+              ? undefined
+              : "Criar Primeira Tarefa"
+          }
+          onAction={
+            searchQuery || showCompleted || selectedPriorities.length > 0
+              ? undefined
+              : () => {
+                  setEditingTask(undefined);
+                  setIsTaskModalOpen(true);
+                }
+          }
+        />
       )}
 
       <TaskModal

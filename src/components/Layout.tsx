@@ -6,10 +6,12 @@ import { useCreateHabit } from "../features/habits/useHabits";
 import { useCreateProject } from "../features/projects/useProjects";
 import { useCreateTask } from "../features/tasks/useTasks";
 import { useHapticFeedback } from "../hooks/useHapticFeedback";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 import { useOfflineOperations } from "../hooks/useOfflineOperations";
 import type { Countdown, Habit, Project, Task } from "../types";
 import BottomNavbar from "./BottomNavbar";
 import CountdownModal from "./CountdownModal";
+import GlobalSearch from "./GlobalSearch";
 import HabitModal from "./HabitModal";
 import LogoutModal from "./LogoutModal";
 import OfflineIndicator from "./OfflineIndicator";
@@ -92,6 +94,7 @@ export default function Layout() {
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [isCountdownModalOpen, setIsCountdownModalOpen] = useState(false);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [showGlobalSearch, setShowGlobalSearch] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -136,6 +139,64 @@ export default function Layout() {
     "/register",
     "/email-verification",
   ].includes(location.pathname);
+
+  const hasOpenModal =
+    isTaskModalOpen ||
+    isHabitModalOpen ||
+    isCountdownModalOpen ||
+    isProjectModalOpen ||
+    showLogoutModal ||
+    showOfflineStatus ||
+    showMenu;
+
+  const closeAllModals = () => {
+    setIsTaskModalOpen(false);
+    setIsHabitModalOpen(false);
+    setIsCountdownModalOpen(false);
+    setIsProjectModalOpen(false);
+    setShowLogoutModal(false);
+    setShowOfflineStatus(false);
+    setShowMenu(false);
+    setShowGlobalSearch(false);
+  };
+
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: "Escape",
+        action: () => {
+          if (hasOpenModal) {
+            closeAllModals();
+          }
+        },
+        description: "Fechar modais",
+      },
+      {
+        key: "k",
+        ctrlKey: true,
+        action: () => {
+          setShowGlobalSearch(true);
+        },
+        description: "Busca global",
+      },
+      {
+        key: "n",
+        ctrlKey: true,
+        action: () => {
+          if (
+            !hasOpenModal &&
+            !["/login", "/register", "/email-verification"].includes(
+              location.pathname
+            )
+          ) {
+            handleTaskClick();
+          }
+        },
+        description: "Nova tarefa",
+      },
+    ],
+    enabled: shouldShowBottomNav,
+  });
 
   const handleTaskClick = () => {
     triggerHaptic("medium");
@@ -357,6 +418,11 @@ export default function Layout() {
         <OfflineStatusModal
           isOpen={showOfflineStatus}
           onClose={() => setShowOfflineStatus(false)}
+        />
+
+        <GlobalSearch
+          isOpen={showGlobalSearch}
+          onClose={() => setShowGlobalSearch(false)}
         />
       </div>
     </>

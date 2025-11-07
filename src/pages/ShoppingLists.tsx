@@ -1,5 +1,7 @@
 import { ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import ConfirmDialog from "../components/ConfirmDialog";
+import EmptyState from "../components/EmptyState";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ShoppingListCard from "../components/ShoppingListCard";
@@ -239,38 +241,37 @@ export default function ShoppingLists() {
           ))}
         </div>
       ) : (
-        <div
-          className="text-center py-8 rounded-lg"
-          style={{ backgroundColor: state.currentTheme.colors.surface }}
-        >
-          <div
-            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary + "20",
-            }}
-          >
-            <ShoppingCart
-              className="w-6 h-6"
-              style={{ color: state.currentTheme.colors.primary }}
-            />
-          </div>
-          <h3
-            className="text-lg font-semibold mb-1"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Nenhuma lista encontrada
-          </h3>
-          <p
-            className="text-sm"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            {searchQuery
-              ? "Tente ajustar sua busca ou filtros"
-              : selectedCategory === "all"
-              ? "Que tal criar sua primeira lista de compras?"
-              : "Nenhuma lista nesta categoria"}
-          </p>
-        </div>
+        <EmptyState
+          icon={ShoppingCart}
+          title={
+            searchQuery
+              ? "Nenhuma lista encontrada"
+              : selectedCategory === "completed"
+              ? "Nenhuma lista concluída"
+              : selectedCategory !== "all"
+              ? "Nenhuma lista nesta categoria"
+              : "Nenhuma lista criada"
+          }
+          description={
+            searchQuery
+              ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
+              : selectedCategory === "completed"
+              ? "Você ainda não concluiu nenhuma lista. Continue organizando suas compras!"
+              : selectedCategory !== "all"
+              ? `Não há listas na categoria "${SHOPPING_CATEGORIES.find((c) => c.value === selectedCategory)?.label || selectedCategory}". Tente outra categoria ou crie uma nova lista.`
+              : "Crie listas de compras para organizar suas compras e nunca mais esquecer de comprar algo importante."
+          }
+          actionLabel={
+            searchQuery || selectedCategory === "completed"
+              ? undefined
+              : "Criar Primeira Lista"
+          }
+          onAction={
+            searchQuery || selectedCategory === "completed"
+              ? undefined
+              : handleCreateList
+          }
+        />
       )}
 
       <ShoppingListModal
@@ -281,55 +282,20 @@ export default function ShoppingLists() {
         categories={SHOPPING_CATEGORIES}
       />
 
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div
-            className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
-            style={{ backgroundColor: state.currentTheme.colors.surface }}
-          >
-            <h3
-              className="text-lg font-semibold mb-4"
-              style={{ color: state.currentTheme.colors.text }}
-            >
-              Excluir lista de compras
-            </h3>
-            <p
-              className="text-sm mb-6"
-              style={{ color: state.currentTheme.colors.textSecondary }}
-            >
-              Tem certeza que deseja excluir esta lista? Esta ação não pode ser
-              desfeita.
-            </p>
-            <div className="flex space-x-3 justify-end">
-              <button
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setListToDelete(null);
-                }}
-                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-                style={{
-                  backgroundColor: state.currentTheme.colors.surface,
-                  color: state.currentTheme.colors.textSecondary,
-                  border: `1px solid ${state.currentTheme.colors.border}`,
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmDeleteList}
-                disabled={deleteListMutation.isPending}
-                className="px-4 py-2 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
-                style={{
-                  backgroundColor: state.currentTheme.colors.error,
-                  color: "white",
-                }}
-              >
-                {deleteListMutation.isPending ? "Excluindo..." : "Excluir"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setListToDelete(null);
+        }}
+        onConfirm={confirmDeleteList}
+        title="Excluir Lista de Compras"
+        message="Tem certeza que deseja excluir esta lista? Todos os itens associados serão removidos. Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+        isLoading={deleteListMutation.isPending}
+      />
 
       <FloatingActionButton onClick={handleCreateList} />
     </div>

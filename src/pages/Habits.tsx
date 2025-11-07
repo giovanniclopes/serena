@@ -7,6 +7,7 @@ import {
 } from "date-fns";
 import { Edit3, Repeat, Target } from "lucide-react";
 import { useState } from "react";
+import EmptyState from "../components/EmptyState";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import HabitModal from "../components/HabitModal";
@@ -433,44 +434,29 @@ export default function Habits() {
           {filteredHabits.map(renderHabitCard)}
         </div>
       ) : (
-        <div
-          className="text-center py-8 rounded-lg"
-          style={{ backgroundColor: state.currentTheme.colors.surface }}
-        >
-          <div
-            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary + "20",
-            }}
-          >
-            <Target
-              className="w-6 h-6"
-              style={{ color: state.currentTheme.colors.primary }}
-            />
-          </div>
-          <h3
-            className="text-lg font-semibold mb-1"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Nenhum hábito criado
-          </h3>
-          <p
-            className="text-sm mb-3"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            Crie hábitos para construir uma rotina mais saudável e produtiva
-          </p>
-          <button
-            onClick={handleCreateHabit}
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary,
-              color: "white",
-            }}
-          >
-            Criar Primeiro Hábito
-          </button>
-        </div>
+        <EmptyState
+          icon={Target}
+          title={
+            searchQuery
+              ? "Nenhum hábito encontrado"
+              : showCompleted
+              ? "Nenhum hábito concluído"
+              : "Nenhum hábito criado"
+          }
+          description={
+            searchQuery
+              ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
+              : showCompleted
+              ? "Você ainda não concluiu nenhum hábito. Continue trabalhando para alcançar seus objetivos!"
+              : "Crie hábitos para construir rotinas positivas e acompanhar seu progresso diário. Pequenos passos levam a grandes mudanças!"
+          }
+          actionLabel={
+            searchQuery || showCompleted ? undefined : "Criar Primeiro Hábito"
+          }
+          onAction={
+            searchQuery || showCompleted ? undefined : handleCreateHabit
+          }
+        />
       )}
 
       <HabitModal

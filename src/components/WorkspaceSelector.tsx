@@ -1,5 +1,6 @@
 import { ChevronDown, Edit, MoreVertical, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import ConfirmDialog from "./ConfirmDialog";
 import { useApp } from "../context/AppContext";
 import {
   useCreateWorkspace,
@@ -105,15 +106,21 @@ export default function WorkspaceSelector({
     setEditingWorkspace(undefined);
   };
 
+  const [workspaceToDelete, setWorkspaceToDelete] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   const handleDeleteWorkspace = (workspaceId: string) => {
-    if (
-      confirm(
-        "Tem certeza que deseja excluir este workspace? Todos os dados associados serão removidos."
-      )
-    ) {
-      deleteWorkspaceMutation.mutate(workspaceId);
-    }
+    setWorkspaceToDelete(workspaceId);
+    setShowDeleteConfirm(true);
     setShowActionsMenu(null);
+  };
+
+  const confirmDeleteWorkspace = () => {
+    if (workspaceToDelete) {
+      deleteWorkspaceMutation.mutate(workspaceToDelete);
+      setShowDeleteConfirm(false);
+      setWorkspaceToDelete(null);
+    }
   };
 
   return (
@@ -333,6 +340,21 @@ export default function WorkspaceSelector({
         onClose={() => setIsWorkspaceModalOpen(false)}
         workspace={editingWorkspace}
         onSave={handleSaveWorkspace}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setWorkspaceToDelete(null);
+        }}
+        onConfirm={confirmDeleteWorkspace}
+        title="Excluir Workspace"
+        message="Tem certeza que deseja excluir este workspace? Todos os projetos, tarefas, hábitos e outros dados associados serão removidos permanentemente. Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+        isLoading={deleteWorkspaceMutation.isPending}
       />
     </div>
   );

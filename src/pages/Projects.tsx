@@ -1,5 +1,7 @@
 import { Folder } from "lucide-react";
 import { useState } from "react";
+import ConfirmDialog from "../components/ConfirmDialog";
+import EmptyState from "../components/EmptyState";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
 import ProjectCard from "../components/ProjectCard";
@@ -35,6 +37,8 @@ export default function Projects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const activeWorkspaceId = state.activeWorkspaceId;
 
   const handleOpenCreateModal = () => {
@@ -77,12 +81,15 @@ export default function Projects() {
   };
 
   const handleDeleteProject = (projectId: string) => {
-    if (
-      window.confirm(
-        "Tem a certeza que quer apagar este projeto e todas as suas tarefas?"
-      )
-    ) {
-      deleteProjectMutation.mutate(projectId);
+    setProjectToDelete(projectId);
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDeleteProject = () => {
+    if (projectToDelete) {
+      deleteProjectMutation.mutate(projectToDelete);
+      setShowDeleteConfirm(false);
+      setProjectToDelete(null);
     }
   };
 
@@ -153,44 +160,27 @@ export default function Projects() {
           ))}
         </div>
       ) : (
-        <div
-          className="text-center py-8 rounded-lg"
-          style={{ backgroundColor: state.currentTheme.colors.surface }}
-        >
-          <div
-            className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary + "20",
-            }}
-          >
-            <Folder
-              className="w-6 h-6"
-              style={{ color: state.currentTheme.colors.primary }}
-            />
-          </div>
-          <h3
-            className="text-lg font-semibold mb-1"
-            style={{ color: state.currentTheme.colors.text }}
-          >
-            Nenhum projeto criado
-          </h3>
-          <p
-            className="text-sm mb-3"
-            style={{ color: state.currentTheme.colors.textSecondary }}
-          >
-            Crie projetos para organizar suas tarefas
-          </p>
-          <button
-            onClick={handleOpenCreateModal}
-            className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-            style={{
-              backgroundColor: state.currentTheme.colors.primary,
-              color: "white",
-            }}
-          >
-            Criar Primeiro Projeto
-          </button>
-        </div>
+        <EmptyState
+          icon={Folder}
+          title={
+            searchQuery
+              ? "Nenhum projeto encontrado"
+              : showCompleted
+              ? "Nenhum projeto concluído"
+              : "Nenhum projeto criado"
+          }
+          description={
+            searchQuery
+              ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
+              : showCompleted
+              ? "Você ainda não concluiu nenhum projeto. Continue trabalhando!"
+              : "Crie projetos para organizar suas tarefas e acompanhar seu progresso de forma mais eficiente."
+          }
+          actionLabel={
+            searchQuery ? undefined : showCompleted ? undefined : "Criar Primeiro Projeto"
+          }
+          onAction={searchQuery || showCompleted ? undefined : handleOpenCreateModal}
+        />
       )}
 
       {isProjectModalOpen && (
@@ -216,6 +206,21 @@ export default function Projects() {
           setEditingProject(null);
           setIsProjectModalOpen(true);
         }}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setProjectToDelete(null);
+        }}
+        onConfirm={confirmDeleteProject}
+        title="Excluir Projeto"
+        message="Tem certeza que deseja excluir este projeto? Todas as tarefas associadas também serão excluídas. Esta ação não pode ser desfeita."
+        confirmText="Excluir"
+        cancelText="Cancelar"
+        variant="danger"
+        isLoading={deleteProjectMutation.isPending}
       />
     </div>
   );
