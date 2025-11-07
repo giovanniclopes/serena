@@ -222,6 +222,21 @@ COMMENT ON COLUMN public.task_shares.task_id IS 'ID da tarefa compartilhada';
 COMMENT ON COLUMN public.task_shares.shared_with_user_id IS 'ID do utilizador com quem a tarefa foi compartilhada';
 COMMENT ON COLUMN public.task_shares.role IS 'Papel do utilizador: viewer (visualizar) ou editor (editar)';
 
+-- Tabela para compartilhamento de listas de compras entre utilizadores.
+CREATE TABLE public.shopping_list_shares (
+  id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  shopping_list_id uuid NOT NULL REFERENCES public.shopping_lists(id) ON DELETE CASCADE,
+  shared_with_user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  role text NOT NULL DEFAULT 'viewer' CHECK (role IN ('viewer', 'editor')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(shopping_list_id, shared_with_user_id)
+);
+
+COMMENT ON TABLE public.shopping_list_shares IS 'Armazena compartilhamentos de listas de compras entre utilizadores.';
+COMMENT ON COLUMN public.shopping_list_shares.shopping_list_id IS 'ID da lista de compras compartilhada';
+COMMENT ON COLUMN public.shopping_list_shares.shared_with_user_id IS 'ID do utilizador com quem a lista foi compartilhada';
+COMMENT ON COLUMN public.shopping_list_shares.role IS 'Papel do utilizador: viewer (visualizar) ou editor (editar)';
+
 -- =============================================================================
 -- 2. POLÍTICAS DE SEGURANÇA (ROW-LEVEL SECURITY - RLS)
 -- =============================================================================
@@ -231,7 +246,26 @@ COMMENT ON COLUMN public.task_shares.role IS 'Papel do utilizador: viewer (visua
 ALTER TABLE
   public.profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem ver e editar o seu próprio perfil." ON public.profiles FOR ALL USING ((select auth.uid()) = id) WITH CHECK ((select auth.uid()) = id);
+DROP POLICY IF EXISTS "Utilizadores podem ver e editar o seu próprio perfil." ON public.profiles;
+DROP POLICY IF EXISTS "Utilizadores podem ver perfis públicos" ON public.profiles;
+DROP POLICY IF EXISTS "Utilizadores podem editar o seu próprio perfil" ON public.profiles;
+DROP POLICY IF EXISTS "Utilizadores podem inserir o seu próprio perfil" ON public.profiles;
+
+CREATE POLICY "Utilizadores podem ver perfis públicos" 
+ON public.profiles 
+FOR SELECT 
+USING (true);
+
+CREATE POLICY "Utilizadores podem editar o seu próprio perfil" 
+ON public.profiles 
+FOR UPDATE 
+USING ((select auth.uid()) = id) 
+WITH CHECK ((select auth.uid()) = id);
+
+CREATE POLICY "Utilizadores podem inserir o seu próprio perfil" 
+ON public.profiles 
+FOR INSERT 
+WITH CHECK ((select auth.uid()) = id);
 
 -- Workspaces
 ALTER TABLE
@@ -358,13 +392,95 @@ CREATE POLICY "Utilizadores podem gerir as suas próprias tags." ON public.tags 
 ALTER TABLE
   public.shopping_lists ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir as suas próprias listas de compras." ON public.shopping_lists FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
+DROP POLICY IF EXISTS "Utilizadores podem gerir as suas próprias listas de compras." ON public.shopping_lists;
+DROP POLICY IF EXISTS "Utilizadores podem ver suas próprias listas e compartilhadas" ON public.shopping_lists;
+DROP POLICY IF EXISTS "Utilizadores podem inserir suas próprias listas" ON public.shopping_lists;
+DROP POLICY IF EXISTS "Utilizadores podem editar suas próprias listas" ON public.shopping_lists;
+DROP POLICY IF EXISTS "Utilizadores podem editar listas compartilhadas como editor" ON public.shopping_lists;
+DROP POLICY IF EXISTS "Utilizadores podem deletar suas próprias listas" ON public.shopping_lists;
+
+CREATE POLICY "Utilizadores podem ver suas próprias listas e compartilhadas" 
+ON public.shopping_lists 
+FOR SELECT 
+USING (
+  (select auth.uid()) = user_id 
+  OR public.is_shopping_list_shared_with_user(shopping_lists.id)
+);
+
+CREATE POLICY "Utilizadores podem inserir suas próprias listas" 
+ON public.shopping_lists 
+FOR INSERT 
+WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Utilizadores podem editar suas próprias listas" 
+ON public.shopping_lists 
+FOR UPDATE 
+USING ((select auth.uid()) = user_id)
+WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Utilizadores podem editar listas compartilhadas como editor" 
+ON public.shopping_lists 
+FOR UPDATE 
+USING (public.is_shopping_list_shared_as_editor(shopping_lists.id))
+WITH CHECK (public.is_shopping_list_shared_as_editor(shopping_lists.id));
+
+CREATE POLICY "Utilizadores podem deletar suas próprias listas" 
+ON public.shopping_lists 
+FOR DELETE 
+USING ((select auth.uid()) = user_id);
 
 -- Itens das Listas de Compras
 ALTER TABLE
   public.shopping_list_items ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Utilizadores podem gerir os seus próprios itens de lista de compras." ON public.shopping_list_items FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
+DROP POLICY IF EXISTS "Utilizadores podem gerir os seus próprios itens de lista de compras." ON public.shopping_list_items;
+DROP POLICY IF EXISTS "Utilizadores podem ver itens de suas próprias listas e compartilhadas" ON public.shopping_list_items;
+DROP POLICY IF EXISTS "Utilizadores podem inserir itens em suas próprias listas" ON public.shopping_list_items;
+DROP POLICY IF EXISTS "Utilizadores podem inserir itens em listas compartilhadas como editor" ON public.shopping_list_items;
+DROP POLICY IF EXISTS "Utilizadores podem editar itens de suas próprias listas" ON public.shopping_list_items;
+DROP POLICY IF EXISTS "Utilizadores podem editar itens de listas compartilhadas como editor" ON public.shopping_list_items;
+DROP POLICY IF EXISTS "Utilizadores podem deletar itens de suas próprias listas" ON public.shopping_list_items;
+DROP POLICY IF EXISTS "Utilizadores podem deletar itens de listas compartilhadas como editor" ON public.shopping_list_items;
+
+CREATE POLICY "Utilizadores podem ver itens de suas próprias listas e compartilhadas" 
+ON public.shopping_list_items 
+FOR SELECT 
+USING (
+  (select auth.uid()) = user_id 
+  OR public.is_shopping_list_shared_with_user(shopping_list_items.shopping_list_id)
+);
+
+CREATE POLICY "Utilizadores podem inserir itens em suas próprias listas" 
+ON public.shopping_list_items 
+FOR INSERT 
+WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Utilizadores podem inserir itens em listas compartilhadas como editor" 
+ON public.shopping_list_items 
+FOR INSERT 
+WITH CHECK (public.is_shopping_list_shared_as_editor(shopping_list_items.shopping_list_id));
+
+CREATE POLICY "Utilizadores podem editar itens de suas próprias listas" 
+ON public.shopping_list_items 
+FOR UPDATE 
+USING ((select auth.uid()) = user_id)
+WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Utilizadores podem editar itens de listas compartilhadas como editor" 
+ON public.shopping_list_items 
+FOR UPDATE 
+USING (public.is_shopping_list_shared_as_editor(shopping_list_items.shopping_list_id))
+WITH CHECK (public.is_shopping_list_shared_as_editor(shopping_list_items.shopping_list_id));
+
+CREATE POLICY "Utilizadores podem deletar itens de suas próprias listas" 
+ON public.shopping_list_items 
+FOR DELETE 
+USING ((select auth.uid()) = user_id);
+
+CREATE POLICY "Utilizadores podem deletar itens de listas compartilhadas como editor" 
+ON public.shopping_list_items 
+FOR DELETE 
+USING (public.is_shopping_list_shared_as_editor(shopping_list_items.shopping_list_id));
 
 -- Compartilhamentos de Tarefas
 ALTER TABLE
@@ -388,6 +504,61 @@ BEGIN
 END;
 $$;
 
+-- Funções para verificar propriedade e compartilhamento de listas de compras
+-- SECURITY DEFINER permite que essas funções executem com privilégios elevados, bypassando RLS
+
+-- Função para verificar se lista está compartilhada com o usuário
+CREATE OR REPLACE FUNCTION public.is_shopping_list_shared_with_user(list_id_param uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 
+    FROM public.shopping_list_shares 
+    WHERE shopping_list_id = list_id_param 
+    AND shared_with_user_id = auth.uid()
+  );
+END;
+$$;
+
+-- Função para verificar se usuário tem role editor na lista compartilhada
+CREATE OR REPLACE FUNCTION public.is_shopping_list_shared_as_editor(list_id_param uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 
+    FROM public.shopping_list_shares 
+    WHERE shopping_list_id = list_id_param
+    AND shared_with_user_id = auth.uid()
+    AND role = 'editor'
+  );
+END;
+$$;
+
+-- Função para verificar se o usuário é dono da lista de compras
+CREATE OR REPLACE FUNCTION public.is_shopping_list_owner(list_id_param uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 
+    FROM public.shopping_lists 
+    WHERE id = list_id_param 
+    AND user_id = auth.uid()
+  );
+END;
+$$;
+
 CREATE POLICY "Dono da tarefa pode compartilhar" ON public.task_shares FOR INSERT WITH CHECK (public.is_task_owner(task_id));
 
 CREATE POLICY "Dono e compartilhado podem ver compartilhamentos" ON public.task_shares FOR SELECT USING (public.is_task_owner(task_id) OR shared_with_user_id = (select auth.uid()));
@@ -395,6 +566,37 @@ CREATE POLICY "Dono e compartilhado podem ver compartilhamentos" ON public.task_
 CREATE POLICY "Dono da tarefa pode atualizar compartilhamentos" ON public.task_shares FOR UPDATE USING (public.is_task_owner(task_id)) WITH CHECK (public.is_task_owner(task_id));
 
 CREATE POLICY "Dono ou compartilhado podem remover compartilhamento" ON public.task_shares FOR DELETE USING (public.is_task_owner(task_id) OR shared_with_user_id = (select auth.uid()));
+
+-- Compartilhamentos de Listas de Compras
+ALTER TABLE
+  public.shopping_list_shares ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Dono da lista pode compartilhar" 
+ON public.shopping_list_shares 
+FOR INSERT 
+WITH CHECK (public.is_shopping_list_owner(shopping_list_id));
+
+CREATE POLICY "Dono e compartilhado podem ver compartilhamentos" 
+ON public.shopping_list_shares 
+FOR SELECT 
+USING (
+  public.is_shopping_list_owner(shopping_list_id) 
+  OR shared_with_user_id = (select auth.uid())
+);
+
+CREATE POLICY "Dono da lista pode atualizar compartilhamentos" 
+ON public.shopping_list_shares 
+FOR UPDATE 
+USING (public.is_shopping_list_owner(shopping_list_id)) 
+WITH CHECK (public.is_shopping_list_owner(shopping_list_id));
+
+CREATE POLICY "Dono ou compartilhado podem remover compartilhamento" 
+ON public.shopping_list_shares 
+FOR DELETE 
+USING (
+  public.is_shopping_list_owner(shopping_list_id) 
+  OR shared_with_user_id = (select auth.uid())
+);
 
 -- =============================================================================
 -- 3. ÍNDICES DE PERFORMANCE
@@ -456,6 +658,10 @@ CREATE INDEX idx_shopping_list_items_order_index ON public.shopping_list_items(o
 CREATE INDEX idx_task_shares_task_id ON public.task_shares(task_id);
 
 CREATE INDEX idx_task_shares_shared_with_user_id ON public.task_shares(shared_with_user_id);
+
+CREATE INDEX idx_shopping_list_shares_shopping_list_id ON public.shopping_list_shares(shopping_list_id);
+
+CREATE INDEX idx_shopping_list_shares_shared_with_user_id ON public.shopping_list_shares(shared_with_user_id);
 
 -- =============================================================================
 -- 4. FUNÇÕES E TRIGGERS PARA MANTER CONTADORES ATUALIZADOS

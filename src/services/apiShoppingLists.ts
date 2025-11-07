@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabaseClient";
+import { getSharedShoppingListIds } from "./shoppingListSharing";
 import type {
   CreateShoppingListData,
   CreateShoppingListItemData,
@@ -19,7 +20,9 @@ export async function getShoppingLists(
     throw new Error("Usuário não autenticado");
   }
 
-  let query = supabase
+  const sharedListIds = await getSharedShoppingListIds();
+
+  const ownListsQuery = supabase
     .from("shopping_lists")
     .select(
       `
@@ -40,17 +43,69 @@ export async function getShoppingLists(
       )
     `
     )
-    .eq("user_id", user.id); 
+    .eq("user_id", user.id);
 
   if (workspaceId) {
-    query = query.eq("workspace_id", workspaceId);
+    ownListsQuery.eq("workspace_id", workspaceId);
   }
 
-  const { data, error } = await query.order("created_at", { ascending: false });
+  const ownListsResult = await ownListsQuery.order("created_at", {
+    ascending: false,
+  });
 
-  if (error) {
-    console.error("Erro ao buscar listas de compras:", error);
-    throw error;
+  let sharedListsResult: any = { data: [], error: null };
+
+  if (sharedListIds.length > 0) {
+    const sharedQuery = supabase
+      .from("shopping_lists")
+      .select(
+        `
+      *,
+      shopping_list_items (
+        id,
+        shopping_list_id,
+        name,
+        quantity,
+        notes,
+        price,
+        is_purchased,
+        purchased_at,
+        order_index,
+        workspace_id,
+        created_at,
+        updated_at
+      )
+    `
+      )
+      .in("id", sharedListIds);
+
+    sharedListsResult = await sharedQuery.order("created_at", {
+      ascending: false,
+    });
+  }
+
+  if (ownListsResult.error) {
+    console.error("Erro ao buscar listas próprias:", ownListsResult.error);
+    throw ownListsResult.error;
+  }
+
+  if (sharedListsResult.error) {
+    console.error("Erro ao buscar listas compartilhadas:", sharedListsResult.error);
+    console.error("IDs compartilhados:", sharedListIds);
+    throw sharedListsResult.error;
+  }
+
+  const data = [
+    ...(ownListsResult.data || []),
+    ...(sharedListsResult.data || []),
+  ].filter(
+    (list, index, self) =>
+      index === self.findIndex((l) => l.id === list.id)
+  );
+
+  if (sharedListIds.length > 0 && sharedListsResult.data?.length === 0) {
+    console.warn("Listas compartilhadas não encontradas. IDs:", sharedListIds);
+    console.warn("Verifique se as políticas RLS estão corretas.");
   }
 
   return (
@@ -145,6 +200,13 @@ export async function updateShoppingList(
     throw new Error("Usuário não autenticado");
   }
 
+  const { canEditShoppingList } = await import("./shoppingListSharing");
+  const canEdit = await canEditShoppingList(id);
+
+  if (!canEdit) {
+    throw new Error("Você não tem permissão para editar esta lista");
+  }
+
   const { data, error } = await supabase
     .from("shopping_lists")
     .update({
@@ -156,7 +218,6 @@ export async function updateShoppingList(
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
-    .eq("user_id", user.id)
     .select()
     .single();
 
@@ -213,6 +274,13 @@ export async function createShoppingListItem(
     throw new Error("Usuário não autenticado");
   }
 
+  const { canEditShoppingList } = await import("./shoppingListSharing");
+  const canEdit = await canEditShoppingList(item.shoppingListId);
+
+  if (!canEdit) {
+    throw new Error("Você não tem permissão para adicionar itens a esta lista");
+  }
+
   const { data, error } = await supabase
     .from("shopping_list_items")
     .insert({
@@ -261,6 +329,23 @@ export async function updateShoppingListItem(
     throw new Error("Usuário não autenticado");
   }
 
+  const { data: item } = await supabase
+    .from("shopping_list_items")
+    .select("shopping_list_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!item) {
+    throw new Error("Item não encontrado");
+  }
+
+  const { canEditShoppingList } = await import("./shoppingListSharing");
+  const canEdit = await canEditShoppingList(item.shopping_list_id);
+
+  if (!canEdit) {
+    throw new Error("Você não tem permissão para editar este item");
+  }
+
   const updateData: any = {
     name: updates.name,
     quantity: updates.quantity,
@@ -281,7 +366,6 @@ export async function updateShoppingListItem(
     .from("shopping_list_items")
     .update(updateData)
     .eq("id", id)
-    .eq("user_id", user.id)
     .select()
     .single();
 
@@ -315,11 +399,27 @@ export async function deleteShoppingListItem(id: string): Promise<void> {
     throw new Error("Usuário não autenticado");
   }
 
+  const { data: item } = await supabase
+    .from("shopping_list_items")
+    .select("shopping_list_id")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!item) {
+    throw new Error("Item não encontrado");
+  }
+
+  const { canEditShoppingList } = await import("./shoppingListSharing");
+  const canEdit = await canEditShoppingList(item.shopping_list_id);
+
+  if (!canEdit) {
+    throw new Error("Você não tem permissão para excluir este item");
+  }
+
   const { error } = await supabase
     .from("shopping_list_items")
     .delete()
-    .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("id", id);
 
   if (error) {
     console.error("Erro ao excluir item da lista:", error);

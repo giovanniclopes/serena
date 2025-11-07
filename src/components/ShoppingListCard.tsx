@@ -1,4 +1,4 @@
-import { CheckCircle, Edit, ShoppingCart, Trash2 } from "lucide-react";
+import { CheckCircle, Edit, Share2, ShoppingCart, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 import {
@@ -9,6 +9,7 @@ import type {
   ShoppingList,
   ShoppingListItem as ShoppingListItemType,
 } from "../types";
+import ShareShoppingListModal from "./ShareShoppingListModal";
 import ShoppingListItem from "./ShoppingListItem";
 import ShoppingListItemModal from "./ShoppingListItemModal";
 
@@ -26,6 +27,7 @@ export default function ShoppingListCard({
   const { state } = useApp();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<
     ShoppingListItemType | undefined
   >(undefined);
@@ -131,6 +133,17 @@ export default function ShoppingListCard({
                 style={{ color: state.currentTheme.colors.success }}
               />
             )}
+            <button
+              onClick={() => setIsShareModalOpen(true)}
+              className="p-2 rounded-lg transition-colors hover:bg-opacity-10"
+              style={{
+                color: state.currentTheme.colors.primary,
+                backgroundColor: state.currentTheme.colors.primary + "10",
+              }}
+              aria-label="Compartilhar lista de compras"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
             <button
               onClick={() => onEdit(list)}
               className="p-2 rounded-lg transition-colors hover:bg-opacity-10"
@@ -277,6 +290,12 @@ export default function ShoppingListCard({
         onSave={handleSaveItem}
         listId={list.id}
         item={editingItem}
+      />
+
+      <ShareShoppingListModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        list={list}
       />
     </>
   );
