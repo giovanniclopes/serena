@@ -1,10 +1,12 @@
 import { CheckCircle, Edit, Share2, ShoppingCart, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import {
   useCreateShoppingListItem,
   useUpdateShoppingListItem,
 } from "../features/shopping-lists/useShoppingLists";
+import { useShoppingListPermissions } from "../hooks/useShoppingListPermissions";
+import { getShoppingListOwner } from "../services/shoppingListSharing";
 import type {
   ShoppingList,
   ShoppingListItem as ShoppingListItemType,
@@ -34,6 +36,34 @@ export default function ShoppingListCard({
 
   const createItemMutation = useCreateShoppingListItem();
   const updateItemMutation = useUpdateShoppingListItem();
+  const { isOwner, canEdit } = useShoppingListPermissions(list.id);
+  const [sharedBy, setSharedBy] = useState<{
+    username?: string | null;
+    firstName?: string | null;
+    lastName?: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    const loadOwner = async () => {
+      if (!isOwner && list.id) {
+        try {
+          const owner = await getShoppingListOwner(list.id);
+          if (owner) {
+            setSharedBy({
+              username: owner.username,
+              firstName: owner.firstName,
+              lastName: owner.lastName,
+            });
+          }
+        } catch (error) {
+          console.error("Erro ao buscar proprietário:", error);
+        }
+      } else {
+        setSharedBy(null);
+      }
+    };
+    loadOwner();
+  }, [isOwner, list.id]);
 
   const completedItems = list.items.filter((item) => item.isPurchased).length;
   const totalItems = list.items.length;
@@ -133,39 +163,64 @@ export default function ShoppingListCard({
                 style={{ color: state.currentTheme.colors.success }}
               />
             )}
-            <button
-              onClick={() => setIsShareModalOpen(true)}
-              className="p-2 rounded-lg transition-colors hover:bg-opacity-10"
-              style={{
-                color: state.currentTheme.colors.primary,
-                backgroundColor: state.currentTheme.colors.primary + "10",
-              }}
-              aria-label="Compartilhar lista de compras"
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onEdit(list)}
-              className="p-2 rounded-lg transition-colors hover:bg-opacity-10"
-              style={{
-                color: state.currentTheme.colors.textSecondary,
-                backgroundColor: state.currentTheme.colors.textSecondary + "10",
-              }}
-              aria-label="Editar lista de compras"
-            >
-              <Edit className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onDelete(list.id)}
-              className="p-2 rounded-lg transition-colors hover:bg-opacity-10"
-              style={{
-                color: state.currentTheme.colors.error,
-                backgroundColor: state.currentTheme.colors.error + "10",
-              }}
-              aria-label="Excluir lista de compras"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {!isOwner && sharedBy && (
+              <div
+                className="px-2 py-1 rounded-md text-xs flex items-center gap-1"
+                style={{
+                  backgroundColor: state.currentTheme.colors.primary + "15",
+                  color: state.currentTheme.colors.primary,
+                  border: `1px solid ${state.currentTheme.colors.primary}30`,
+                }}
+                title={`Compartilhado por ${sharedBy.firstName && sharedBy.lastName ? `${sharedBy.firstName} ${sharedBy.lastName}` : sharedBy.firstName || sharedBy.username || "usuário"}`}
+              >
+                <Share2 className="w-3 h-3" />
+                <span>
+                  Compartilhado por{" "}
+                  {sharedBy.firstName && sharedBy.lastName
+                    ? `${sharedBy.firstName} ${sharedBy.lastName}`
+                    : sharedBy.firstName || sharedBy.username || "usuário"}
+                </span>
+              </div>
+            )}
+            {isOwner && (
+              <button
+                onClick={() => setIsShareModalOpen(true)}
+                className="p-2 rounded-lg transition-colors hover:bg-opacity-10"
+                style={{
+                  color: state.currentTheme.colors.primary,
+                  backgroundColor: state.currentTheme.colors.primary + "10",
+                }}
+                aria-label="Compartilhar lista de compras"
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+            )}
+            {canEdit && (
+              <button
+                onClick={() => onEdit(list)}
+                className="p-2 rounded-lg transition-colors hover:bg-opacity-10"
+                style={{
+                  color: state.currentTheme.colors.textSecondary,
+                  backgroundColor: state.currentTheme.colors.textSecondary + "10",
+                }}
+                aria-label="Editar lista de compras"
+              >
+                <Edit className="w-4 h-4" />
+              </button>
+            )}
+            {isOwner && (
+              <button
+                onClick={() => onDelete(list.id)}
+                className="p-2 rounded-lg transition-colors hover:bg-opacity-10"
+                style={{
+                  color: state.currentTheme.colors.error,
+                  backgroundColor: state.currentTheme.colors.error + "10",
+                }}
+                aria-label="Excluir lista de compras"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -223,7 +278,8 @@ export default function ShoppingListCard({
                     key={item.id}
                     item={item}
                     listColor={list.color}
-                    onEdit={handleEditItem}
+                    onEdit={canEdit ? handleEditItem : undefined}
+                    canEdit={canEdit}
                   />
                 ))
             ) : (
@@ -255,7 +311,7 @@ export default function ShoppingListCard({
             >
               {isExpanded ? "Recolher" : "Ver itens"} ({totalItems})
             </button>
-            {isExpanded && (
+            {isExpanded && canEdit && (
               <button
                 onClick={handleAddItem}
                 className="text-sm font-medium transition-colors"

@@ -251,6 +251,13 @@ export async function deleteShoppingList(id: string): Promise<void> {
     throw new Error("Usuário não autenticado");
   }
 
+  const { isShoppingListOwner } = await import("./shoppingListSharing");
+  const isOwner = await isShoppingListOwner(id);
+
+  if (!isOwner) {
+    throw new Error("Apenas o proprietário da lista pode excluí-la");
+  }
+
   const { error } = await supabase
     .from("shopping_lists")
     .delete()

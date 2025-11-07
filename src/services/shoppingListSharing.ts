@@ -195,6 +195,26 @@ export async function getShoppingListOwner(shoppingListId: string): Promise<{
   };
 }
 
+export async function isShoppingListOwner(
+  shoppingListId: string
+): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return false;
+  }
+
+  const { data: listRow } = await supabase
+    .from("shopping_lists")
+    .select("user_id")
+    .eq("id", shoppingListId)
+    .maybeSingle();
+
+  return listRow?.user_id === user.id;
+}
+
 export async function canEditShoppingList(
   shoppingListId: string
 ): Promise<boolean> {
@@ -223,5 +243,30 @@ export async function canEditShoppingList(
     .eq("shared_with_user_id", user.id);
 
   return (shares ?? []).some((s) => s.role === "editor");
+}
+
+export async function canViewShoppingList(
+  shoppingListId: string
+): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return false;
+  }
+
+  const isOwner = await isShoppingListOwner(shoppingListId);
+  if (isOwner) {
+    return true;
+  }
+
+  const { data: shares } = await supabase
+    .from("shopping_list_shares")
+    .select("role")
+    .eq("shopping_list_id", shoppingListId)
+    .eq("shared_with_user_id", user.id);
+
+  return (shares ?? []).length > 0;
 }
 

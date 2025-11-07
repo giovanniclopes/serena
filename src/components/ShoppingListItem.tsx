@@ -11,12 +11,14 @@ interface ShoppingListItemProps {
   item: ShoppingListItem;
   listColor: string;
   onEdit?: (item: ShoppingListItem) => void;
+  canEdit?: boolean;
 }
 
 export default function ShoppingListItem({
   item,
   listColor,
   onEdit,
+  canEdit = true,
 }: ShoppingListItemProps) {
   const { state } = useApp();
   const [showActions, setShowActions] = useState(false);
@@ -68,7 +70,7 @@ export default function ShoppingListItem({
             ? listColor
             : state.currentTheme.colors.border,
         }}
-        disabled={toggleItemMutation.isPending}
+        disabled={toggleItemMutation.isPending || !canEdit}
         aria-label={
           item.isPurchased ? "Marcar como não comprado" : "Marcar como comprado"
         }
@@ -121,7 +123,7 @@ export default function ShoppingListItem({
         </div>
       </div>
 
-      {showActions && (
+      {showActions && canEdit && (
         <div className="flex items-center space-x-1">
           {onEdit && (
             <button

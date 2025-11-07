@@ -6,6 +6,7 @@ import { useApp } from "../context/AppContext";
 import {
   getShoppingListOwner,
   getShoppingListShares,
+  isShoppingListOwner,
   revokeShoppingListShare,
   shareShoppingList,
   updateShoppingListShareRole,
@@ -49,6 +50,7 @@ export default function ShareShoppingListModal({
     lastName?: string | null;
     avatarUrl?: string | null;
   } | null>(null);
+  const [isCurrentUserOwner, setIsCurrentUserOwner] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewUser, setPreviewUser] = useState<{
     id: string;
@@ -64,12 +66,14 @@ export default function ShareShoppingListModal({
       if (!list || !isOpen) return;
       setLoading(true);
       try {
-        const [sharesData, ownerData] = await Promise.all([
+        const [sharesData, ownerData, ownerCheck] = await Promise.all([
           getShoppingListShares(list.id),
           getShoppingListOwner(list.id),
+          isShoppingListOwner(list.id),
         ]);
         setShares(sharesData);
         setOwner(ownerData);
+        setIsCurrentUserOwner(ownerCheck);
       } catch (e) {
         console.error(e);
       } finally {
@@ -166,14 +170,15 @@ export default function ShareShoppingListModal({
           Compartilhar lista de compras
         </h3>
 
-        <div className="space-y-3">
-          <div>
-            <label
-              className="text-sm"
-              style={{ color: state.currentTheme.colors.textSecondary }}
-            >
-              Usuário (username ou e-mail)
-            </label>
+        {isCurrentUserOwner && (
+          <div className="space-y-3">
+            <div>
+              <label
+                className="text-sm"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Usuário (username ou e-mail)
+              </label>
             <input
               value={identifier}
               onChange={(e) => setIdentifier(e.target.value)}
@@ -281,42 +286,54 @@ export default function ShareShoppingListModal({
                 </div>
               )}
             </div>
-          </div>
-          <div>
-            <label
-              className="text-sm"
-              style={{ color: state.currentTheme.colors.textSecondary }}
-            >
-              Permissão
-            </label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as ShareRole)}
-              className="w-full mt-1 px-3 py-2 rounded border"
+            </div>
+            <div>
+              <label
+                className="text-sm"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Permissão
+              </label>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value as ShareRole)}
+                className="w-full mt-1 px-3 py-2 rounded border"
+                style={{
+                  borderColor: state.currentTheme.colors.border,
+                  color: state.currentTheme.colors.text,
+                  background: state.currentTheme.colors.surface,
+                }}
+                aria-label="Nível de permissão"
+              >
+                <option value="viewer">Visualizador</option>
+                <option value="editor">Editor</option>
+              </select>
+            </div>
+            <button
+              onClick={handleAdd}
+              disabled={loading || !identifier.trim()}
+              className="w-full px-4 py-2 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
               style={{
-                borderColor: state.currentTheme.colors.border,
-                color: state.currentTheme.colors.text,
-                background: state.currentTheme.colors.surface,
+                backgroundColor: state.currentTheme.colors.primary,
+                color: "white",
               }}
-              aria-label="Nível de permissão"
+              aria-label="Adicionar compartilhamento"
             >
-              <option value="viewer">Visualizador</option>
-              <option value="editor">Editor</option>
-            </select>
+              {loading ? "Adicionando..." : "Adicionar compartilhamento"}
+            </button>
           </div>
-          <button
-            onClick={handleAdd}
-            disabled={loading || !identifier.trim()}
-            className="w-full px-4 py-2 rounded-lg font-medium transition-colors text-sm disabled:opacity-50"
+        )}
+        {!isCurrentUserOwner && (
+          <div
+            className="p-3 rounded-lg text-sm"
             style={{
-              backgroundColor: state.currentTheme.colors.primary,
-              color: "white",
+              backgroundColor: state.currentTheme.colors.background,
+              color: state.currentTheme.colors.textSecondary,
             }}
-            aria-label="Adicionar compartilhamento"
           >
-            {loading ? "Adicionando..." : "Adicionar compartilhamento"}
-          </button>
-        </div>
+            Apenas o proprietário da lista pode gerenciar compartilhamentos.
+          </div>
+        )}
 
         <div className="mt-6">
           {owner && (
@@ -421,35 +438,49 @@ export default function ShareShoppingListModal({
                     {new Date(s.createdAt).toLocaleString()}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <select
-                    value={s.role}
-                    onChange={(e) =>
-                      handleChangeRole(s.id, e.target.value as ShareRole)
-                    }
-                    className="px-2 py-1 rounded border text-sm"
+                {isCurrentUserOwner && (
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={s.role}
+                      onChange={(e) =>
+                        handleChangeRole(s.id, e.target.value as ShareRole)
+                      }
+                      className="px-2 py-1 rounded border text-sm"
+                      style={{
+                        borderColor: state.currentTheme.colors.border,
+                        color: state.currentTheme.colors.text,
+                        background: state.currentTheme.colors.surface,
+                      }}
+                      aria-label={`Alterar permissão de ${s.user.username || s.user.id}`}
+                    >
+                      <option value="viewer">Visualizador</option>
+                      <option value="editor">Editor</option>
+                    </select>
+                    <button
+                      onClick={() => handleRevoke(s.id)}
+                      className="px-2 py-1 rounded text-sm"
+                      style={{
+                        color: state.currentTheme.colors.error,
+                        border: `1px solid ${state.currentTheme.colors.error}`,
+                      }}
+                      aria-label={`Revogar acesso de ${s.user.username || s.user.id}`}
+                    >
+                      Revogar
+                    </button>
+                  </div>
+                )}
+                {!isCurrentUserOwner && (
+                  <div
+                    className="text-xs px-2 py-1 rounded-md"
                     style={{
-                      borderColor: state.currentTheme.colors.border,
-                      color: state.currentTheme.colors.text,
-                      background: state.currentTheme.colors.surface,
+                      backgroundColor: state.currentTheme.colors.surface,
+                      color: state.currentTheme.colors.textSecondary,
+                      border: `1px solid ${state.currentTheme.colors.border}`,
                     }}
-                    aria-label={`Alterar permissão de ${s.user.username || s.user.id}`}
                   >
-                    <option value="viewer">Visualizador</option>
-                    <option value="editor">Editor</option>
-                  </select>
-                  <button
-                    onClick={() => handleRevoke(s.id)}
-                    className="px-2 py-1 rounded text-sm"
-                    style={{
-                      color: state.currentTheme.colors.error,
-                      border: `1px solid ${state.currentTheme.colors.error}`,
-                    }}
-                    aria-label={`Revogar acesso de ${s.user.username || s.user.id}`}
-                  >
-                    Revogar
-                  </button>
-                </div>
+                    {s.role === "editor" ? "Editor" : "Visualizador"}
+                  </div>
+                )}
               </div>
             ))}
           </div>
