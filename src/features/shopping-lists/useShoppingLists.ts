@@ -137,10 +137,11 @@ export function useReorderShoppingListItems() {
     mutationFn: reorderShoppingListItems,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["shopping-lists"] });
+      toast.success("Ordem dos itens atualizada!");
     },
     onError: (error) => {
       console.error("Erro ao reordenar itens:", error);
-      toast.error("Erro ao reordenar itens");
+      toast.error("Erro ao reordenar itens. Tente novamente.");
     },
   });
 }

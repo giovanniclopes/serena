@@ -1,8 +1,26 @@
-import { CheckCircle, Edit, Share2, ShoppingCart, Trash2 } from "lucide-react";
+import type { DragEndEvent } from "@dnd-kit/core";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { CheckCircle, Edit, GripVertical, Share2, ShoppingCart, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useApp } from "../context/AppContext";
 import {
   useCreateShoppingListItem,
+  useReorderShoppingListItems,
   useUpdateShoppingListItem,
 } from "../features/shopping-lists/useShoppingLists";
 import { useShoppingListPermissions } from "../hooks/useShoppingListPermissions";
@@ -14,6 +32,64 @@ import type {
 import ShareShoppingListModal from "./ShareShoppingListModal";
 import ShoppingListItem from "./ShoppingListItem";
 import ShoppingListItemModal from "./ShoppingListItemModal";
+
+interface SortableShoppingListItemProps {
+  item: ShoppingListItemType;
+  listColor: string;
+  onEdit?: (item: ShoppingListItemType) => void;
+  canEdit?: boolean;
+}
+
+function SortableShoppingListItem({
+  item,
+  listColor,
+  onEdit,
+  canEdit,
+}: SortableShoppingListItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <div className="flex items-center gap-2">
+        {canEdit && (
+          <button
+            {...attributes}
+            {...listeners}
+            className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-opacity-10 transition-colors"
+            style={{
+              color: listColor,
+              backgroundColor: listColor + "10",
+            }}
+            aria-label="Arrastar para reordenar"
+          >
+            <GripVertical className="w-4 h-4" />
+          </button>
+        )}
+        <div className="flex-1">
+          <ShoppingListItem
+            item={item}
+            listColor={listColor}
+            onEdit={onEdit}
+            canEdit={canEdit}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface ShoppingListCardProps {
   list: ShoppingList;
@@ -36,7 +112,15 @@ export default function ShoppingListCard({
 
   const createItemMutation = useCreateShoppingListItem();
   const updateItemMutation = useUpdateShoppingListItem();
+  const reorderItemsMutation = useReorderShoppingListItems();
   const { isOwner, canEdit } = useShoppingListPermissions(list.id);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
   const [sharedBy, setSharedBy] = useState<{
     username?: string | null;
     firstName?: string | null;
@@ -112,6 +196,30 @@ export default function ShoppingListCard({
     }
     setIsItemModalOpen(false);
     setEditingItem(undefined);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id || !list.items || list.items.length === 0) {
+      return;
+    }
+
+    const oldIndex = list.items.findIndex((item) => item.id === active.id);
+    const newIndex = list.items.findIndex((item) => item.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    const reorderedItems = arrayMove(list.items, oldIndex, newIndex);
+
+    await reorderItemsMutation.mutateAsync(
+      reorderedItems.map((item, index) => ({
+        id: item.id,
+        orderIndex: index,
+      }))
+    );
   };
 
   return (
@@ -271,17 +379,30 @@ export default function ShoppingListCard({
         {isExpanded && (
           <div className="space-y-2 mb-3">
             {list.items.length > 0 ? (
-              list.items
-                .sort((a, b) => a.orderIndex - b.orderIndex)
-                .map((item) => (
-                  <ShoppingListItem
-                    key={item.id}
-                    item={item}
-                    listColor={list.color}
-                    onEdit={canEdit ? handleEditItem : undefined}
-                    canEdit={canEdit}
-                  />
-                ))
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={list.items
+                    .sort((a, b) => a.orderIndex - b.orderIndex)
+                    .map((item) => item.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {list.items
+                    .sort((a, b) => a.orderIndex - b.orderIndex)
+                    .map((item) => (
+                      <SortableShoppingListItem
+                        key={item.id}
+                        item={item}
+                        listColor={list.color}
+                        onEdit={canEdit ? handleEditItem : undefined}
+                        canEdit={canEdit}
+                      />
+                    ))}
+                </SortableContext>
+              </DndContext>
             ) : (
               <div
                 className="text-center py-4 rounded-lg"
