@@ -27,7 +27,7 @@ export default function ShoppingListCard({
   onDelete,
 }: ShoppingListCardProps) {
   const { state } = useApp();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<
