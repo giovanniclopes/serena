@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { toast } from "sonner";
-import { useApp } from "../context/AppContext";
 import { uploadAttachment } from "../services/apiAttachments";
 import type { Attachment } from "../types";
 import DrawingCanvas from "./DrawingCanvas";
@@ -19,11 +17,7 @@ export default function DrawingModal({
   onSave,
   workspaceId,
 }: DrawingModalProps) {
-  const { state } = useApp();
-  const [isSaving, setIsSaving] = useState(false);
-
   const handleSave = async (imageData: string) => {
-    setIsSaving(true);
     try {
       const response = await fetch(imageData);
       const blob = await response.blob();
@@ -46,8 +40,6 @@ export default function DrawingModal({
     } catch (error) {
       console.error("Erro ao salvar desenho:", error);
       toast.error("Erro ao salvar desenho");
-    } finally {
-      setIsSaving(false);
     }
   };
 
