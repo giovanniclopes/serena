@@ -21,7 +21,6 @@ import { Textarea } from "./ui/textarea";
 interface StickyNoteProps {
   note: StickyNote;
   onPreview: (note: StickyNote) => void;
-  onEdit: (note: StickyNote) => void;
   onUpdate?: (note: StickyNote) => void;
   onDelete: (noteId: string) => void;
   onTogglePin: (note: StickyNote) => void;
@@ -43,7 +42,6 @@ interface StickyNoteProps {
 export default function StickyNoteComponent({
   note,
   onPreview,
-  onEdit,
   onUpdate,
   onDelete,
   onTogglePin,

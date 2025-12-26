@@ -52,7 +52,6 @@ import type {
 interface SortableStickyNoteProps {
   note: StickyNoteType;
   onPreview: (note: StickyNoteType) => void;
-  onEdit: (note: StickyNoteType) => void;
   onUpdate?: (note: StickyNoteType) => void;
   onDelete: (noteId: string) => void;
   onTogglePin: (note: StickyNoteType) => void;
@@ -64,7 +63,6 @@ interface SortableStickyNoteProps {
 function SortableStickyNote({
   note,
   onPreview,
-  onEdit,
   onUpdate,
   onDelete,
   onTogglePin,
@@ -92,7 +90,6 @@ function SortableStickyNote({
       <StickyNote
         note={note}
         onPreview={onPreview}
-        onEdit={onEdit}
         onUpdate={onUpdate}
         onDelete={onDelete}
         onTogglePin={onTogglePin}
@@ -249,11 +246,6 @@ export default function StickyNotes() {
       setIsModalOpen(true);
       setPreviewNote(null);
     }
-  };
-
-  const handleEditNote = (note: StickyNoteType) => {
-    setEditingNote(note);
-    setIsModalOpen(true);
   };
 
   const handleSaveNote = async (
@@ -742,7 +734,6 @@ export default function StickyNotes() {
                           <SortableStickyNote
                             note={note}
                             onPreview={handlePreviewNote}
-                            onEdit={handleEditNote}
                             onUpdate={handleUpdateNote}
                             onDelete={handleDeleteNote}
                             onTogglePin={handleTogglePin}
@@ -788,7 +779,6 @@ export default function StickyNotes() {
                           <SortableStickyNote
                             note={note}
                             onPreview={handlePreviewNote}
-                            onEdit={handleEditNote}
                             onUpdate={handleUpdateNote}
                             onDelete={handleDeleteNote}
                             onTogglePin={handleTogglePin}
