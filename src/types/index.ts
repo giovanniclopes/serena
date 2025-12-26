@@ -200,6 +200,7 @@ export interface AppState {
   habitEntries: HabitEntry[];
   countdowns: Countdown[];
   shoppingLists: ShoppingList[];
+  stickyNotes: StickyNote[];
   tags: Tag[];
   filters: Filter[];
   currentTheme: Theme;
@@ -357,4 +358,58 @@ export interface TaskShare {
   sharedWithUserId: string;
   role: ShareRole;
   createdAt: Date;
+}
+
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  isChecked: boolean;
+}
+
+export interface StickyNote {
+  id: string;
+  workspaceId: string;
+  title?: string;
+  content: string;
+  color: string;
+  positionX: number;
+  positionY: number;
+  width: number;
+  height: number;
+  isPinned: boolean;
+  isArchived: boolean;
+  reminderDate?: Date;
+  tags: string[];
+  attachments: Attachment[];
+  checklist?: ChecklistItem[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateStickyNoteData {
+  workspaceId: string;
+  title?: string;
+  content?: string;
+  color?: string;
+  positionX?: number;
+  positionY?: number;
+  width?: number;
+  height?: number;
+  tags?: string[];
+  checklist?: ChecklistItem[];
+}
+
+export interface UpdateStickyNoteData {
+  title?: string;
+  content?: string;
+  color?: string;
+  positionX?: number;
+  positionY?: number;
+  width?: number;
+  height?: number;
+  isPinned?: boolean;
+  isArchived?: boolean;
+  reminderDate?: Date;
+  tags?: string[];
+  checklist?: ChecklistItem[];
 }

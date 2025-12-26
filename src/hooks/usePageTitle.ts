@@ -9,6 +9,8 @@ const pageTitles: Record<string, string> = {
   "/habits": "Serena - Hábitos",
   "/calendar": "Serena - Calendário",
   "/countdowns": "Serena - Contadores",
+  "/shopping-lists": "Serena - Listas de Compras",
+  "/sticky-notes": "Serena - Post-its",
   "/profile": "Serena - Perfil",
   "/notifications": "Serena - Notificações",
   "/login": "Serena - Entrar",

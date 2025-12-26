@@ -7,6 +7,7 @@ import {
   List,
   LogOut,
   ShoppingCart,
+  StickyNote,
   Target,
   User,
   Wifi,
@@ -46,6 +47,7 @@ export default function SideMenu({
     { path: "/habits", icon: Target, label: "Hábitos" },
     { path: "/calendar", icon: Calendar, label: "Calendário" },
     { path: "/shopping-lists", icon: ShoppingCart, label: "Compras" },
+    { path: "/sticky-notes", icon: StickyNote, label: "Post-its" },
     { path: "/countdowns", icon: Clock, label: "Contagem" },
     { path: "/profile", icon: User, label: "Perfil" },
   ];

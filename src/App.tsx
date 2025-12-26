@@ -21,6 +21,7 @@ const Projects = lazy(() => import("./pages/Projects"));
 const Habits = lazy(() => import("./pages/Habits"));
 const Countdowns = lazy(() => import("./pages/Countdowns"));
 const ShoppingLists = lazy(() => import("./pages/ShoppingLists"));
+const StickyNotes = lazy(() => import("./pages/StickyNotes"));
 const Profile = lazy(() => import("./pages/Profile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 
@@ -111,6 +112,14 @@ function App() {
                 element={
                   <Suspense fallback={<LoadingSpinner />}>
                     <ShoppingLists />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="sticky-notes"
+                element={
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <StickyNotes />
                   </Suspense>
                 }
               />

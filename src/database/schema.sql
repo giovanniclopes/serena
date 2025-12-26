@@ -239,6 +239,54 @@ COMMENT ON COLUMN public.shopping_list_shares.shopping_list_id IS 'ID da lista d
 COMMENT ON COLUMN public.shopping_list_shares.shared_with_user_id IS 'ID do utilizador com quem a lista foi compartilhada';
 COMMENT ON COLUMN public.shopping_list_shares.role IS 'Papel do utilizador: viewer (visualizar) ou editor (editar)';
 
+-- Tabela para armazenar post-its estilo Google Keep
+CREATE TABLE public.sticky_notes (
+  id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title text,
+  content text,
+  color text NOT NULL DEFAULT '#fffacd',
+  position_x numeric NOT NULL DEFAULT 0,
+  position_y numeric NOT NULL DEFAULT 0,
+  width integer NOT NULL DEFAULT 300,
+  height integer NOT NULL DEFAULT 250,
+  is_pinned boolean NOT NULL DEFAULT false,
+  is_archived boolean NOT NULL DEFAULT false,
+  reminder_date timestamptz,
+  tags jsonb DEFAULT '[]'::jsonb,
+  attachments jsonb DEFAULT '[]'::jsonb,
+  checklist jsonb DEFAULT '[]'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE public.sticky_notes IS 'Armazena post-its estilo Google Keep organizados em canvas.';
+COMMENT ON COLUMN public.sticky_notes.position_x IS 'Posição X no canvas (coordenada horizontal)';
+COMMENT ON COLUMN public.sticky_notes.position_y IS 'Posição Y no canvas (coordenada vertical)';
+COMMENT ON COLUMN public.sticky_notes.width IS 'Largura do post-it em pixels';
+COMMENT ON COLUMN public.sticky_notes.height IS 'Altura do post-it em pixels';
+COMMENT ON COLUMN public.sticky_notes.is_pinned IS 'Indica se o post-it está fixado no topo';
+COMMENT ON COLUMN public.sticky_notes.is_archived IS 'Indica se o post-it está arquivado';
+COMMENT ON COLUMN public.sticky_notes.tags IS 'Array de tags para categorização';
+COMMENT ON COLUMN public.sticky_notes.attachments IS 'Array de anexos/imagens';
+COMMENT ON COLUMN public.sticky_notes.checklist IS 'Array de itens de checklist (texto e checkbox)';
+
+-- Tabela para compartilhamento de post-its entre utilizadores.
+CREATE TABLE public.sticky_note_shares (
+  id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  sticky_note_id uuid NOT NULL REFERENCES public.sticky_notes(id) ON DELETE CASCADE,
+  shared_with_user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  role text NOT NULL DEFAULT 'viewer' CHECK (role IN ('viewer', 'editor')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(sticky_note_id, shared_with_user_id)
+);
+
+COMMENT ON TABLE public.sticky_note_shares IS 'Armazena compartilhamentos de post-its entre utilizadores.';
+COMMENT ON COLUMN public.sticky_note_shares.sticky_note_id IS 'ID do post-it compartilhado';
+COMMENT ON COLUMN public.sticky_note_shares.shared_with_user_id IS 'ID do utilizador com quem o post-it foi compartilhado';
+COMMENT ON COLUMN public.sticky_note_shares.role IS 'Papel do utilizador: viewer (visualizar) ou editor (editar)';
+
 -- =============================================================================
 -- 2. POLÍTICAS DE SEGURANÇA (ROW-LEVEL SECURITY - RLS)
 -- =============================================================================
@@ -600,6 +648,129 @@ USING (
   OR shared_with_user_id = (select auth.uid())
 );
 
+-- Post-its (Sticky Notes)
+ALTER TABLE public.sticky_notes ENABLE ROW LEVEL SECURITY;
+
+-- Funções para verificar propriedade e compartilhamento de post-its
+CREATE OR REPLACE FUNCTION public.is_sticky_note_owner(note_id_param uuid)
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.sticky_notes 
+    WHERE id = note_id_param 
+    AND user_id = (SELECT auth.uid())
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.is_sticky_note_shared_with_user(note_id_param uuid)
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.sticky_note_shares 
+    WHERE sticky_note_id = note_id_param 
+    AND shared_with_user_id = (SELECT auth.uid())
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.is_sticky_note_shared_as_editor(note_id_param uuid)
+RETURNS boolean AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.sticky_note_shares 
+    WHERE sticky_note_id = note_id_param 
+    AND shared_with_user_id = (SELECT auth.uid())
+    AND role = 'editor'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP POLICY IF EXISTS "Utilizadores podem gerir os seus próprios post-its." ON public.sticky_notes;
+DROP POLICY IF EXISTS "Utilizadores podem ver post-its compartilhados" ON public.sticky_notes;
+
+CREATE POLICY "Utilizadores podem gerir os seus próprios post-its." 
+ON public.sticky_notes 
+FOR ALL 
+USING ((select auth.uid()) = user_id) 
+WITH CHECK ((select auth.uid()) = user_id);
+
+CREATE POLICY "Utilizadores podem ver post-its compartilhados" 
+ON public.sticky_notes 
+FOR SELECT 
+USING (
+  (select auth.uid()) = user_id 
+  OR public.is_sticky_note_shared_with_user(id)
+);
+
+CREATE POLICY "Utilizadores podem editar post-its compartilhados como editor" 
+ON public.sticky_notes 
+FOR UPDATE 
+USING (
+  (select auth.uid()) = user_id 
+  OR public.is_sticky_note_shared_as_editor(id)
+) 
+WITH CHECK (
+  (select auth.uid()) = user_id 
+  OR public.is_sticky_note_shared_as_editor(id)
+);
+
+-- Compartilhamentos de Post-its
+ALTER TABLE public.sticky_note_shares ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Dono do post-it pode compartilhar" 
+ON public.sticky_note_shares 
+FOR INSERT 
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.sticky_notes 
+    WHERE id = sticky_note_id 
+    AND user_id = (SELECT auth.uid())
+  )
+);
+
+CREATE POLICY "Dono e compartilhado podem ver compartilhamentos" 
+ON public.sticky_note_shares 
+FOR SELECT 
+USING (
+  EXISTS (
+    SELECT 1 FROM public.sticky_notes 
+    WHERE id = sticky_note_id 
+    AND user_id = (SELECT auth.uid())
+  )
+  OR shared_with_user_id = (SELECT auth.uid())
+);
+
+CREATE POLICY "Dono do post-it pode atualizar compartilhamentos" 
+ON public.sticky_note_shares 
+FOR UPDATE 
+USING (
+  EXISTS (
+    SELECT 1 FROM public.sticky_notes 
+    WHERE id = sticky_note_id 
+    AND user_id = (SELECT auth.uid())
+  )
+) 
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.sticky_notes 
+    WHERE id = sticky_note_id 
+    AND user_id = (SELECT auth.uid())
+  )
+);
+
+CREATE POLICY "Dono ou compartilhado podem remover compartilhamento" 
+ON public.sticky_note_shares 
+FOR DELETE 
+USING (
+  EXISTS (
+    SELECT 1 FROM public.sticky_notes 
+    WHERE id = sticky_note_id 
+    AND user_id = (SELECT auth.uid())
+  )
+  OR shared_with_user_id = (SELECT auth.uid())
+);
+
 -- =============================================================================
 -- 3. ÍNDICES DE PERFORMANCE
 -- =============================================================================
@@ -664,6 +835,20 @@ CREATE INDEX idx_task_shares_shared_with_user_id ON public.task_shares(shared_wi
 CREATE INDEX idx_shopping_list_shares_shopping_list_id ON public.shopping_list_shares(shopping_list_id);
 
 CREATE INDEX idx_shopping_list_shares_shared_with_user_id ON public.shopping_list_shares(shared_with_user_id);
+
+CREATE INDEX idx_sticky_notes_user_id ON public.sticky_notes(user_id);
+
+CREATE INDEX idx_sticky_notes_workspace_id ON public.sticky_notes(workspace_id);
+
+CREATE INDEX idx_sticky_notes_is_archived ON public.sticky_notes(is_archived);
+
+CREATE INDEX idx_sticky_notes_is_pinned ON public.sticky_notes(is_pinned);
+
+CREATE INDEX idx_sticky_notes_created_at ON public.sticky_notes(created_at DESC);
+
+CREATE INDEX idx_sticky_note_shares_sticky_note_id ON public.sticky_note_shares(sticky_note_id);
+
+CREATE INDEX idx_sticky_note_shares_shared_with_user_id ON public.sticky_note_shares(shared_with_user_id);
 
 -- =============================================================================
 -- 4. FUNÇÕES E TRIGGERS PARA MANTER CONTADORES ATUALIZADOS
@@ -979,6 +1164,10 @@ CREATE TRIGGER trigger_handle_updated_at_shopping_lists
 
 CREATE TRIGGER trigger_handle_updated_at_shopping_list_items
   BEFORE UPDATE ON public.shopping_list_items
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_sticky_notes
+  BEFORE UPDATE ON public.sticky_notes
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 
 -- Trigger para verificar subtarefas pendentes antes de completar tarefa

@@ -22,6 +22,7 @@ import type {
   Habit,
   HabitEntry,
   Project,
+  StickyNote,
   Tag,
   Task,
   Theme,
@@ -38,6 +39,7 @@ interface LoadDataPayload {
   habits: Habit[];
   habitEntries: HabitEntry[];
   countdowns: Countdown[];
+  stickyNotes: StickyNote[];
   tags: Tag[];
   filters: Filter[];
   currentTheme: Theme;
@@ -82,6 +84,9 @@ type AppAction =
   | { type: "ADD_COUNTDOWN"; payload: Countdown }
   | { type: "UPDATE_COUNTDOWN"; payload: Countdown }
   | { type: "DELETE_COUNTDOWN"; payload: string }
+  | { type: "ADD_STICKY_NOTE"; payload: StickyNote }
+  | { type: "UPDATE_STICKY_NOTE"; payload: StickyNote }
+  | { type: "DELETE_STICKY_NOTE"; payload: string }
   | { type: "ADD_TAG"; payload: Tag }
   | { type: "UPDATE_TAG"; payload: Tag }
   | { type: "DELETE_TAG"; payload: string }
@@ -104,6 +109,7 @@ const getInitialState = (): AppState => {
     habitEntries: [],
     countdowns: [],
     shoppingLists: [],
+    stickyNotes: [],
     tags: [],
     filters: [],
     currentTheme: defaultTheme,
@@ -260,6 +266,23 @@ function appReducer(state: AppState, action: AppAction): AppState {
         countdowns: state.countdowns.filter((c) => c.id !== action.payload),
       };
 
+    case "ADD_STICKY_NOTE":
+      return { ...state, stickyNotes: [...state.stickyNotes, action.payload] };
+
+    case "UPDATE_STICKY_NOTE":
+      return {
+        ...state,
+        stickyNotes: state.stickyNotes.map((n) =>
+          n.id === action.payload.id ? action.payload : n
+        ),
+      };
+
+    case "DELETE_STICKY_NOTE":
+      return {
+        ...state,
+        stickyNotes: state.stickyNotes.filter((n) => n.id !== action.payload),
+      };
+
     case "ADD_TAG":
       return { ...state, tags: [...state.tags, action.payload] };
 
@@ -351,6 +374,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           habitEntries: [],
           countdowns: [],
           shoppingLists: [],
+          stickyNotes: [],
           tags: [],
           filters: [],
           currentTheme: defaultTheme,
@@ -400,6 +424,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
             habitEntries: [],
             countdowns: [],
             shoppingLists: [],
+            stickyNotes: [],
             tags: [],
             filters: [],
             currentTheme: appData?.currentThemeId
