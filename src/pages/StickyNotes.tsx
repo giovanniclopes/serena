@@ -509,12 +509,6 @@ export default function StickyNotes() {
     }
   };
 
-  useStickyNoteReminders({
-    notes: workspaceNotes,
-    enabled: true,
-    checkInterval: 60000,
-  });
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
