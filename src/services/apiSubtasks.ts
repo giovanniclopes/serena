@@ -288,3 +288,93 @@ export async function reorderSubtasks({
     }
   }
 }
+
+export async function completeAllSubtasks(taskId: string): Promise<{
+  updatedCount: number;
+  subtasks: Task[];
+}> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Usuário não autenticado");
+  }
+
+  const originalTaskId = sanitizeTaskIdForAPI(taskId);
+
+  const { data: taskData, error: taskError } = await supabase
+    .from("tasks")
+    .select("id")
+    .eq("id", originalTaskId)
+    .single();
+
+  if (taskError || !taskData) {
+    throw new Error("Tarefa não encontrada");
+  }
+
+  const { data: pendingSubtasks, error: fetchError } = await supabase
+    .from("subtasks")
+    .select("*")
+    .eq("task_id", originalTaskId)
+    .eq("is_completed", false);
+
+  if (fetchError) {
+    console.error("Erro ao buscar subtarefas pendentes:", fetchError);
+    throw new Error("Falha ao buscar subtarefas pendentes");
+  }
+
+  if (!pendingSubtasks || pendingSubtasks.length === 0) {
+    return {
+      updatedCount: 0,
+      subtasks: [],
+    };
+  }
+
+  const now = formatDateForSupabase(new Date());
+
+  const { data: updatedSubtasks, error: updateError } = await supabase
+    .from("subtasks")
+    .update({
+      is_completed: true,
+      completed_at: now,
+      updated_at: now,
+    })
+    .eq("task_id", originalTaskId)
+    .eq("is_completed", false)
+    .select();
+
+  if (updateError) {
+    console.error("Erro ao completar todas as subtarefas:", updateError);
+    throw new Error("Falha ao completar todas as subtarefas");
+  }
+
+  const formattedSubtasks = (updatedSubtasks || []).map((subtask) => ({
+    id: subtask.id,
+    title: subtask.title,
+    description: subtask.description,
+    projectId: subtask.project_id,
+    parentTaskId: subtask.parent_task_id,
+    subtasks: [],
+    dueDate: subtask.due_date ? new Date(subtask.due_date) : undefined,
+    priority: subtask.priority,
+    reminders: subtask.reminders || [],
+    tags: subtask.tags || [],
+    attachments: subtask.attachments || [],
+    isCompleted: subtask.is_completed,
+    completedAt: subtask.completed_at ? new Date(subtask.completed_at) : undefined,
+    workspaceId: subtask.workspace_id,
+    order: subtask.order || 0,
+    timeEntries: [],
+    totalTimeSpent: 0,
+    isTimerRunning: false,
+    currentSessionStart: undefined,
+    createdAt: new Date(subtask.created_at),
+    updatedAt: new Date(subtask.updated_at),
+  }));
+
+  return {
+    updatedCount: formattedSubtasks.length,
+    subtasks: formattedSubtasks,
+  };
+}
