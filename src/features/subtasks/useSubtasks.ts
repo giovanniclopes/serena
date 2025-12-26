@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  completeAllSubtasks,
   completeSubtask,
   createSubtask,
   deleteSubtask,
@@ -130,6 +131,31 @@ export function useReorderSubtasks() {
     onError: (error) => {
       console.error("Erro ao reordenar subtarefas:", error);
       toast.error("Erro ao reordenar subtarefas. Tente novamente.");
+    },
+  });
+}
+
+export function useCompleteAllSubtasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: completeAllSubtasks,
+    onSuccess: (result, taskId) => {
+      queryClient.invalidateQueries({
+        queryKey: ["subtasks", taskId],
+      });
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      if (result.updatedCount > 0) {
+        toast.success(
+          `${result.updatedCount} subtarefa${result.updatedCount !== 1 ? "s" : ""} completada${result.updatedCount !== 1 ? "s" : ""}!`
+        );
+      } else {
+        toast.info("Não há subtarefas pendentes para completar.");
+      }
+    },
+    onError: (error) => {
+      console.error("Erro ao completar todas as subtarefas:", error);
+      toast.error("Erro ao completar todas as subtarefas. Tente novamente.");
     },
   });
 }

@@ -18,6 +18,7 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   Calendar,
   Check,
+  CheckCircle2,
   Edit,
   GripVertical,
   Plus,
@@ -30,6 +31,7 @@ import { useState } from "react";
 import { FEATURES } from "../config/features";
 import { useApp } from "../context/AppContext";
 import {
+  useCompleteAllSubtasks,
   useCompleteSubtask,
   useCreateSubtask,
   useDeleteSubtask,
@@ -255,6 +257,7 @@ export default function SubtaskManager({
   const completeSubtaskMutation = useCompleteSubtask();
   const uncompleteSubtaskMutation = useUncompleteSubtask();
   const reorderSubtasksMutation = useReorderSubtasks();
+  const completeAllSubtasksMutation = useCompleteAllSubtasks();
   const suggestSubtasksMutation = useSuggestSubtasks();
 
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
@@ -446,6 +449,18 @@ export default function SubtaskManager({
     }
   };
 
+  const handleCompleteAllSubtasks = async () => {
+    try {
+      await completeAllSubtasksMutation.mutateAsync(taskId);
+    } catch (error) {
+      console.error("Erro ao completar todas as subtarefas:", error);
+    }
+  };
+
+  const pendingSubtasksCount =
+    subtasks?.filter((subtask) => !subtask.isCompleted).length || 0;
+  const hasPendingSubtasks = pendingSubtasksCount > 0;
+
   if (isLoading) {
     return (
       <div className="text-center py-2">
@@ -496,6 +511,32 @@ export default function SubtaskManager({
             </h4>
             {!isAddingSubtask && (
               <div className="flex items-center gap-2">
+                {hasPendingSubtasks && (
+                  <button
+                    onClick={handleCompleteAllSubtasks}
+                    disabled={completeAllSubtasksMutation.isPending}
+                    className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-green-100 transition-colors min-h-[44px] sm:min-h-0 disabled:opacity-50"
+                    style={{
+                      color: completeAllSubtasksMutation.isPending
+                        ? state.currentTheme.colors.textSecondary
+                        : "#16a34a",
+                    }}
+                    aria-label={`Completar todas as ${pendingSubtasksCount} subtarefa${pendingSubtasksCount !== 1 ? "s" : ""} pendente${pendingSubtasksCount !== 1 ? "s" : ""}`}
+                    aria-busy={completeAllSubtasksMutation.isPending}
+                  >
+                    {completeAllSubtasksMutation.isPending ? (
+                      <InlineLoadingSpinner
+                        size={14}
+                        className="sm:w-3 sm:h-3"
+                      />
+                    ) : (
+                      <CheckCircle2 size={14} className="sm:w-3 sm:h-3" />
+                    )}
+                    {completeAllSubtasksMutation.isPending
+                      ? "Completando..."
+                      : "Completar todas"}
+                  </button>
+                )}
                 <button
                   onClick={() => setIsAddingSubtask(true)}
                   className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
@@ -649,6 +690,32 @@ export default function SubtaskManager({
             </h4>
             {!isAddingSubtask && (
               <div className="flex items-center gap-2">
+                {hasPendingSubtasks && (
+                  <button
+                    onClick={handleCompleteAllSubtasks}
+                    disabled={completeAllSubtasksMutation.isPending}
+                    className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-green-100 transition-colors min-h-[44px] sm:min-h-0 disabled:opacity-50"
+                    style={{
+                      color: completeAllSubtasksMutation.isPending
+                        ? state.currentTheme.colors.textSecondary
+                        : "#16a34a",
+                    }}
+                    aria-label={`Completar todas as ${pendingSubtasksCount} subtarefa${pendingSubtasksCount !== 1 ? "s" : ""} pendente${pendingSubtasksCount !== 1 ? "s" : ""}`}
+                    aria-busy={completeAllSubtasksMutation.isPending}
+                  >
+                    {completeAllSubtasksMutation.isPending ? (
+                      <InlineLoadingSpinner
+                        size={14}
+                        className="sm:w-3 sm:h-3"
+                      />
+                    ) : (
+                      <CheckCircle2 size={14} className="sm:w-3 sm:h-3" />
+                    )}
+                    {completeAllSubtasksMutation.isPending
+                      ? "Completando..."
+                      : "Completar todas"}
+                  </button>
+                )}
                 <button
                   onClick={() => setIsAddingSubtask(true)}
                   className="flex items-center gap-1 text-xs px-3 py-2 sm:px-2 sm:py-1 rounded-md hover:bg-gray-100 transition-colors min-h-[44px] sm:min-h-0"
