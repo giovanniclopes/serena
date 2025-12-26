@@ -48,10 +48,30 @@ export default function DrawingCanvas({
 
     const resizeCanvas = () => {
       const rect = canvas.getBoundingClientRect();
+      const oldWidth = canvas.width;
+      const oldHeight = canvas.height;
+      const imageData = context.getImageData(0, 0, oldWidth, oldHeight);
+      
       canvas.width = rect.width;
       canvas.height = rect.height;
+      
       context.fillStyle = "#FFFFFF";
       context.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const hasContent = imageData.data.some((pixel, index) => {
+        return index % 4 !== 3 && pixel !== 255;
+      });
+      
+      if (hasContent && oldWidth > 0 && oldHeight > 0) {
+        const tempCanvas = document.createElement("canvas");
+        tempCanvas.width = oldWidth;
+        tempCanvas.height = oldHeight;
+        const tempContext = tempCanvas.getContext("2d");
+        if (tempContext) {
+          tempContext.putImageData(imageData, 0, 0);
+          context.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+        }
+      }
     };
 
     resizeCanvas();

@@ -111,6 +111,7 @@ export default function StickyNoteComponent({
     const updatedNote: StickyNote = {
       ...note,
       title: value.trim() || undefined,
+      content: editContent,
     };
     debouncedSave(updatedNote);
   };
@@ -119,6 +120,7 @@ export default function StickyNoteComponent({
     setEditContent(value);
     const updatedNote: StickyNote = {
       ...note,
+      title: editTitle.trim() || undefined,
       content: value.trim(),
     };
     debouncedSave(updatedNote);
