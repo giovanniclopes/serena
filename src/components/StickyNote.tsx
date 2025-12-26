@@ -88,7 +88,7 @@ export default function StickyNoteComponent({
   }, [isEditing, note.title]);
 
   const onUpdateRef = useRef(onUpdate);
-  
+
   useEffect(() => {
     onUpdateRef.current = onUpdate;
   }, [onUpdate]);
@@ -103,7 +103,19 @@ export default function StickyNoteComponent({
     debounce(saveFunction as (...args: unknown[]) => unknown, 500)
   ).current as (updatedNote: StickyNote) => void;
 
-  const handleSave = () => {
+  const handleSave = (
+    e?: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const relatedTarget = e?.relatedTarget as HTMLElement | null;
+    if (
+      relatedTarget &&
+      (relatedTarget === titleInputRef.current ||
+        relatedTarget === contentTextareaRef.current ||
+        titleInputRef.current?.contains(relatedTarget) ||
+        contentTextareaRef.current?.contains(relatedTarget))
+    ) {
+      return;
+    }
     const updatedNote: StickyNote = {
       ...note,
       title: editTitle.trim() || undefined,
@@ -275,7 +287,7 @@ export default function StickyNoteComponent({
               value={editTitle}
               onChange={(e) => handleTitleChange(e.target.value)}
               onKeyDown={(e) => handleKeyDown(e, "title")}
-              onBlur={handleSave}
+              onBlur={(e) => handleSave(e)}
               onFocus={(e) => e.stopPropagation()}
               onClick={(e) => e.stopPropagation()}
               placeholder="Título"
@@ -383,7 +395,7 @@ export default function StickyNoteComponent({
           value={editContent}
           onChange={(e) => handleContentChange(e.target.value)}
           onKeyDown={(e) => handleKeyDown(e, "content")}
-          onBlur={handleSave}
+          onBlur={(e) => handleSave(e)}
           onFocus={(e) => e.stopPropagation()}
           onClick={(e) => e.stopPropagation()}
           placeholder="Criar uma nota..."

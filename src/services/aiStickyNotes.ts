@@ -155,7 +155,7 @@ export async function parseNoteFromNaturalLanguage(
 
     const parsed = JSON.parse(jsonMatch[0]);
 
-    if (!parsed.content || typeof parsed.content !== "string") {
+    if (typeof parsed.content !== "string") {
       return {
         success: false,
         error: "Não foi possível identificar o conteúdo da nota",
