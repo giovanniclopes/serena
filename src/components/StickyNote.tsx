@@ -60,6 +60,13 @@ export default function StickyNoteComponent({
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    if (!isEditing) {
+      setEditTitle(note.title || "");
+      setEditContent(note.content);
+    }
+  }, [note.title, note.content, isEditing]);
+
+  useEffect(() => {
     if (isEditing) {
       const timeout = setTimeout(() => {
         if (
@@ -78,9 +85,15 @@ export default function StickyNoteComponent({
     }
   }, [isEditing, note.title]);
 
+  const onUpdateRef = useRef(onUpdate);
+  
+  useEffect(() => {
+    onUpdateRef.current = onUpdate;
+  }, [onUpdate]);
+
   const saveFunction = (updatedNote: StickyNote) => {
-    if (onUpdate) {
-      onUpdate(updatedNote);
+    if (onUpdateRef.current) {
+      onUpdateRef.current(updatedNote);
     }
   };
 

@@ -416,11 +416,53 @@ export default function StickyNotes() {
       const input = document.createElement("input");
       input.type = "file";
       input.accept = "image/*";
-      input.onchange = (e) => {
-        const file = (e.target as HTMLInputElement).files?.[0] || null;
-        resolve(file);
+      
+      let resolved = false;
+      const cleanup = () => {
+        window.removeEventListener("focus", handleFocus);
+        clearTimeout(timeoutId);
       };
-      input.oncancel = () => resolve(null);
+      
+      const handleFocus = () => {
+        if (!resolved) {
+          setTimeout(() => {
+            if (!resolved && !input.files?.length) {
+              resolved = true;
+              cleanup();
+              resolve(null);
+            }
+          }, 300);
+        }
+      };
+      
+      const timeoutId = setTimeout(() => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          resolve(null);
+        }
+      }, 30000);
+      
+      input.onchange = (e) => {
+        if (!resolved) {
+          resolved = true;
+          cleanup();
+          const file = (e.target as HTMLInputElement).files?.[0] || null;
+          resolve(file);
+        }
+      };
+      
+      if ("oncancel" in input && typeof input.oncancel === "object") {
+        input.oncancel = () => {
+          if (!resolved) {
+            resolved = true;
+            cleanup();
+            resolve(null);
+          }
+        };
+      }
+      
+      window.addEventListener("focus", handleFocus);
       input.click();
     });
   };
