@@ -5,6 +5,7 @@ import {
   deleteStickyNote,
   getStickyNotes,
   updateStickyNote,
+  updateStickyNoteOrder,
   updateStickyNotePosition,
 } from "../../services/apiStickyNotes";
 
@@ -72,6 +73,26 @@ export function useUpdateStickyNotePosition() {
     },
     onError: (error) => {
       console.error("Erro ao atualizar posição do post-it:", error);
+    },
+  });
+}
+
+export function useUpdateStickyNoteOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      noteId,
+      newUpdatedAt,
+    }: {
+      noteId: string;
+      newUpdatedAt: Date;
+    }) => updateStickyNoteOrder(noteId, newUpdatedAt),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sticky-notes"] });
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar ordem do post-it:", error);
     },
   });
 }

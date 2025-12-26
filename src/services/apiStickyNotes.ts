@@ -235,6 +235,23 @@ export async function updateStickyNotePosition(
   }
 }
 
+export async function updateStickyNoteOrder(
+  noteId: string,
+  newUpdatedAt: Date
+): Promise<void> {
+  const { error } = await supabase
+    .from("sticky_notes")
+    .update({
+      updated_at: newUpdatedAt.toISOString(),
+    })
+    .eq("id", noteId);
+
+  if (error) {
+    console.error("Erro ao atualizar ordem do post-it:", error);
+    throw new Error("Falha ao atualizar ordem do post-it");
+  }
+}
+
 export async function deleteStickyNote(noteId: string): Promise<void> {
   const { error } = await supabase
     .from("sticky_notes")

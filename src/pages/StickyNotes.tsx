@@ -5,6 +5,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -36,7 +37,7 @@ import {
   useDeleteStickyNote,
   useStickyNotes,
   useUpdateStickyNote,
-  useUpdateStickyNotePosition,
+  useUpdateStickyNoteOrder,
 } from "../features/sticky-notes/useStickyNotes";
 import { useParseNoteInput } from "../hooks/useParseNoteInput";
 import { useStickyNoteReminders } from "../hooks/useStickyNoteReminders";
@@ -111,7 +112,7 @@ export default function StickyNotes() {
   const { stickyNotes, isLoading } = useStickyNotes();
   const createNoteMutation = useCreateStickyNote();
   const updateNoteMutation = useUpdateStickyNote();
-  const updatePositionMutation = useUpdateStickyNotePosition();
+  const updateOrderMutation = useUpdateStickyNoteOrder();
   const deleteNoteMutation = useDeleteStickyNote();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -165,7 +166,7 @@ export default function StickyNotes() {
 
       if (sortBy === "created") {
         comparison = a.createdAt.getTime() - b.createdAt.getTime();
-      } else if (sortBy === "modified") {
+      } else if (sortBy === "modified" || sortBy === "manual") {
         comparison = a.updatedAt.getTime() - b.updatedAt.getTime();
       } else if (sortBy === "alphabetical") {
         const titleA = (a.title || a.content || "").toLowerCase();
@@ -277,7 +278,7 @@ export default function StickyNotes() {
   };
 
   const handleDragEnd = useCallback(
-    async (event: any) => {
+    async (event: DragEndEvent) => {
       const { active, over } = event;
 
       if (!over || active.id === over.id) {
@@ -287,20 +288,60 @@ export default function StickyNotes() {
       const activeNote = filteredNotes.find((n) => n.id === active.id);
       const overNote = filteredNotes.find((n) => n.id === over.id);
 
-      if (activeNote && overNote) {
-        const oldIndex = filteredNotes.findIndex((n) => n.id === active.id);
-        const newIndex = filteredNotes.findIndex((n) => n.id === over.id);
+      if (!activeNote || !overNote) {
+        return;
+      }
 
-        if (oldIndex !== -1 && newIndex !== -1) {
-          await updatePositionMutation.mutateAsync({
-            noteId: activeNote.id,
-            positionX: activeNote.positionX,
-            positionY: activeNote.positionY,
-          });
+      const oldIndex = filteredNotes.findIndex((n) => n.id === active.id);
+      const newIndex = filteredNotes.findIndex((n) => n.id === over.id);
+
+      if (oldIndex === -1 || newIndex === -1 || oldIndex === newIndex) {
+        return;
+      }
+
+      let newUpdatedAt: Date;
+
+      if (newIndex > oldIndex) {
+        const nextNote = filteredNotes[newIndex + 1];
+        if (nextNote) {
+          const nextTime = nextNote.updatedAt.getTime();
+          const currentTime = overNote.updatedAt.getTime();
+          newUpdatedAt = new Date((nextTime + currentTime) / 2);
+        } else {
+          newUpdatedAt = new Date(overNote.updatedAt.getTime() + 1000);
+        }
+      } else {
+        const prevNote = filteredNotes[newIndex - 1];
+        if (prevNote) {
+          const prevTime = prevNote.updatedAt.getTime();
+          const currentTime = overNote.updatedAt.getTime();
+          newUpdatedAt = new Date((prevTime + currentTime) / 2);
+        } else {
+          newUpdatedAt = new Date(overNote.updatedAt.getTime() - 1000);
         }
       }
+
+      if (newUpdatedAt.getTime() === activeNote.updatedAt.getTime()) {
+        newUpdatedAt = new Date(
+          newUpdatedAt.getTime() + (newIndex > oldIndex ? 1 : -1)
+        );
+      }
+
+      try {
+        await updateOrderMutation.mutateAsync({
+          noteId: activeNote.id,
+          newUpdatedAt,
+        });
+
+        if (sortBy !== "manual" && sortBy !== "modified") {
+          setSortBy("modified");
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar ordem do post-it:", error);
+        toast.error("Erro ao salvar a ordem. Tente novamente.");
+      }
     },
-    [filteredNotes, updatePositionMutation]
+    [filteredNotes, updateOrderMutation, sortBy]
   );
 
   const handleTogglePin = async (note: StickyNoteType) => {

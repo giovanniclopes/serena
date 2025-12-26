@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "./ui/select";
 
-export type SortBy = "created" | "modified" | "alphabetical";
+export type SortBy = "created" | "modified" | "alphabetical" | "manual";
 export type SortOrder = "asc" | "desc";
 
 interface StickyNotesToolbarProps {
@@ -70,6 +70,7 @@ export default function StickyNotesToolbar({
               <SelectItem value="modified">Data de modificação</SelectItem>
               <SelectItem value="created">Data de criação</SelectItem>
               <SelectItem value="alphabetical">Alfabética</SelectItem>
+              <SelectItem value="manual">Ordem manual</SelectItem>
             </SelectContent>
           </Select>
           {onSortOrderChange && (
