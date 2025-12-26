@@ -301,30 +301,53 @@ export default function StickyNotes() {
 
       let newUpdatedAt: Date;
 
-      if (newIndex > oldIndex) {
-        const nextNote = filteredNotes[newIndex + 1];
-        if (nextNote) {
-          const nextTime = nextNote.updatedAt.getTime();
-          const currentTime = overNote.updatedAt.getTime();
-          newUpdatedAt = new Date((nextTime + currentTime) / 2);
+      if (sortOrder === "desc") {
+        if (newIndex > oldIndex) {
+          const nextNote = filteredNotes[newIndex + 1];
+          if (nextNote) {
+            const nextTime = nextNote.updatedAt.getTime();
+            const currentTime = overNote.updatedAt.getTime();
+            newUpdatedAt = new Date((nextTime + currentTime) / 2);
+          } else {
+            newUpdatedAt = new Date(overNote.updatedAt.getTime() - 1000);
+          }
         } else {
-          newUpdatedAt = new Date(overNote.updatedAt.getTime() + 1000);
+          const prevNote = filteredNotes[newIndex - 1];
+          if (prevNote) {
+            const prevTime = prevNote.updatedAt.getTime();
+            const currentTime = overNote.updatedAt.getTime();
+            newUpdatedAt = new Date((prevTime + currentTime) / 2);
+          } else {
+            newUpdatedAt = new Date(overNote.updatedAt.getTime() + 1000);
+          }
         }
       } else {
-        const prevNote = filteredNotes[newIndex - 1];
-        if (prevNote) {
-          const prevTime = prevNote.updatedAt.getTime();
-          const currentTime = overNote.updatedAt.getTime();
-          newUpdatedAt = new Date((prevTime + currentTime) / 2);
+        if (newIndex > oldIndex) {
+          const nextNote = filteredNotes[newIndex + 1];
+          if (nextNote) {
+            const nextTime = nextNote.updatedAt.getTime();
+            const currentTime = overNote.updatedAt.getTime();
+            newUpdatedAt = new Date((nextTime + currentTime) / 2);
+          } else {
+            newUpdatedAt = new Date(overNote.updatedAt.getTime() + 1000);
+          }
         } else {
-          newUpdatedAt = new Date(overNote.updatedAt.getTime() - 1000);
+          const prevNote = filteredNotes[newIndex - 1];
+          if (prevNote) {
+            const prevTime = prevNote.updatedAt.getTime();
+            const currentTime = overNote.updatedAt.getTime();
+            newUpdatedAt = new Date((prevTime + currentTime) / 2);
+          } else {
+            newUpdatedAt = new Date(overNote.updatedAt.getTime() - 1000);
+          }
         }
       }
 
       if (newUpdatedAt.getTime() === activeNote.updatedAt.getTime()) {
-        newUpdatedAt = new Date(
-          newUpdatedAt.getTime() + (newIndex > oldIndex ? 1 : -1)
-        );
+        const adjustment = sortOrder === "desc" 
+          ? (newIndex > oldIndex ? -1 : 1)
+          : (newIndex > oldIndex ? 1 : -1);
+        newUpdatedAt = new Date(newUpdatedAt.getTime() + adjustment);
       }
 
       try {
@@ -341,7 +364,7 @@ export default function StickyNotes() {
         toast.error("Erro ao salvar a ordem. Tente novamente.");
       }
     },
-    [filteredNotes, updateOrderMutation, sortBy]
+    [filteredNotes, updateOrderMutation, sortBy, sortOrder]
   );
 
   const handleTogglePin = async (note: StickyNoteType) => {

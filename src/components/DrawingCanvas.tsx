@@ -50,7 +50,15 @@ export default function DrawingCanvas({
       const rect = canvas.getBoundingClientRect();
       const oldWidth = canvas.width;
       const oldHeight = canvas.height;
-      const imageData = context.getImageData(0, 0, oldWidth, oldHeight);
+      
+      let imageData: ImageData | null = null;
+      if (oldWidth > 0 && oldHeight > 0) {
+        try {
+          imageData = context.getImageData(0, 0, oldWidth, oldHeight);
+        } catch (error) {
+          console.warn("Erro ao obter dados da imagem do canvas:", error);
+        }
+      }
       
       canvas.width = rect.width;
       canvas.height = rect.height;
@@ -58,18 +66,20 @@ export default function DrawingCanvas({
       context.fillStyle = "#FFFFFF";
       context.fillRect(0, 0, canvas.width, canvas.height);
       
-      const hasContent = imageData.data.some((pixel, index) => {
-        return index % 4 !== 3 && pixel !== 255;
-      });
-      
-      if (hasContent && oldWidth > 0 && oldHeight > 0) {
-        const tempCanvas = document.createElement("canvas");
-        tempCanvas.width = oldWidth;
-        tempCanvas.height = oldHeight;
-        const tempContext = tempCanvas.getContext("2d");
-        if (tempContext) {
-          tempContext.putImageData(imageData, 0, 0);
-          context.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+      if (imageData) {
+        const hasContent = imageData.data.some((pixel, index) => {
+          return index % 4 !== 3 && pixel !== 255;
+        });
+        
+        if (hasContent) {
+          const tempCanvas = document.createElement("canvas");
+          tempCanvas.width = oldWidth;
+          tempCanvas.height = oldHeight;
+          const tempContext = tempCanvas.getContext("2d");
+          if (tempContext) {
+            tempContext.putImageData(imageData, 0, 0);
+            context.drawImage(tempCanvas, 0, 0, canvas.width, canvas.height);
+          }
         }
       }
     };
