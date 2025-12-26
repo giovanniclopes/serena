@@ -25,6 +25,7 @@ import QuickNoteInput from "../components/QuickNoteInput";
 import ShareStickyNoteModal from "../components/ShareStickyNoteModal";
 import StickyNote from "../components/StickyNote";
 import StickyNoteModal from "../components/StickyNoteModal";
+import StickyNotePreviewModal from "../components/StickyNotePreviewModal";
 import type { SortBy, SortOrder } from "../components/StickyNotesToolbar";
 import StickyNotesToolbar from "../components/StickyNotesToolbar";
 import {
@@ -50,6 +51,7 @@ import type {
 
 interface SortableStickyNoteProps {
   note: StickyNoteType;
+  onPreview: (note: StickyNoteType) => void;
   onEdit: (note: StickyNoteType) => void;
   onUpdate?: (note: StickyNoteType) => void;
   onDelete: (noteId: string) => void;
@@ -61,6 +63,7 @@ interface SortableStickyNoteProps {
 
 function SortableStickyNote({
   note,
+  onPreview,
   onEdit,
   onUpdate,
   onDelete,
@@ -88,6 +91,7 @@ function SortableStickyNote({
     <div ref={setNodeRef} style={style} className="w-full">
       <StickyNote
         note={note}
+        onPreview={onPreview}
         onEdit={onEdit}
         onUpdate={onUpdate}
         onDelete={onDelete}
@@ -117,6 +121,8 @@ export default function StickyNotes() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<StickyNoteType | undefined>();
+  const [previewNote, setPreviewNote] = useState<StickyNoteType | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
@@ -229,6 +235,20 @@ export default function StickyNotes() {
       checklist: checklist,
       attachments: [],
     });
+  };
+
+  const handlePreviewNote = (note: StickyNoteType) => {
+    setPreviewNote(note);
+    setIsPreviewOpen(true);
+  };
+
+  const handleEditFromPreview = () => {
+    if (previewNote) {
+      setIsPreviewOpen(false);
+      setEditingNote(previewNote);
+      setIsModalOpen(true);
+      setPreviewNote(null);
+    }
   };
 
   const handleEditNote = (note: StickyNoteType) => {
@@ -721,6 +741,7 @@ export default function StickyNotes() {
                         >
                           <SortableStickyNote
                             note={note}
+                            onPreview={handlePreviewNote}
                             onEdit={handleEditNote}
                             onUpdate={handleUpdateNote}
                             onDelete={handleDeleteNote}
@@ -766,6 +787,7 @@ export default function StickyNotes() {
                         >
                           <SortableStickyNote
                             note={note}
+                            onPreview={handlePreviewNote}
                             onEdit={handleEditNote}
                             onUpdate={handleUpdateNote}
                             onDelete={handleDeleteNote}
@@ -786,6 +808,16 @@ export default function StickyNotes() {
       </div>
 
       <FloatingActionButton onClick={handleCreateNote} />
+
+      <StickyNotePreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => {
+          setIsPreviewOpen(false);
+          setPreviewNote(null);
+        }}
+        note={previewNote}
+        onEdit={handleEditFromPreview}
+      />
 
       <StickyNoteModal
         isOpen={isModalOpen}

@@ -20,6 +20,7 @@ import { Textarea } from "./ui/textarea";
 
 interface StickyNoteProps {
   note: StickyNote;
+  onPreview: (note: StickyNote) => void;
   onEdit: (note: StickyNote) => void;
   onUpdate?: (note: StickyNote) => void;
   onDelete: (noteId: string) => void;
@@ -41,6 +42,7 @@ interface StickyNoteProps {
 
 export default function StickyNoteComponent({
   note,
+  onPreview,
   onEdit,
   onUpdate,
   onDelete,
@@ -215,7 +217,7 @@ export default function StickyNoteComponent({
           target.closest("textarea") === null &&
           !isEditing
         ) {
-          onEdit(note);
+          onPreview(note);
         }
       }}
       onDoubleClick={(e) => {
