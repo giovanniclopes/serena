@@ -40,6 +40,7 @@ import {
   useUpdateStickyNote,
   useUpdateStickyNoteOrder,
 } from "../features/sticky-notes/useStickyNotes";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useParseNoteInput } from "../hooks/useParseNoteInput";
 import { useStickyNoteReminders } from "../hooks/useStickyNoteReminders";
 import { uploadAttachment } from "../services/apiAttachments";
@@ -86,7 +87,11 @@ function SortableStickyNote({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="w-full">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`w-full ${isDragging ? "is-dragging" : ""}`}
+    >
       <StickyNote
         note={note}
         onPreview={onPreview}
@@ -133,6 +138,8 @@ export default function StickyNotes() {
   const [isAIInputOpen, setIsAIInputOpen] = useState(false);
   const [aiInputValue, setAiInputValue] = useState("");
   const parseNoteMutation = useParseNoteInput();
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -356,9 +363,14 @@ export default function StickyNotes() {
       }
 
       if (newUpdatedAt.getTime() === activeNote.updatedAt.getTime()) {
-        const adjustment = sortOrder === "desc" 
-          ? (newIndex > oldIndex ? -1 : 1)
-          : (newIndex > oldIndex ? 1 : -1);
+        const adjustment =
+          sortOrder === "desc"
+            ? newIndex > oldIndex
+              ? -1
+              : 1
+            : newIndex > oldIndex
+            ? 1
+            : -1;
         newUpdatedAt = new Date(newUpdatedAt.getTime() + adjustment);
       }
 
@@ -451,13 +463,13 @@ export default function StickyNotes() {
       const input = document.createElement("input");
       input.type = "file";
       input.accept = "image/*";
-      
+
       let resolved = false;
       const cleanup = () => {
         window.removeEventListener("focus", handleFocus);
         clearTimeout(timeoutId);
       };
-      
+
       const handleFocus = () => {
         if (!resolved) {
           setTimeout(() => {
@@ -469,7 +481,7 @@ export default function StickyNotes() {
           }, 300);
         }
       };
-      
+
       const timeoutId = setTimeout(() => {
         if (!resolved) {
           resolved = true;
@@ -477,7 +489,7 @@ export default function StickyNotes() {
           resolve(null);
         }
       }, 30000);
-      
+
       input.onchange = (e) => {
         if (!resolved) {
           resolved = true;
@@ -486,7 +498,7 @@ export default function StickyNotes() {
           resolve(file);
         }
       };
-      
+
       if ("oncancel" in input && typeof input.oncancel === "object") {
         input.oncancel = () => {
           if (!resolved) {
@@ -496,7 +508,7 @@ export default function StickyNotes() {
           }
         };
       }
-      
+
       window.addEventListener("focus", handleFocus);
       input.click();
     });
@@ -714,38 +726,71 @@ export default function StickyNotes() {
                 >
                   Fixados
                 </h3>
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext items={pinnedNotes.map((n) => n.id)}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 auto-rows-max">
-                      {pinnedNotes.map((note, index) => (
-                        <div
-                          key={note.id}
-                          className="animate-in fade-in slide-in-from-bottom-4"
+                {isMobile ? (
+                  <div className="flex flex-col gap-4">
+                    {pinnedNotes.map((note, index) => (
+                      <div
+                        key={note.id}
+                        className="animate-in fade-in slide-in-from-bottom-4"
+                        style={{
+                          animationDelay: `${index * 50}ms`,
+                          animationDuration: "400ms",
+                          animationFillMode: "both",
+                        }}
+                      >
+                        <StickyNote
+                          note={note}
+                          onPreview={handlePreviewNote}
+                          onUpdate={handleUpdateNote}
+                          onDelete={handleDeleteNote}
+                          onTogglePin={handleTogglePin}
+                          onToggleArchive={handleToggleArchive}
+                          onChecklistToggle={handleChecklistToggle}
+                          onShare={handleShareNote}
                           style={{
-                            animationDelay: `${index * 50}ms`,
-                            animationDuration: "400ms",
-                            animationFillMode: "both",
+                            position: "relative",
+                            left: 0,
+                            top: 0,
+                            width: "100%",
                           }}
-                        >
-                          <SortableStickyNote
-                            note={note}
-                            onPreview={handlePreviewNote}
-                            onUpdate={handleUpdateNote}
-                            onDelete={handleDeleteNote}
-                            onTogglePin={handleTogglePin}
-                            onToggleArchive={handleToggleArchive}
-                            onChecklistToggle={handleChecklistToggle}
-                            onShare={handleShareNote}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext items={pinnedNotes.map((n) => n.id)}>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 auto-rows-max">
+                        {pinnedNotes.map((note, index) => (
+                          <div
+                            key={note.id}
+                            className="animate-in fade-in slide-in-from-bottom-4"
+                            style={{
+                              animationDelay: `${index * 50}ms`,
+                              animationDuration: "400ms",
+                              animationFillMode: "both",
+                            }}
+                          >
+                            <SortableStickyNote
+                              note={note}
+                              onPreview={handlePreviewNote}
+                              onUpdate={handleUpdateNote}
+                              onDelete={handleDeleteNote}
+                              onTogglePin={handleTogglePin}
+                              onToggleArchive={handleToggleArchive}
+                              onChecklistToggle={handleChecklistToggle}
+                              onShare={handleShareNote}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
               </div>
             )}
 
@@ -759,38 +804,71 @@ export default function StickyNotes() {
                     Outros
                   </h3>
                 )}
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext items={unpinnedNotes.map((n) => n.id)}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 auto-rows-max">
-                      {unpinnedNotes.map((note, index) => (
-                        <div
-                          key={note.id}
-                          className="animate-in fade-in slide-in-from-bottom-4"
+                {isMobile ? (
+                  <div className="flex flex-col gap-4">
+                    {unpinnedNotes.map((note, index) => (
+                      <div
+                        key={note.id}
+                        className="animate-in fade-in slide-in-from-bottom-4"
+                        style={{
+                          animationDelay: `${index * 50}ms`,
+                          animationDuration: "400ms",
+                          animationFillMode: "both",
+                        }}
+                      >
+                        <StickyNote
+                          note={note}
+                          onPreview={handlePreviewNote}
+                          onUpdate={handleUpdateNote}
+                          onDelete={handleDeleteNote}
+                          onTogglePin={handleTogglePin}
+                          onToggleArchive={handleToggleArchive}
+                          onChecklistToggle={handleChecklistToggle}
+                          onShare={handleShareNote}
                           style={{
-                            animationDelay: `${index * 50}ms`,
-                            animationDuration: "400ms",
-                            animationFillMode: "both",
+                            position: "relative",
+                            left: 0,
+                            top: 0,
+                            width: "100%",
                           }}
-                        >
-                          <SortableStickyNote
-                            note={note}
-                            onPreview={handlePreviewNote}
-                            onUpdate={handleUpdateNote}
-                            onDelete={handleDeleteNote}
-                            onTogglePin={handleTogglePin}
-                            onToggleArchive={handleToggleArchive}
-                            onChecklistToggle={handleChecklistToggle}
-                            onShare={handleShareNote}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </SortableContext>
-                </DndContext>
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext items={unpinnedNotes.map((n) => n.id)}>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 auto-rows-max">
+                        {unpinnedNotes.map((note, index) => (
+                          <div
+                            key={note.id}
+                            className="animate-in fade-in slide-in-from-bottom-4"
+                            style={{
+                              animationDelay: `${index * 50}ms`,
+                              animationDuration: "400ms",
+                              animationFillMode: "both",
+                            }}
+                          >
+                            <SortableStickyNote
+                              note={note}
+                              onPreview={handlePreviewNote}
+                              onUpdate={handleUpdateNote}
+                              onDelete={handleDeleteNote}
+                              onTogglePin={handleTogglePin}
+                              onToggleArchive={handleToggleArchive}
+                              onChecklistToggle={handleChecklistToggle}
+                              onShare={handleShareNote}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </SortableContext>
+                  </DndContext>
+                )}
               </div>
             )}
           </div>

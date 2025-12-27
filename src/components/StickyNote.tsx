@@ -244,14 +244,15 @@ export default function StickyNoteComponent({
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-1 flex-1">
-          {dragHandleProps && isHovered && !isEditing && (
+          {dragHandleProps && !isEditing && (
             <button
               {...dragHandleProps.attributes}
               {...dragHandleProps.listeners}
-              className="cursor-grab active:cursor-grabbing p-1 rounded hover:bg-black/5 transition-all duration-200 ease-in-out flex-shrink-0"
+              className={`cursor-grab active:cursor-grabbing rounded transition-all duration-200 ease-in-out flex-shrink-0 ${
+                isHovered ? "p-1 opacity-80" : "hidden"
+              }`}
               style={{
                 color: textColor,
-                opacity: 0.8,
               }}
               onClick={(e) => e.stopPropagation()}
               aria-label="Arrastar para reordenar"
