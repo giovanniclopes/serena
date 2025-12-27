@@ -32,13 +32,23 @@ body {
 
   /* @dnd-kit specific optimizations */
   [data-sortable-id] {
-    touch-action: none;
+    touch-action: pan-y;
     -webkit-user-select: none;
     user-select: none;
   }
 
-  [data-sortable-id]:active {
+  [data-sortable-id].is-dragging {
     touch-action: none;
+  }
+
+  [data-sortable-id] button[aria-label="Arrastar para reordenar"] {
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   button,

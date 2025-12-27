@@ -278,7 +278,7 @@ export default function QuickNoteInput({
           </div>
         ) : (
           <div
-            className="p-4 cursor-text flex items-center justify-between"
+            className="p-4 cursor-text flex flex-col md:flex-row md:items-center md:justify-between"
             onClick={(e) => {
               const target = e.target as HTMLElement;
               if (target.closest("button") === null) {
@@ -291,7 +291,7 @@ export default function QuickNoteInput({
           >
             <span>Criar uma nota...</span>
             <div
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 mt-2 md:mt-0"
               onClick={(e) => e.stopPropagation()}
             >
               <button
