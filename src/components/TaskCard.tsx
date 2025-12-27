@@ -151,42 +151,44 @@ export default function TaskCard({
         style={{ gap: spacing.sm }}
       >
         <div className="flex-1 min-w-0">
-          <div className="flex items-start mb-4 md:gap-3 justify-between">
-            {isBulkDeleteMode ? (
-              <Checkbox
-                checked={isSelected}
-                onCheckedChange={handleSelectionChange}
-                className="flex-shrink-0"
-                style={{
-                  minWidth: touchTarget,
-                  minHeight: touchTarget,
-                }}
-              />
-            ) : (
-              <Checkbox
-                checked={task.isCompleted}
-                onCheckedChange={handleToggleComplete}
-                className="flex-shrink-0"
-                style={{
-                  minWidth: touchTarget,
-                  minHeight: touchTarget,
-                }}
-              />
-            )}
-            <ResponsiveText
-              variant="h3"
-              weight="medium"
-              className={`flex-1 mt-1 leading-tight ${
-                task.isCompleted ? "line-through" : ""
-              }`}
-              style={{ color: state.currentTheme.colors.text }}
-            >
-              {task.title}
-            </ResponsiveText>
+          <div className="flex flex-col md:flex-row md:items-start mb-4 md:gap-3 md:justify-between">
+            <div className="flex items-start gap-3 flex-1 min-w-0">
+              {isBulkDeleteMode ? (
+                <Checkbox
+                  checked={isSelected}
+                  onCheckedChange={handleSelectionChange}
+                  className="flex-shrink-0"
+                  style={{
+                    minWidth: touchTarget,
+                    minHeight: touchTarget,
+                  }}
+                />
+              ) : (
+                <Checkbox
+                  checked={task.isCompleted}
+                  onCheckedChange={handleToggleComplete}
+                  className="flex-shrink-0"
+                  style={{
+                    minWidth: touchTarget,
+                    minHeight: touchTarget,
+                  }}
+                />
+              )}
+              <ResponsiveText
+                variant="h3"
+                weight="medium"
+                className={`flex-1 mt-1 leading-tight ${
+                  task.isCompleted ? "line-through" : ""
+                }`}
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                {task.title}
+              </ResponsiveText>
+            </div>
 
             <div
-              className="flex items-center"
-              style={{ gap: spacing.xs, marginLeft: spacing.sm }}
+              className="flex items-center justify-end md:ml-0 ml-12 mt-2 md:mt-0"
+              style={{ gap: spacing.xs }}
             >
               <div className="hidden md:block">
                 <Badge

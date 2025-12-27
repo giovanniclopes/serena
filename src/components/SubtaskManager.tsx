@@ -176,7 +176,7 @@ function SortableSubtaskItem({
           </button>
         </div>
       ) : (
-        <>
+        <div className="flex flex-col md:flex-row md:items-start flex-1 min-w-0 gap-2 md:gap-0">
           <div className="flex-1 min-w-0">
             <span
               className={`text-sm sm:text-sm py-1 block break-words cursor-pointer select-none ${
@@ -207,7 +207,7 @@ function SortableSubtaskItem({
               </div>
             )}
           </div>
-          <div className="flex items-start sm:items-center gap-0 pt-1 sm:pt-0 flex-shrink-0">
+          <div className="flex items-start sm:items-center justify-end gap-0 pt-1 sm:pt-0 flex-shrink-0 md:ml-auto">
             {!isMobile && (
               <button
                 onClick={() => onOpenAdvancedEdit(subtask)}
@@ -235,7 +235,7 @@ function SortableSubtaskItem({
               <Trash2 size={16} className="w-4 h-4" />
             </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
