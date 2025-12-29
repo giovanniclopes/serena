@@ -162,7 +162,16 @@ ADD
   COLUMN IF NOT EXISTS notes text;
 
 -- =============================================================================
--- 7. ATUALIZAÇÕES DA TABELA COUNTDOWNS
+-- 7. ATUALIZAÇÕES DA TABELA STICKY_NOTES
+-- =============================================================================
+-- Adicionar campo project_id na tabela sticky_notes
+ALTER TABLE
+  public.sticky_notes
+ADD
+  COLUMN IF NOT EXISTS project_id uuid REFERENCES public.projects(id) ON DELETE SET NULL;
+
+-- =============================================================================
+-- 8. ATUALIZAÇÕES DA TABELA COUNTDOWNS
 -- =============================================================================
 -- Adicionar campos que podem estar faltando na tabela countdowns
 ALTER TABLE

@@ -244,6 +244,7 @@ CREATE TABLE public.sticky_notes (
   id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
   workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  project_id uuid REFERENCES public.projects(id) ON DELETE SET NULL,
   title text,
   content text,
   color text NOT NULL DEFAULT '#fffacd',

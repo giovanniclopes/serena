@@ -11,7 +11,8 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useProjects } from "../features/projects/useProjects";
 import type { ChecklistItem, StickyNote } from "../types";
 import { debounce, getContrastTextColor } from "../utils";
 import { Checkbox } from "./ui/checkbox";
@@ -54,12 +55,18 @@ export default function StickyNoteComponent({
   style,
   dragHandleProps,
 }: StickyNoteProps) {
+  const { projects } = useProjects();
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(note.title || "");
   const [editContent, setEditContent] = useState(note.content);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const relatedProject = useMemo(() => {
+    if (!note.projectId || !projects) return null;
+    return projects.find((p) => p.id === note.projectId) || null;
+  }, [note.projectId, projects]);
 
   useEffect(() => {
     if (!isEditing) {
@@ -472,6 +479,21 @@ export default function StickyNoteComponent({
               />
             </div>
           ))}
+        </div>
+      )}
+
+      {relatedProject && (
+        <div className="mt-2">
+          <span
+            className="text-xs px-2 py-0.5 rounded-full font-medium transition-all duration-200 ease-in-out"
+            style={{
+              backgroundColor: relatedProject.color + "30",
+              color: relatedProject.color,
+              border: `1px solid ${relatedProject.color}50`,
+            }}
+          >
+            {relatedProject.name}
+          </span>
         </div>
       )}
 

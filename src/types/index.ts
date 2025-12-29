@@ -369,6 +369,7 @@ export interface ChecklistItem {
 export interface StickyNote {
   id: string;
   workspaceId: string;
+  projectId?: string;
   title?: string;
   content: string;
   color: string;

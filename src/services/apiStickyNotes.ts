@@ -55,6 +55,7 @@ export async function getStickyNotes(): Promise<StickyNote[]> {
     uniqueNotes.map((note) => ({
       id: note.id,
       workspaceId: note.workspace_id,
+      projectId: note.project_id || undefined,
       title: note.title,
       content: note.content || "",
       color: note.color,
@@ -101,6 +102,7 @@ export async function createStickyNote(
     .insert({
       workspace_id: note.workspaceId,
       user_id: user.id,
+      project_id: note.projectId || null,
       title: note.title,
       content: note.content,
       color: note.color,
@@ -126,6 +128,7 @@ export async function createStickyNote(
   return {
     id: data.id,
     workspaceId: data.workspace_id,
+    projectId: data.project_id || undefined,
     title: data.title,
     content: data.content || "",
     color: data.color,
@@ -159,6 +162,7 @@ export async function updateStickyNote(note: StickyNote): Promise<StickyNote> {
   const { data, error } = await supabase
     .from("sticky_notes")
     .update({
+      project_id: note.projectId || null,
       title: note.title,
       content: note.content,
       color: note.color,
@@ -186,6 +190,7 @@ export async function updateStickyNote(note: StickyNote): Promise<StickyNote> {
   return {
     id: data.id,
     workspaceId: data.workspace_id,
+    projectId: data.project_id || undefined,
     title: data.title,
     content: data.content || "",
     color: data.color,
