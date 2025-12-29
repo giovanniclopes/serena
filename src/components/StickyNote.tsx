@@ -31,11 +31,12 @@ interface StickyNoteProps {
     checked: boolean
   ) => void;
   onShare?: (note: StickyNote) => void;
+  onEdit?: (note: StickyNote) => void;
   isDragging?: boolean;
   style?: React.CSSProperties;
   dragHandleProps?: {
-    attributes: any;
-    listeners: any;
+    attributes: Record<string, unknown>;
+    listeners: Record<string, unknown>;
   };
 }
 
@@ -48,6 +49,7 @@ export default function StickyNoteComponent({
   onToggleArchive,
   onChecklistToggle,
   onShare,
+  onEdit,
   isDragging = false,
   style,
   dragHandleProps,
@@ -325,7 +327,11 @@ export default function StickyNoteComponent({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsEditing(true);
+                  if (onEdit) {
+                    onEdit(note);
+                  } else {
+                    setIsEditing(true);
+                  }
                 }}
                 className="p-1 rounded hover:bg-black/10 transition-all duration-200 ease-in-out hover:scale-110"
                 aria-label="Editar"

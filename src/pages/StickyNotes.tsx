@@ -59,6 +59,7 @@ interface SortableStickyNoteProps {
   onToggleArchive: (note: StickyNoteType) => void;
   onChecklistToggle: (noteId: string, itemId: string, checked: boolean) => void;
   onShare?: (note: StickyNoteType) => void;
+  onEdit?: (note: StickyNoteType) => void;
 }
 
 function SortableStickyNote({
@@ -70,6 +71,7 @@ function SortableStickyNote({
   onToggleArchive,
   onChecklistToggle,
   onShare,
+  onEdit,
 }: SortableStickyNoteProps) {
   const {
     attributes,
@@ -101,8 +103,12 @@ function SortableStickyNote({
         onToggleArchive={onToggleArchive}
         onChecklistToggle={onChecklistToggle}
         onShare={onShare}
+        onEdit={onEdit}
         isDragging={isDragging}
-        dragHandleProps={{ attributes, listeners }}
+        dragHandleProps={{
+          attributes: attributes as unknown as Record<string, unknown>,
+          listeners: listeners as unknown as Record<string, unknown>,
+        }}
         style={{
           position: "relative",
           left: 0,
@@ -253,6 +259,12 @@ export default function StickyNotes() {
       setIsModalOpen(true);
       setPreviewNote(null);
     }
+  };
+
+  const handleEditNote = (note: StickyNoteType) => {
+    setEditingNote(note);
+    setModalMode("default");
+    setIsModalOpen(true);
   };
 
   const handleSaveNote = async (
@@ -747,6 +759,7 @@ export default function StickyNotes() {
                           onToggleArchive={handleToggleArchive}
                           onChecklistToggle={handleChecklistToggle}
                           onShare={handleShareNote}
+                          onEdit={handleEditNote}
                           style={{
                             position: "relative",
                             left: 0,
@@ -784,6 +797,7 @@ export default function StickyNotes() {
                               onToggleArchive={handleToggleArchive}
                               onChecklistToggle={handleChecklistToggle}
                               onShare={handleShareNote}
+                              onEdit={handleEditNote}
                             />
                           </div>
                         ))}
@@ -825,6 +839,7 @@ export default function StickyNotes() {
                           onToggleArchive={handleToggleArchive}
                           onChecklistToggle={handleChecklistToggle}
                           onShare={handleShareNote}
+                          onEdit={handleEditNote}
                           style={{
                             position: "relative",
                             left: 0,
@@ -862,6 +877,7 @@ export default function StickyNotes() {
                               onToggleArchive={handleToggleArchive}
                               onChecklistToggle={handleChecklistToggle}
                               onShare={handleShareNote}
+                              onEdit={handleEditNote}
                             />
                           </div>
                         ))}
