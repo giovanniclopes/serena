@@ -8,7 +8,8 @@ import {
   STICKY_NOTE_SIZES,
 } from "../constants/stickyNoteColors";
 import { useApp } from "../context/AppContext";
-import type { ChecklistItem, StickyNote } from "../types";
+import { useProjects } from "../features/projects/useProjects";
+import type { ChecklistItem, Project, StickyNote } from "../types";
 import AttachmentManager from "./AttachmentManager";
 import ColorPicker from "./ColorPicker";
 import ResponsiveModal from "./ResponsiveModal";
@@ -43,12 +44,14 @@ export default function StickyNoteModal({
   mode = "default",
 }: StickyNoteModalProps) {
   const { state } = useApp();
+  const { projects } = useProjects();
   const [formData, setFormData] = useState({
     title: note?.title || "",
     content: note?.content || "",
     color: note?.color || DEFAULT_STICKY_NOTE_COLOR,
     width: note?.width || STICKY_NOTE_SIZES.medium.width,
     height: note?.height || STICKY_NOTE_SIZES.medium.height,
+    projectId: note?.projectId || "",
     tags: note?.tags || [],
     checklist: note?.checklist || [],
     attachments: note?.attachments || [],
@@ -68,6 +71,7 @@ export default function StickyNoteModal({
         color: note.color,
         width: note.width,
         height: note.height,
+        projectId: note.projectId || "",
         tags: note.tags || [],
         checklist: note.checklist || [],
         attachments: note.attachments || [],
@@ -82,6 +86,7 @@ export default function StickyNoteModal({
         color: DEFAULT_STICKY_NOTE_COLOR,
         width: STICKY_NOTE_SIZES.medium.width,
         height: STICKY_NOTE_SIZES.medium.height,
+        projectId: "",
         tags: [],
         checklist: [],
         attachments: [],
@@ -98,6 +103,7 @@ export default function StickyNoteModal({
         color: DEFAULT_STICKY_NOTE_COLOR,
         width: STICKY_NOTE_SIZES.medium.width,
         height: STICKY_NOTE_SIZES.medium.height,
+        projectId: "",
         tags: [],
         checklist: [],
         attachments: [],
@@ -113,6 +119,7 @@ export default function StickyNoteModal({
 
     const noteData = {
       workspaceId,
+      projectId: formData.projectId || undefined,
       title: formData.title.trim() || undefined,
       content: isListMode ? "" : formData.content.trim() || "",
       color: isListMode ? DEFAULT_STICKY_NOTE_COLOR : formData.color,
@@ -202,6 +209,11 @@ export default function StickyNoteModal({
 
   const isListMode = mode === "list";
 
+  const availableProjects =
+    (projects as Project[])?.filter(
+      (p: Project) => p.workspaceId === workspaceId
+    ) || [];
+
   return (
     <ResponsiveModal
       isOpen={isOpen}
@@ -242,6 +254,31 @@ export default function StickyNoteModal({
 
         {!isListMode && (
           <>
+            <div>
+              <Label htmlFor="project">Projeto</Label>
+              <Select
+                value={formData.projectId || "none"}
+                onValueChange={(value) =>
+                  setFormData({
+                    ...formData,
+                    projectId: value === "none" ? "" : value,
+                  })
+                }
+              >
+                <SelectTrigger id="project">
+                  <SelectValue placeholder="Selecione um projeto" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum</SelectItem>
+                  {availableProjects.map((project: Project) => (
+                    <SelectItem key={project.id} value={project.id}>
+                      {project.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div>
               <Label>Cor</Label>
               <ColorPicker

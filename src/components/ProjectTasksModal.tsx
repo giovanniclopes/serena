@@ -1,7 +1,8 @@
-import { Calendar, Paperclip, RotateCcw, Tag, Target, X } from "lucide-react";
+import { Calendar, Paperclip, RotateCcw, StickyNote, Tag, Target, X } from "lucide-react";
 import { useApp } from "../context/AppContext";
+import { useStickyNotes } from "../features/sticky-notes/useStickyNotes";
 import { useCompleteTask, useUncompleteTask } from "../features/tasks/useTasks";
-import type { Project, Task } from "../types";
+import type { Project, StickyNote as StickyNoteType, Task } from "../types";
 import {
   formatDate,
   formatTime,
@@ -30,6 +31,7 @@ export default function ProjectTasksModal({
   const { spacing, touchTarget, isMobile } = useMobileSpacing();
   const completeTaskMutation = useCompleteTask();
   const uncompleteTaskMutation = useUncompleteTask();
+  const { stickyNotes } = useStickyNotes();
 
   if (!isOpen || !project) return null;
 
@@ -37,6 +39,13 @@ export default function ProjectTasksModal({
     (task) =>
       task.projectId === project.id &&
       task.workspaceId === state.activeWorkspaceId
+  );
+
+  const projectNotes = stickyNotes.filter(
+    (note) =>
+      note.projectId === project.id &&
+      note.workspaceId === state.activeWorkspaceId &&
+      !note.isArchived
   );
 
   const completedTasks = projectTasks.filter((task) => task.isCompleted);
@@ -197,6 +206,121 @@ export default function ProjectTasksModal({
     );
   };
 
+  const renderNote = (note: StickyNoteType) => {
+    return (
+      <MobileCard
+        key={note.id}
+        className="transition-all duration-200 hover:shadow-md"
+        padding="md"
+        onClick={() => {
+          // Pode adicionar ação de preview/editar nota aqui se necessário
+        }}
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className="w-3 h-3 rounded flex-shrink-0 mt-1"
+            style={{ backgroundColor: note.color }}
+          />
+          <div className="flex-1 min-w-0">
+            {note.title && (
+              <ResponsiveText
+                variant="h4"
+                weight="medium"
+                style={{ color: state.currentTheme.colors.text }}
+              >
+                {note.title}
+              </ResponsiveText>
+            )}
+            {note.content && (
+              <ResponsiveText
+                variant="caption"
+                color="secondary"
+                className="mt-1 line-clamp-2"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                {note.content}
+              </ResponsiveText>
+            )}
+            {(note.tags.length > 0 || (note.checklist && note.checklist.length > 0)) && (
+              <div
+                className="flex items-center flex-wrap mt-2"
+                style={{ gap: spacing.xs }}
+              >
+                {note.tags.length > 0 && (
+                  <div className="flex items-center" style={{ gap: spacing.xs }}>
+                    <Tag
+                      className={isMobile ? "w-3 h-3" : "w-2.5 h-2.5"}
+                      style={{
+                        color: state.currentTheme.colors.textSecondary,
+                      }}
+                    />
+                    <div className="flex flex-wrap" style={{ gap: spacing.xs }}>
+                      {note.tags.slice(0, 3).map((tag, index) => (
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          style={{
+                            backgroundColor:
+                              state.currentTheme.colors.primary + "20",
+                            color: state.currentTheme.colors.primary,
+                            borderColor: state.currentTheme.colors.primary,
+                            fontSize: isMobile ? "0.6875rem" : "0.625rem",
+                            padding: isMobile
+                              ? "0.125rem 0.375rem"
+                              : "0.0625rem 0.25rem",
+                          }}
+                        >
+                          {tag}
+                        </Badge>
+                      ))}
+                      {note.tags.length > 3 && (
+                        <Badge
+                          variant="outline"
+                          style={{
+                            backgroundColor:
+                              state.currentTheme.colors.primary + "20",
+                            color: state.currentTheme.colors.primary,
+                            borderColor: state.currentTheme.colors.primary,
+                            fontSize: isMobile ? "0.6875rem" : "0.625rem",
+                            padding: isMobile
+                              ? "0.125rem 0.375rem"
+                              : "0.0625rem 0.25rem",
+                          }}
+                        >
+                          +{note.tags.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {note.checklist && note.checklist.length > 0 && (
+                  <div className="flex items-center" style={{ gap: spacing.xs }}>
+                    <StickyNote
+                      className={isMobile ? "w-3 h-3" : "w-2.5 h-2.5"}
+                      style={{
+                        color: state.currentTheme.colors.textSecondary,
+                      }}
+                    />
+                    <ResponsiveText
+                      variant="caption"
+                      color="secondary"
+                      style={{
+                        color: state.currentTheme.colors.textSecondary,
+                      }}
+                    >
+                      {note.checklist.filter((item) => item.isChecked).length}/
+                      {note.checklist?.length || 0}
+                    </ResponsiveText>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </MobileCard>
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose} />
@@ -238,6 +362,8 @@ export default function ProjectTasksModal({
               >
                 {projectTasks.length} tarefa
                 {projectTasks.length !== 1 ? "s" : ""}
+                {projectNotes.length > 0 &&
+                  ` • ${projectNotes.length} nota${projectNotes.length !== 1 ? "s" : ""}`}
               </p>
             </div>
           </div>
@@ -257,7 +383,7 @@ export default function ProjectTasksModal({
         </div>
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-          {projectTasks.length === 0 ? (
+          {projectTasks.length === 0 && projectNotes.length === 0 ? (
             <div className="text-center py-8">
               <div
                 className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
@@ -274,17 +400,31 @@ export default function ProjectTasksModal({
                 className="text-lg font-semibold mb-1"
                 style={{ color: state.currentTheme.colors.text }}
               >
-                Nenhuma tarefa encontrada
+                Nenhum conteúdo encontrado
               </h3>
               <p
                 className="text-sm"
                 style={{ color: state.currentTheme.colors.textSecondary }}
               >
-                Este projeto ainda não possui tarefas
+                Este projeto ainda não possui tarefas ou notas
               </p>
             </div>
           ) : (
             <div className="space-y-6">
+              {projectNotes.length > 0 && (
+                <div>
+                  <h3
+                    className="text-lg font-semibold mb-4"
+                    style={{ color: state.currentTheme.colors.text }}
+                  >
+                    Notas ({projectNotes.length})
+                  </h3>
+                  <div className="space-y-3">
+                    {projectNotes.map(renderNote)}
+                  </div>
+                </div>
+              )}
+
               {pendingTasks.length > 0 && (
                 <div>
                   <h3

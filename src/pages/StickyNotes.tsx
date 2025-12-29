@@ -59,6 +59,7 @@ interface SortableStickyNoteProps {
   onToggleArchive: (note: StickyNoteType) => void;
   onChecklistToggle: (noteId: string, itemId: string, checked: boolean) => void;
   onShare?: (note: StickyNoteType) => void;
+  onEdit?: (note: StickyNoteType) => void;
 }
 
 function SortableStickyNote({
@@ -70,6 +71,7 @@ function SortableStickyNote({
   onToggleArchive,
   onChecklistToggle,
   onShare,
+  onEdit,
 }: SortableStickyNoteProps) {
   const {
     attributes,
@@ -89,7 +91,10 @@ function SortableStickyNote({
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        position: "relative",
+      }}
       className={`w-full ${isDragging ? "is-dragging" : ""}`}
     >
       <StickyNote
@@ -101,8 +106,12 @@ function SortableStickyNote({
         onToggleArchive={onToggleArchive}
         onChecklistToggle={onChecklistToggle}
         onShare={onShare}
+        onEdit={onEdit}
         isDragging={isDragging}
-        dragHandleProps={{ attributes, listeners }}
+        dragHandleProps={{
+          attributes: attributes as unknown as Record<string, unknown>,
+          listeners: listeners as unknown as Record<string, unknown>,
+        }}
         style={{
           position: "relative",
           left: 0,
@@ -127,6 +136,7 @@ export default function StickyNotes() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showArchived, setShowArchived] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [noteToDelete, setNoteToDelete] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [sortBy, setSortBy] = useState<SortBy>("modified");
@@ -158,6 +168,18 @@ export default function StickyNotes() {
     [stickyNotes, state.activeWorkspaceId, showArchived]
   );
 
+  const availableTags = useMemo(() => {
+    const tagsSet = new Set<string>();
+    workspaceNotes.forEach((note) => {
+      note.tags.forEach((tag) => {
+        if (tag.trim()) {
+          tagsSet.add(tag.trim());
+        }
+      });
+    });
+    return Array.from(tagsSet).sort();
+  }, [workspaceNotes]);
+
   const filteredNotes = useMemo(() => {
     let notes = workspaceNotes;
 
@@ -168,6 +190,16 @@ export default function StickyNotes() {
           note.title?.toLowerCase().includes(query) ||
           note.content.toLowerCase().includes(query) ||
           note.tags.some((tag) => tag.toLowerCase().includes(query))
+      );
+    }
+
+    if (selectedTags.length > 0) {
+      notes = notes.filter((note) =>
+        selectedTags.some((selectedTag) =>
+          note.tags.some(
+            (tag) => tag.toLowerCase() === selectedTag.toLowerCase()
+          )
+        )
       );
     }
 
@@ -188,7 +220,7 @@ export default function StickyNotes() {
     });
 
     return sorted;
-  }, [workspaceNotes, searchQuery, sortBy, sortOrder]);
+  }, [workspaceNotes, searchQuery, sortBy, sortOrder, selectedTags]);
 
   useStickyNoteReminders({
     notes: workspaceNotes,
@@ -253,6 +285,12 @@ export default function StickyNotes() {
       setIsModalOpen(true);
       setPreviewNote(null);
     }
+  };
+
+  const handleEditNote = (note: StickyNoteType) => {
+    setEditingNote(note);
+    setModalMode("default");
+    setIsModalOpen(true);
   };
 
   const handleSaveNote = async (
@@ -672,6 +710,9 @@ export default function StickyNotes() {
         onSortByChange={setSortBy}
         sortOrder={sortOrder}
         onSortOrderChange={setSortOrder}
+        availableTags={availableTags}
+        selectedTags={selectedTags}
+        onTagsChange={setSelectedTags}
       />
 
       <div className="px-4 pt-4">
@@ -747,6 +788,7 @@ export default function StickyNotes() {
                           onToggleArchive={handleToggleArchive}
                           onChecklistToggle={handleChecklistToggle}
                           onShare={handleShareNote}
+                          onEdit={handleEditNote}
                           style={{
                             position: "relative",
                             left: 0,
@@ -784,6 +826,7 @@ export default function StickyNotes() {
                               onToggleArchive={handleToggleArchive}
                               onChecklistToggle={handleChecklistToggle}
                               onShare={handleShareNote}
+                              onEdit={handleEditNote}
                             />
                           </div>
                         ))}
@@ -825,6 +868,7 @@ export default function StickyNotes() {
                           onToggleArchive={handleToggleArchive}
                           onChecklistToggle={handleChecklistToggle}
                           onShare={handleShareNote}
+                          onEdit={handleEditNote}
                           style={{
                             position: "relative",
                             left: 0,
@@ -862,6 +906,7 @@ export default function StickyNotes() {
                               onToggleArchive={handleToggleArchive}
                               onChecklistToggle={handleChecklistToggle}
                               onShare={handleShareNote}
+                              onEdit={handleEditNote}
                             />
                           </div>
                         ))}

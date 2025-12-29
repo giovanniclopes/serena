@@ -11,7 +11,8 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useProjects } from "../features/projects/useProjects";
 import type { ChecklistItem, StickyNote } from "../types";
 import { debounce, getContrastTextColor } from "../utils";
 import { Checkbox } from "./ui/checkbox";
@@ -31,11 +32,12 @@ interface StickyNoteProps {
     checked: boolean
   ) => void;
   onShare?: (note: StickyNote) => void;
+  onEdit?: (note: StickyNote) => void;
   isDragging?: boolean;
   style?: React.CSSProperties;
   dragHandleProps?: {
-    attributes: any;
-    listeners: any;
+    attributes: Record<string, unknown>;
+    listeners: Record<string, unknown>;
   };
 }
 
@@ -48,16 +50,23 @@ export default function StickyNoteComponent({
   onToggleArchive,
   onChecklistToggle,
   onShare,
+  onEdit,
   isDragging = false,
   style,
   dragHandleProps,
 }: StickyNoteProps) {
+  const { projects } = useProjects();
   const [isHovered, setIsHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(note.title || "");
   const [editContent, setEditContent] = useState(note.content);
   const titleInputRef = useRef<HTMLInputElement>(null);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const relatedProject = useMemo(() => {
+    if (!note.projectId || !projects) return null;
+    return projects.find((p) => p.id === note.projectId) || null;
+  }, [note.projectId, projects]);
 
   useEffect(() => {
     if (!isEditing) {
@@ -179,8 +188,10 @@ export default function StickyNoteComponent({
     note.attachments?.filter((att) => att.type.startsWith("image/")) || [];
   const textColor = getContrastTextColor(note.color);
 
+  const isInGrid = style?.position === "relative";
+  
   const finalStyle: React.CSSProperties = {
-    width: `${note.width}px`,
+    width: isInGrid ? "100%" : `${note.width}px`,
     minHeight: `${note.height}px`,
     backgroundColor: note.color,
     boxShadow: isDragging
@@ -197,12 +208,12 @@ export default function StickyNoteComponent({
       : "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
     transform: isHovered && !isEditing ? "translateY(-2px)" : "translateY(0)",
     zIndex:
-      isHovered && !isEditing
-        ? 2000
+      isDragging
+        ? 20
+        : isHovered && !isEditing
+        ? 39
         : note.isPinned
-        ? 1000
-        : isDragging
-        ? 999
+        ? 10
         : 1,
     position: "relative",
     ...style,
@@ -325,7 +336,11 @@ export default function StickyNoteComponent({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsEditing(true);
+                  if (onEdit) {
+                    onEdit(note);
+                  } else {
+                    setIsEditing(true);
+                  }
                 }}
                 className="p-1 rounded hover:bg-black/10 transition-all duration-200 ease-in-out hover:scale-110"
                 aria-label="Editar"
@@ -464,6 +479,21 @@ export default function StickyNoteComponent({
               />
             </div>
           ))}
+        </div>
+      )}
+
+      {relatedProject && (
+        <div className="mt-2">
+          <span
+            className="text-xs px-2 py-0.5 rounded-full font-medium transition-all duration-200 ease-in-out"
+            style={{
+              backgroundColor: relatedProject.color + "30",
+              color: relatedProject.color,
+              border: `1px solid ${relatedProject.color}50`,
+            }}
+          >
+            {relatedProject.name}
+          </span>
         </div>
       )}
 
