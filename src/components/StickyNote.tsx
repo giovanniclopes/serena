@@ -199,12 +199,12 @@ export default function StickyNoteComponent({
       : "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out, opacity 0.3s ease-in-out",
     transform: isHovered && !isEditing ? "translateY(-2px)" : "translateY(0)",
     zIndex:
-      isHovered && !isEditing
-        ? 2000
+      isDragging
+        ? 20
+        : isHovered && !isEditing
+        ? 40
         : note.isPinned
-        ? 1000
-        : isDragging
-        ? 999
+        ? 10
         : 1,
     position: "relative",
     ...style,
