@@ -181,8 +181,10 @@ export default function StickyNoteComponent({
     note.attachments?.filter((att) => att.type.startsWith("image/")) || [];
   const textColor = getContrastTextColor(note.color);
 
+  const isInGrid = style?.position === "relative";
+  
   const finalStyle: React.CSSProperties = {
-    width: `${note.width}px`,
+    width: isInGrid ? "100%" : `${note.width}px`,
     minHeight: `${note.height}px`,
     backgroundColor: note.color,
     boxShadow: isDragging
@@ -202,7 +204,7 @@ export default function StickyNoteComponent({
       isDragging
         ? 20
         : isHovered && !isEditing
-        ? 40
+        ? 39
         : note.isPinned
         ? 10
         : 1,

@@ -91,7 +91,10 @@ function SortableStickyNote({
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        position: "relative",
+      }}
       className={`w-full ${isDragging ? "is-dragging" : ""}`}
     >
       <StickyNote
