@@ -66,6 +66,22 @@ export interface Project {
   updatedAt: Date;
 }
 
+export interface ProjectGoal {
+  id: string;
+  projectId: string;
+  workspaceId: string;
+  title: string;
+  description?: string;
+  dueDate?: Date;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  progress: number;
+  targetValue?: number;
+  currentValue: number;
+  completedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Task {
   id: string;
   title: string;

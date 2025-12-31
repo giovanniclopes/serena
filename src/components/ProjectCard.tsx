@@ -1,4 +1,4 @@
-import { CheckCircle2, Edit, Eye, Folder, Target, Trash2 } from "lucide-react";
+import { CheckCircle2, Edit, Eye, Flag, Folder, Target, Trash2 } from "lucide-react";
 import { useApp } from "../context/AppContext";
 import type { Project } from "../types";
 import { MobileButton } from "./ui/mobile-button";
@@ -11,6 +11,7 @@ interface ProjectCardProps {
   onEdit: (project: Project) => void;
   onDelete: (projectId: string) => void;
   onView: (project: Project) => void;
+  onViewGoals?: (project: Project) => void;
   isDeleting?: boolean;
 }
 
@@ -19,6 +20,7 @@ export default function ProjectCard({
   onEdit,
   onDelete,
   onView,
+  onViewGoals,
   isDeleting = false,
 }: ProjectCardProps) {
   const { state } = useApp();
@@ -41,6 +43,12 @@ export default function ProjectCard({
 
   const handleView = () => {
     onView(project);
+  };
+
+  const handleViewGoals = () => {
+    if (onViewGoals) {
+      onViewGoals(project);
+    }
   };
 
   return (
@@ -102,6 +110,23 @@ export default function ProjectCard({
               >
                 <Eye className="w-5 h-5" />
               </MobileButton>
+
+              {onViewGoals && (
+                <MobileButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleViewGoals}
+                  style={{
+                    minWidth: touchTarget,
+                    minHeight: touchTarget,
+                    padding: 0,
+                    color: state.currentTheme.colors.primary,
+                  }}
+                  aria-label="Visualizar metas"
+                >
+                  <Flag className="w-5 h-5" />
+                </MobileButton>
+              )}
 
               <MobileButton
                 variant="ghost"
@@ -248,6 +273,22 @@ export default function ProjectCard({
               <Eye className="w-4 h-4 inline mr-1" />
               Visualizar
             </button>
+            {onViewGoals && (
+              <button
+                onClick={handleViewGoals}
+                className="flex-1 py-3 px-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  backgroundColor: state.currentTheme.colors.primary + "10",
+                  color: state.currentTheme.colors.primary,
+                  border: `1px solid ${state.currentTheme.colors.primary}30`,
+                  opacity: isDeleting ? 0.5 : 1,
+                }}
+                disabled={isDeleting}
+              >
+                <Flag className="w-4 h-4 inline mr-1" />
+                Metas
+              </button>
+            )}
             <button
               onClick={handleEdit}
               className="flex-1 py-3 px-3 rounded-xl font-medium text-sm transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
