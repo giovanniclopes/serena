@@ -106,7 +106,7 @@ export async function updateGoal(
     updateData.target_value = updates.targetValue || null;
   if (updates.currentValue !== undefined)
     updateData.current_value = updates.currentValue;
-  if (updates.completedAt !== undefined)
+  if ("completedAt" in updates)
     updateData.completed_at = updates.completedAt
       ? updates.completedAt.toISOString()
       : null;
@@ -158,9 +158,47 @@ export async function completeGoal(id: string): Promise<ProjectGoal> {
 }
 
 export async function uncompleteGoal(id: string): Promise<ProjectGoal> {
+  const { data: goalData, error: fetchError } = await supabase
+    .from("project_goals")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !goalData) {
+    throw new Error("Meta não encontrada");
+  }
+
+  const goal = {
+    id: goalData.id,
+    projectId: goalData.project_id,
+    workspaceId: goalData.workspace_id,
+    title: goalData.title,
+    description: goalData.description,
+    dueDate: goalData.due_date ? new Date(goalData.due_date) : undefined,
+    status: goalData.status,
+    progress: goalData.progress || 0,
+    targetValue: goalData.target_value
+      ? Number(goalData.target_value)
+      : undefined,
+    currentValue: goalData.current_value ? Number(goalData.current_value) : 0,
+    completedAt: goalData.completed_at
+      ? new Date(goalData.completed_at)
+      : undefined,
+    createdAt: new Date(goalData.created_at),
+    updatedAt: new Date(goalData.updated_at),
+  };
+
+  let newProgress = goal.progress;
+  if (goal.targetValue && goal.targetValue > 0) {
+    newProgress = Math.round((goal.currentValue / goal.targetValue) * 100);
+    newProgress = Math.min(Math.max(newProgress, 0), 100);
+  } else if (goal.progress === 100) {
+    newProgress = 0;
+  }
+
   return updateGoal(id, {
     status: "in_progress",
+    progress: newProgress,
     completedAt: undefined,
   });
 }
-
