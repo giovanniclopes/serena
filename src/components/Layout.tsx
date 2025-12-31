@@ -381,7 +381,6 @@ export default function Layout() {
         <SideMenu
           isOpen={showMenu}
           onClose={() => setShowMenu(false)}
-          onShowOfflineStatus={() => setShowOfflineStatus(true)}
         />
         <WorkspaceLoadingOverlay />
 

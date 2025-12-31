@@ -10,7 +10,6 @@ import {
   StickyNote,
   Target,
   User,
-  Wifi,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -18,7 +17,6 @@ import { NavLink } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
 import { useProfile } from "../features/profile/useProfile";
-import { useOfflineMode } from "../hooks/useOfflineMode";
 import LogoutModal from "./LogoutModal";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { ShimmeringText } from "./ui/shimmering-text";
@@ -26,17 +24,14 @@ import { ShimmeringText } from "./ui/shimmering-text";
 interface SideMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  onShowOfflineStatus?: () => void;
 }
 
 export default function SideMenu({
   isOpen,
   onClose,
-  onShowOfflineStatus,
 }: SideMenuProps) {
   const { state } = useApp();
   const { user } = useAuth();
-  const { pendingActions } = useOfflineMode();
   const { profile } = useProfile();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -194,36 +189,6 @@ export default function SideMenu({
                 className="px-6 py-2 md:pb-6 pt-4 border-t space-y-2"
                 style={{ borderColor: state.currentTheme.colors.border }}
               >
-                {onShowOfflineStatus && (
-                  <button
-                    onClick={() => {
-                      onShowOfflineStatus();
-                      onClose();
-                    }}
-                    className="flex items-center justify-between p-3 rounded-xl transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800 w-full"
-                    style={{ color: state.currentTheme.colors.text }}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <Wifi className="w-5 h-5" />
-                      <span className="text-sm font-medium">
-                        Status Offline
-                      </span>
-                    </div>
-                    {pendingActions.length > 0 && (
-                      <span
-                        className="px-2 py-1 text-xs rounded-full font-semibold"
-                        style={{
-                          backgroundColor:
-                            state.currentTheme.colors.warning + "20",
-                          color: state.currentTheme.colors.warning,
-                        }}
-                      >
-                        {pendingActions.length}
-                      </span>
-                    )}
-                  </button>
-                )}
-
                 <button
                   onClick={() => setShowLogoutModal(true)}
                   className="flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20 w-full"
