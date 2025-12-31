@@ -4,6 +4,7 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import EmptyState from "../components/EmptyState";
 import FilterControls from "../components/FilterControls";
 import FloatingActionButton from "../components/FloatingActionButton";
+import GoalModal from "../components/GoalModal";
 import ProjectCard from "../components/ProjectCard";
 import ProjectModal from "../components/ProjectModal";
 import ProjectTasksModal from "../components/ProjectTasksModal";
@@ -32,8 +33,10 @@ export default function Projects() {
 
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [isProjectTasksModalOpen, setIsProjectTasksModalOpen] = useState(false);
+  const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
+  const [viewingGoalsProject, setViewingGoalsProject] = useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -54,6 +57,11 @@ export default function Projects() {
   const handleOpenViewModal = (project: Project) => {
     setViewingProject(project);
     setIsProjectTasksModalOpen(true);
+  };
+
+  const handleOpenGoalsModal = (project: Project) => {
+    setViewingGoalsProject(project);
+    setIsGoalModalOpen(true);
   };
 
   const handleSaveProject = (
@@ -155,6 +163,7 @@ export default function Projects() {
               onEdit={handleOpenEditModal}
               onDelete={handleDeleteProject}
               onView={handleOpenViewModal}
+              onViewGoals={handleOpenGoalsModal}
               isDeleting={deleteProjectMutation.isPending}
             />
           ))}
@@ -198,6 +207,17 @@ export default function Projects() {
           isOpen={isProjectTasksModalOpen}
           onClose={() => setIsProjectTasksModalOpen(false)}
           project={viewingProject}
+        />
+      )}
+
+      {isGoalModalOpen && (
+        <GoalModal
+          isOpen={isGoalModalOpen}
+          onClose={() => {
+            setIsGoalModalOpen(false);
+            setViewingGoalsProject(null);
+          }}
+          project={viewingGoalsProject}
         />
       )}
 

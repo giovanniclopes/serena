@@ -451,6 +451,39 @@ export function filterShoppingLists(
   return shoppingLists.filter((list) => !list.isCompleted);
 }
 
+export function getGoalStatusColor(
+  status: "pending" | "in_progress" | "completed" | "cancelled"
+): string {
+  const colors = {
+    pending: "#6b7280",
+    in_progress: "#3b82f6",
+    completed: "#10b981",
+    cancelled: "#ef4444",
+  };
+  return colors[status];
+}
+
+export function getGoalStatusLabel(
+  status: "pending" | "in_progress" | "completed" | "cancelled"
+): string {
+  const labels = {
+    pending: "Pendente",
+    in_progress: "Em Progresso",
+    completed: "Concluída",
+    cancelled: "Cancelada",
+  };
+  return labels[status];
+}
+
+export function calculateGoalProgress(
+  current: number,
+  target?: number
+): number {
+  if (!target || target === 0) return 0;
+  const progress = Math.round((current / target) * 100);
+  return Math.min(Math.max(progress, 0), 100);
+}
+
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result

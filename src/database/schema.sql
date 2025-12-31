@@ -59,6 +59,34 @@ COMMENT ON COLUMN public.projects.tasks_total_count IS 'Número total de tarefas
 
 COMMENT ON COLUMN public.projects.tasks_completed_count IS 'Número de tarefas concluídas do projeto';
 
+-- Tabela para metas de projetos.
+CREATE TABLE public.project_goals (
+  id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  project_id uuid NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
+  title text NOT NULL,
+  description text,
+  due_date timestamptz,
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'completed', 'cancelled')),
+  progress integer NOT NULL DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
+  target_value numeric,
+  current_value numeric NOT NULL DEFAULT 0,
+  completed_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE public.project_goals IS 'Metas específicas dentro de um projeto que ajudam a alcançar os objetivos finais.';
+COMMENT ON COLUMN public.project_goals.title IS 'Título da meta';
+COMMENT ON COLUMN public.project_goals.description IS 'Descrição detalhada da meta';
+COMMENT ON COLUMN public.project_goals.due_date IS 'Data de vencimento da meta';
+COMMENT ON COLUMN public.project_goals.status IS 'Status da meta: pending, in_progress, completed, cancelled';
+COMMENT ON COLUMN public.project_goals.progress IS 'Progresso da meta em percentual (0-100)';
+COMMENT ON COLUMN public.project_goals.target_value IS 'Valor alvo para metas numéricas';
+COMMENT ON COLUMN public.project_goals.current_value IS 'Valor atual da meta';
+COMMENT ON COLUMN public.project_goals.completed_at IS 'Data de conclusão da meta';
+
 -- Tabela principal para as tarefas.
 CREATE TABLE public.tasks (
   id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -329,6 +357,12 @@ ALTER TABLE
   public.projects ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Utilizadores podem gerir os seus próprios projetos." ON public.projects FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
+
+-- Metas de Projetos
+ALTER TABLE
+  public.project_goals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Utilizadores podem gerir as suas próprias metas de projetos." ON public.project_goals FOR ALL USING ((select auth.uid()) = user_id) WITH CHECK ((select auth.uid()) = user_id);
 
 -- Tarefas
 ALTER TABLE
@@ -783,6 +817,14 @@ CREATE INDEX idx_projects_user_id ON public.projects(user_id);
 
 CREATE INDEX idx_projects_workspace_id ON public.projects(workspace_id);
 
+CREATE INDEX idx_project_goals_project_id ON public.project_goals(project_id);
+
+CREATE INDEX idx_project_goals_user_id ON public.project_goals(user_id);
+
+CREATE INDEX idx_project_goals_workspace_id ON public.project_goals(workspace_id);
+
+CREATE INDEX idx_project_goals_status ON public.project_goals(status);
+
 CREATE INDEX idx_tasks_user_id ON public.tasks(user_id);
 
 CREATE INDEX idx_tasks_project_id ON public.tasks(project_id);
@@ -1137,6 +1179,10 @@ CREATE TRIGGER trigger_handle_updated_at_workspaces
 
 CREATE TRIGGER trigger_handle_updated_at_projects
   BEFORE UPDATE ON public.projects
+  FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
+
+CREATE TRIGGER trigger_handle_updated_at_project_goals
+  BEFORE UPDATE ON public.project_goals
   FOR EACH ROW EXECUTE FUNCTION handle_updated_at();
 
 CREATE TRIGGER trigger_handle_updated_at_tasks
