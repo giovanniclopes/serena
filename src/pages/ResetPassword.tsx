@@ -1,17 +1,17 @@
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SerenaLogo from "../../public/icons/icon.svg";
 import PageTitle from "../components/PageTitle";
 import { useAuth } from "../context/AuthContext";
 import { useWorkspaceColor } from "../hooks/useWorkspaceColor";
 
-export default function Login() {
-  const [email, setEmail] = useState("");
+export default function ResetPassword() {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, loading } = useAuth();
+  const { updatePassword, loading } = useAuth();
   const navigate = useNavigate();
   const workspaceColor = useWorkspaceColor();
 
@@ -19,28 +19,28 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    if (!email.trim()) {
-      setError("Email é obrigatório");
-      return;
-    }
-
-    if (!email.includes("@") || !email.includes(".")) {
-      setError("Email inválido");
-      return;
-    }
-
     if (!password.trim()) {
       setError("Senha é obrigatória");
       return;
     }
 
+    if (password.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("As senhas não coincidem");
+      return;
+    }
+
     try {
-      await signIn(email, password);
-      console.log("🎉 Login realizado com sucesso");
-      navigate("/");
+      await updatePassword(password);
+      console.log("🎉 Senha redefinida com sucesso");
+      navigate("/login");
     } catch (err) {
-      console.log("💥 Erro ao fazer login:", err);
-      setError(err instanceof Error ? err.message : "Erro ao fazer login");
+      console.log("💥 Erro ao redefinir senha:", err);
+      setError(err instanceof Error ? err.message : "Erro ao redefinir senha");
     }
   };
 
@@ -58,56 +58,26 @@ export default function Login() {
             <h1 className="text-3xl font-bold bg-pink-500 bg-clip-text text-transparent">
               Serena
             </h1>
-            <p className="text-gray-700 mt-2">
-              Sua jornada de produtividade começa aqui
-            </p>
+            <p className="text-gray-700 mt-2">Crie uma nova senha</p>
           </div>
 
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-8">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Bem-vindo de volta!
+                Redefinir Senha
               </h2>
-              <p className="text-gray-700">Entre na sua conta para continuar</p>
+              <p className="text-gray-700">
+                Escolha uma senha forte para sua segurança.
+              </p>
             </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Email
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-500" />
-                  </div>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
-                    style={
-                      {
-                        "--tw-ring-color": workspaceColor
-                      } as React.CSSProperties
-                    }
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Senha
+                  Nova Senha
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -117,7 +87,6 @@ export default function Login() {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
                     required
                     className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
                     style={
@@ -125,7 +94,7 @@ export default function Login() {
                         "--tw-ring-color": workspaceColor
                       } as React.CSSProperties
                     }
-                    placeholder="Sua senha"
+                    placeholder="Sua nova senha"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -141,14 +110,34 @@ export default function Login() {
                     )}
                   </button>
                 </div>
-                <div className="flex justify-end mt-2">
-                  <Link
-                    to="/forgot-password"
-                    className="text-sm font-medium transition-colors duration-200"
-                    style={{ color: workspaceColor }}
-                  >
-                    Esqueceu sua senha?
-                  </Link>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Confirmar Nova Senha
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-500" />
+                  </div>
+                  <input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200"
+                    style={
+                      {
+                        "--tw-ring-color": workspaceColor
+                      } as React.CSSProperties
+                    }
+                    placeholder="Confirme sua nova senha"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
                 </div>
               </div>
 
@@ -172,28 +161,13 @@ export default function Login() {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Entrando...
+                    Redefinindo...
                   </>
                 ) : (
-                  "Entrar"
+                  "Redefinir senha"
                 )}
               </button>
             </form>
-
-            <div className="mt-6 text-center">
-              <p className="text-sm text-gray-700">
-                Não tem uma conta?{" "}
-                <Link
-                  to="/register"
-                  className="font-medium transition-colors duration-200"
-                  style={{
-                    color: workspaceColor
-                  }}
-                >
-                  Criar conta
-                </Link>
-              </p>
-            </div>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import {
   Navigate,
   Route,
   BrowserRouter as Router,
-  Routes,
+  Routes
 } from "react-router-dom";
 import "./App.css";
 import AppUpdateNotification from "./components/AppUpdateNotification";
@@ -26,8 +26,10 @@ const Profile = lazy(() => import("./pages/Profile"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
 
 import EmailVerification from "./pages/EmailVerification";
+import ForgotPassword from "./pages/ForgotPassword";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ResetPassword from "./pages/ResetPassword";
 
 function App() {
   return (
@@ -36,13 +38,15 @@ function App() {
         <Router
           future={{
             v7_startTransition: true,
-            v7_relativeSplatPath: true,
+            v7_relativeSplatPath: true
           }}
         >
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/email-verification" element={<EmailVerification />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/"
               element={

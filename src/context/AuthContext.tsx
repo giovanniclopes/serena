@@ -4,7 +4,13 @@ import { toast } from "sonner";
 import { useOnboarding } from "../hooks/useOnboarding";
 import { supabase } from "../lib/supabaseClient";
 import { createProfile } from "../services/apiProfile";
-import { signIn, signOut, signUp } from "../services/auth";
+import {
+  resetPassword,
+  signIn,
+  signOut,
+  signUp,
+  updatePassword
+} from "../services/auth";
 
 interface AuthContextType {
   user: unknown | null;
@@ -12,6 +18,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name?: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const {
-      data: { subscription },
+      data: { subscription }
     } = supabase.auth.onAuthStateChange(async (_, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
@@ -61,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await createProfile({
             username: name || email.split("@")[0],
             firstName: name || undefined,
-            status: "active",
+            status: "active"
           });
           console.log("✅ Perfil criado automaticamente");
           queryClient.invalidateQueries({ queryKey: ["profile"] });
@@ -103,12 +111,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleResetPassword = async (email: string) => {
+    setLoading(true);
+    try {
+      await resetPassword(email);
+      toast.success("E-mail de recuperação enviado com sucesso!");
+    } catch (error) {
+      console.log("❌ Erro ao enviar e-mail de recuperação:", error);
+      toast.error("Erro ao enviar e-mail de recuperação. Tente novamente.");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (password: string) => {
+    setLoading(true);
+    try {
+      await updatePassword(password);
+      toast.success("Senha atualizada com sucesso!");
+    } catch (error) {
+      console.log("❌ Erro ao atualizar senha:", error);
+      toast.error("Erro ao atualizar senha. Tente novamente.");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     user,
     loading,
     signIn: handleSignIn,
     signUp: handleSignUp,
     signOut: handleSignOut,
+    resetPassword: handleResetPassword,
+    updatePassword: handleUpdatePassword
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
