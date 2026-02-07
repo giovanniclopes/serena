@@ -29,6 +29,7 @@ dist-ssr
 # Outros
 docs
 scripts
+.github
 
 # Supabase
 supabase/
