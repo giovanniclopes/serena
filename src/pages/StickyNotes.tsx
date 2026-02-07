@@ -155,7 +155,7 @@ export default function StickyNotes() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const workspaceNotes = useMemo(
@@ -163,9 +163,9 @@ export default function StickyNotes() {
       stickyNotes.filter(
         (note) =>
           note.workspaceId === state.activeWorkspaceId &&
-          (showArchived ? note.isArchived : !note.isArchived)
+          (showArchived ? note.isArchived : !note.isArchived),
       ),
-    [stickyNotes, state.activeWorkspaceId, showArchived]
+    [stickyNotes, state.activeWorkspaceId, showArchived],
   );
 
   const availableTags = useMemo(() => {
@@ -189,7 +189,7 @@ export default function StickyNotes() {
         (note) =>
           note.title?.toLowerCase().includes(query) ||
           note.content.toLowerCase().includes(query) ||
-          note.tags.some((tag) => tag.toLowerCase().includes(query))
+          note.tags.some((tag) => tag.toLowerCase().includes(query)),
       );
     }
 
@@ -197,9 +197,9 @@ export default function StickyNotes() {
       notes = notes.filter((note) =>
         selectedTags.some((selectedTag) =>
           note.tags.some(
-            (tag) => tag.toLowerCase() === selectedTag.toLowerCase()
-          )
-        )
+            (tag) => tag.toLowerCase() === selectedTag.toLowerCase(),
+          ),
+        ),
       );
     }
 
@@ -294,7 +294,7 @@ export default function StickyNotes() {
   };
 
   const handleSaveNote = async (
-    noteData: Omit<StickyNoteType, "id" | "createdAt" | "updatedAt">
+    noteData: Omit<StickyNoteType, "id" | "createdAt" | "updatedAt">,
   ) => {
     if (editingNote) {
       await updateNoteMutation.mutateAsync({
@@ -407,8 +407,8 @@ export default function StickyNotes() {
               ? -1
               : 1
             : newIndex > oldIndex
-            ? 1
-            : -1;
+              ? 1
+              : -1;
         newUpdatedAt = new Date(newUpdatedAt.getTime() + adjustment);
       }
 
@@ -426,7 +426,7 @@ export default function StickyNotes() {
         toast.error("Erro ao salvar a ordem. Tente novamente.");
       }
     },
-    [filteredNotes, updateOrderMutation, sortBy, sortOrder]
+    [filteredNotes, updateOrderMutation, sortBy, sortOrder],
   );
 
   const handleTogglePin = async (note: StickyNoteType) => {
@@ -444,7 +444,7 @@ export default function StickyNotes() {
     toast.success(
       note.isArchived
         ? "Post-it desarquivado com sucesso!"
-        : "Post-it arquivado com sucesso!"
+        : "Post-it arquivado com sucesso!",
     );
   };
 
@@ -455,12 +455,12 @@ export default function StickyNotes() {
   const handleChecklistToggle = async (
     noteId: string,
     itemId: string,
-    checked: boolean
+    checked: boolean,
   ) => {
     const note = filteredNotes.find((n) => n.id === noteId);
     if (note) {
       const updatedChecklist: ChecklistItem[] = (note.checklist || []).map(
-        (item) => (item.id === itemId ? { ...item, isChecked: checked } : item)
+        (item) => (item.id === itemId ? { ...item, isChecked: checked } : item),
       );
       await updateNoteMutation.mutateAsync({
         ...note,
@@ -669,7 +669,7 @@ export default function StickyNotes() {
         setAiInputValue("");
         setIsAIInputOpen(false);
         toast.success(
-          "Nota criada com dados parciais. Você pode editar para completar."
+          "Nota criada com dados parciais. Você pode editar para completar.",
         );
       }
     } catch (error) {
@@ -740,15 +740,15 @@ export default function StickyNotes() {
               searchQuery
                 ? "Nenhum post-it encontrado"
                 : showArchived
-                ? "Nenhum post-it arquivado"
-                : "Nenhum post-it criado"
+                  ? "Nenhum post-it arquivado"
+                  : "Nenhum post-it criado"
             }
             description={
               searchQuery
                 ? "Tente ajustar sua busca para encontrar o que procura."
                 : showArchived
-                ? "Você ainda não arquivou nenhum post-it."
-                : "Crie seu primeiro post-it para começar a organizar suas ideias!"
+                  ? "Você ainda não arquivou nenhum post-it."
+                  : "Crie seu primeiro post-it para começar a organizar suas ideias!"
             }
             actionLabel={
               searchQuery || showArchived ? undefined : "Criar Primeiro Post-it"
@@ -920,7 +920,16 @@ export default function StickyNotes() {
         )}
       </div>
 
-      <FloatingActionButton onClick={handleCreateNote} />
+      <FloatingActionButton
+        onClick={handleCreateNote}
+        hidden={
+          isModalOpen ||
+          isPreviewOpen ||
+          isShareModalOpen ||
+          isDrawingModalOpen ||
+          isAIInputOpen
+        }
+      />
 
       <StickyNotePreviewModal
         isOpen={isPreviewOpen}

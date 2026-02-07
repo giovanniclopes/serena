@@ -37,12 +37,12 @@ export default function Countdowns() {
   const updateCountdownMutation = useUpdateCountdown();
 
   const workspaceCountdowns = countdowns.filter(
-    (countdown) => countdown.workspaceId === state.activeWorkspaceId
+    (countdown) => countdown.workspaceId === state.activeWorkspaceId,
   );
 
   const filteredCountdowns = filterCountdowns(
     searchCountdowns(workspaceCountdowns, searchQuery),
-    showCompleted
+    showCompleted,
   );
 
   const sortedCountdowns = [...filteredCountdowns].sort((a, b) => {
@@ -89,7 +89,7 @@ export default function Countdowns() {
   };
 
   const handleSaveCountdown = (
-    countdownData: Omit<Countdown, "id" | "createdAt" | "updatedAt">
+    countdownData: Omit<Countdown, "id" | "createdAt" | "updatedAt">,
   ) => {
     if (editingCountdown) {
       updateCountdownMutation.mutate({
@@ -221,10 +221,10 @@ export default function Countdowns() {
   };
 
   const upcomingCountdowns = sortedCountdowns.filter(
-    (c) => !isOverdue(c.targetDate)
+    (c) => !isOverdue(c.targetDate),
   );
   const pastCountdowns = sortedCountdowns.filter((c) =>
-    isOverdue(c.targetDate)
+    isOverdue(c.targetDate),
   );
 
   if (isLoading) {
@@ -336,25 +336,21 @@ export default function Countdowns() {
             searchQuery
               ? "Nenhuma contagem encontrada"
               : showCompleted
-              ? "Nenhuma contagem concluída"
-              : "Nenhuma contagem regressiva"
+                ? "Nenhuma contagem concluída"
+                : "Nenhuma contagem regressiva"
           }
           description={
             searchQuery
               ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
               : showCompleted
-              ? "Você ainda não concluiu nenhuma contagem regressiva. Continue acompanhando seus eventos!"
-              : "Crie contagens regressivas para eventos importantes e acompanhe o tempo restante. Nunca mais perca uma data especial!"
+                ? "Você ainda não concluiu nenhuma contagem regressiva. Continue acompanhando seus eventos!"
+                : "Crie contagens regressivas para eventos importantes e acompanhe o tempo restante. Nunca mais perca uma data especial!"
           }
           actionLabel={
-            searchQuery || showCompleted
-              ? undefined
-              : "Criar Primeira Contagem"
+            searchQuery || showCompleted ? undefined : "Criar Primeira Contagem"
           }
           onAction={
-            searchQuery || showCompleted
-              ? undefined
-              : handleCreateCountdown
+            searchQuery || showCompleted ? undefined : handleCreateCountdown
           }
         />
       )}
@@ -371,6 +367,7 @@ export default function Countdowns() {
           setEditingCountdown(undefined);
           setIsCountdownModalOpen(true);
         }}
+        hidden={isCountdownModalOpen}
       />
     </div>
   );

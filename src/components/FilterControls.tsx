@@ -20,7 +20,7 @@ interface FilterControlsProps {
   selectedTasksCount?: number;
   sortBy?: "priority" | "recent" | "dueDate" | "date" | "dateNew" | "dateOld";
   onSortChange?: (
-    sort: "priority" | "recent" | "dueDate" | "date" | "dateNew" | "dateOld"
+    sort: "priority" | "recent" | "dueDate" | "date" | "dateNew" | "dateOld",
   ) => void;
 }
 
@@ -94,7 +94,7 @@ export default function FilterControls({
                     | "date"
                   )[] = ["priority", "recent", "dueDate", "date"];
                   const currentIndex = sortOptions.indexOf(
-                    sortBy as "priority" | "recent" | "dueDate" | "date"
+                    sortBy as "priority" | "recent" | "dueDate" | "date",
                   );
                   const nextIndex = (currentIndex + 1) % sortOptions.length;
                   onSortChange(sortOptions[nextIndex]);
@@ -109,14 +109,14 @@ export default function FilterControls({
                 sortBy === "priority"
                   ? "Prioridade"
                   : sortBy === "recent"
-                  ? "Mais recentes"
-                  : sortBy === "dueDate"
-                  ? "Data de vencimento"
-                  : sortBy === "date"
-                  ? "Data do evento"
-                  : sortBy === "dateNew"
-                  ? "Data nova (mais próximas)"
-                  : "Data antiga (mais distantes)"
+                    ? "Mais recentes"
+                    : sortBy === "dueDate"
+                      ? "Data de vencimento"
+                      : sortBy === "date"
+                        ? "Data do evento"
+                        : sortBy === "dateNew"
+                          ? "Data nova (mais próximas)"
+                          : "Data antiga (mais distantes)"
               }`}
             >
               <ArrowUpDown className="w-4 h-4" />
@@ -173,7 +173,7 @@ export default function FilterControls({
         <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => onShowCompletedChange(!showCompleted)}
-            className={`flex items-center gap-1.5 px-2 py-1.5 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 hover:scale-105 ${
+            className={`flex items-center md:gap-1.5 px-2 py-1.5 sm:px-3 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 hover:scale-105 ${
               showCompleted ? "text-white shadow-md" : "hover:bg-opacity-10"
             }`}
             style={{
@@ -201,7 +201,7 @@ export default function FilterControls({
               type="checkbox"
               checked={showCompleted}
               onChange={(e) => onShowCompletedChange(e.target.checked)}
-              className="w-3 h-3 sm:w-4 sm:h-4 rounded"
+              className="w-8 h-8 md:w-3 md:h-3 rounded"
               style={{
                 accentColor: showCompleted
                   ? "white"
@@ -272,7 +272,7 @@ export default function FilterControls({
                   onClick={() => {
                     if (isSelected) {
                       onPrioritiesChange(
-                        selectedPriorities.filter((p) => p !== priority)
+                        selectedPriorities.filter((p) => p !== priority),
                       );
                     } else {
                       onPrioritiesChange([...selectedPriorities, priority]);

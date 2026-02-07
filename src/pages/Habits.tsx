@@ -71,7 +71,7 @@ export default function Habits() {
   const { triggerHaptic, triggerSuccess } = useHapticFeedback();
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | undefined>(
-    undefined
+    undefined,
   );
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
@@ -86,12 +86,12 @@ export default function Habits() {
   const { showSkeleton } = useSkeletonLoading(habitsLoading || entriesLoading);
 
   const workspaceHabits = habits.filter(
-    (habit) => habit.workspaceId === state.activeWorkspaceId
+    (habit) => habit.workspaceId === state.activeWorkspaceId,
   );
 
   const filteredHabits = filterHabits(
     searchHabits(workspaceHabits, searchQuery),
-    showCompleted
+    showCompleted,
   );
   const createHabitMutation = useCreateHabit();
   const updateHabitMutation = useUpdateHabit();
@@ -106,12 +106,12 @@ export default function Habits() {
   const handleHabitEntry = (
     habitId: string,
     date: Date,
-    targetValue: number
+    targetValue: number,
   ) => {
     triggerHaptic("light");
 
     const normalizedDate = new Date(
-      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+      Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
     );
 
     const existingEntry = entries.find((entry) => {
@@ -119,8 +119,8 @@ export default function Habits() {
         Date.UTC(
           entry.date.getUTCFullYear(),
           entry.date.getUTCMonth(),
-          entry.date.getUTCDate()
-        )
+          entry.date.getUTCDate(),
+        ),
       );
       return (
         entry.habitId === habitId &&
@@ -156,7 +156,7 @@ export default function Habits() {
   };
 
   const handleSaveHabit = (
-    habitData: Omit<Habit, "id" | "createdAt" | "updatedAt">
+    habitData: Omit<Habit, "id" | "createdAt" | "updatedAt">,
   ) => {
     if (editingHabit) {
       updateHabitMutation.mutate({
@@ -304,21 +304,21 @@ export default function Habits() {
                     backgroundColor: isCompleted
                       ? habit.color
                       : isPartial
-                      ? habit.color + "60"
-                      : isPast
-                      ? state.currentTheme.colors.surface
-                      : state.currentTheme.colors.background,
+                        ? habit.color + "60"
+                        : isPast
+                          ? state.currentTheme.colors.surface
+                          : state.currentTheme.colors.background,
                     color:
                       isCompleted || isPartial
                         ? "white"
                         : isPast
-                        ? state.currentTheme.colors.textSecondary
-                        : state.currentTheme.colors.text,
+                          ? state.currentTheme.colors.textSecondary
+                          : state.currentTheme.colors.text,
                     borderColor: isToday
                       ? state.currentTheme.colors.primary
                       : isCompleted
-                      ? habit.color
-                      : state.currentTheme.colors.border,
+                        ? habit.color
+                        : state.currentTheme.colors.border,
                     borderWidth: "1px",
                     borderStyle: "solid",
                     opacity: isPast && !isCompleted && !isPartial ? 0.6 : 1,
@@ -327,15 +327,15 @@ export default function Habits() {
                     isCompleted
                       ? "Completo"
                       : isPartial
-                      ? `${Math.round(progress * 100)}%`
-                      : "Não realizado"
+                        ? `${Math.round(progress * 100)}%`
+                        : "Não realizado"
                   }`}
                   title={`${format(day, "dd/MM")} - ${
                     isCompleted
                       ? "Completo"
                       : isPartial
-                      ? `${Math.round(progress * 100)}%`
-                      : "Não realizado"
+                        ? `${Math.round(progress * 100)}%`
+                        : "Não realizado"
                   }`}
                 >
                   {format(day, "d")}
@@ -440,15 +440,15 @@ export default function Habits() {
             searchQuery
               ? "Nenhum hábito encontrado"
               : showCompleted
-              ? "Nenhum hábito concluído"
-              : "Nenhum hábito criado"
+                ? "Nenhum hábito concluído"
+                : "Nenhum hábito criado"
           }
           description={
             searchQuery
               ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
               : showCompleted
-              ? "Você ainda não concluiu nenhum hábito. Continue trabalhando para alcançar seus objetivos!"
-              : "Crie hábitos para construir rotinas positivas e acompanhar seu progresso diário. Pequenos passos levam a grandes mudanças!"
+                ? "Você ainda não concluiu nenhum hábito. Continue trabalhando para alcançar seus objetivos!"
+                : "Crie hábitos para construir rotinas positivas e acompanhar seu progresso diário. Pequenos passos levam a grandes mudanças!"
           }
           actionLabel={
             searchQuery || showCompleted ? undefined : "Criar Primeiro Hábito"
@@ -471,6 +471,7 @@ export default function Habits() {
           setEditingHabit(undefined);
           setIsHabitModalOpen(true);
         }}
+        hidden={isHabitModalOpen}
       />
     </div>
   );

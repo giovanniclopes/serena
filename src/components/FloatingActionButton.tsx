@@ -6,14 +6,18 @@ import { adjustColorBrightness } from "../utils/colorUtils";
 interface FloatingActionButtonProps {
   onClick: () => void;
   className?: string;
+  hidden?: boolean;
 }
 
 export default function FloatingActionButton({
   onClick,
   className = "",
+  hidden = false,
 }: FloatingActionButtonProps) {
   const { state } = useApp();
   const { triggerHaptic } = useHapticFeedback();
+
+  if (hidden) return null;
 
   const handleClick = () => {
     triggerHaptic("medium");

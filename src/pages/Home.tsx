@@ -70,11 +70,11 @@ export default function Home() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         triggerSuccess();
       },
-    }
+    },
   );
 
   const filteredTasks = tasks.filter(
-    (task) => task.workspaceId === state.activeWorkspaceId
+    (task) => task.workspaceId === state.activeWorkspaceId,
   );
 
   if (showSkeleton) {
@@ -99,7 +99,7 @@ export default function Home() {
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = adjustColorBrightness(
                 state.currentTheme.colors.primary,
-                0.8
+                0.8,
               );
             }}
             onMouseLeave={(e) => {
@@ -131,7 +131,7 @@ export default function Home() {
   const handleRecurringTaskToggle = (
     taskId: string,
     date: Date,
-    isCompleted: boolean
+    isCompleted: boolean,
   ) => {
     triggerHaptic("light");
     markInstanceComplete(taskId, date, isCompleted);
@@ -182,7 +182,7 @@ export default function Home() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
                 const searchWords = searchName
                   .split(/\s+/)
@@ -199,15 +199,15 @@ export default function Home() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
 
                 return searchWords.every((searchWord) =>
                   projectWords.some(
                     (projectWord) =>
                       projectWord.includes(searchWord) ||
-                      searchWord.includes(projectWord)
-                  )
+                      searchWord.includes(projectWord),
+                  ),
                 );
               })?.id || undefined
             : undefined,
@@ -264,7 +264,7 @@ export default function Home() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
                 const searchWords = searchName
                   .split(/\s+/)
@@ -281,15 +281,15 @@ export default function Home() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
 
                 return searchWords.every((searchWord) =>
                   projectWords.some(
                     (projectWord) =>
                       projectWord.includes(searchWord) ||
-                      searchWord.includes(projectWord)
-                  )
+                      searchWord.includes(projectWord),
+                  ),
                 );
               })?.id || undefined
             : undefined,
@@ -343,7 +343,7 @@ export default function Home() {
   };
 
   const handleSaveTask = async (
-    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">,
   ): Promise<Task> => {
     if (editingTask) {
       return new Promise((resolve, reject) => {
@@ -362,7 +362,7 @@ export default function Home() {
             onError: (error) => {
               reject(error);
             },
-          }
+          },
         );
       });
     } else {
@@ -380,7 +380,7 @@ export default function Home() {
             onError: (error) => {
               reject(error);
             },
-          }
+          },
         );
       });
     }
@@ -388,7 +388,7 @@ export default function Home() {
 
   const totalTimeToday = filteredTasks.reduce(
     (sum, task) => sum + (task.totalTimeSpent || 0),
-    0
+    0,
   );
 
   const formatTimeDisplay = (seconds: number): string => {
@@ -425,7 +425,7 @@ export default function Home() {
       icon: Target,
       label: "Hábitos Ativos",
       value: state.habits.filter(
-        (habit) => habit.workspaceId === state.activeWorkspaceId
+        (habit) => habit.workspaceId === state.activeWorkspaceId,
       ).length,
       color: state.currentTheme.colors.primary,
       displayValue: undefined,
@@ -442,7 +442,7 @@ export default function Home() {
   return (
     <div
       ref={elementRef as React.RefObject<HTMLDivElement>}
-      className="min-h-screen bg-gray-50 pb-20"
+      className="min-h-screen pb-20"
       style={{ backgroundColor: state.currentTheme.colors.background }}
     >
       <PullToRefreshIndicator
@@ -450,11 +450,11 @@ export default function Home() {
         isRefreshing={isRefreshing}
         pullDistance={pullDistance}
       />
-      <div className="bg-white shadow-sm border-b border-gray-100 px-4 py-4">
+      <div className="bg-white shadow-sm border-b border-gray-100 px-4 py-5 md:py-4">
         <div className="flex items-center justify-between">
           <div>
             <h1
-              className="text-xl font-bold"
+              className="text-xl md:text-2xl font-bold"
               style={{ color: state.currentTheme.colors.text }}
             >
               Olá
@@ -493,11 +493,11 @@ export default function Home() {
       <NextEventAlert />
 
       <div className="px-4 py-6 space-y-6">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:gap-4">
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+              className="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-gray-100"
             >
               <div className="flex items-center space-x-3">
                 <div
@@ -509,7 +509,7 @@ export default function Home() {
                     style={{ color: stat.color }}
                   />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p
                     className={`font-bold ${
                       stat.displayValue ? "text-xl" : "text-2xl"
@@ -519,7 +519,7 @@ export default function Home() {
                     {stat.displayValue || stat.value}
                   </p>
                   <p
-                    className="text-xs font-medium"
+                    className="text-xs font-medium truncate"
                     style={{ color: state.currentTheme.colors.textSecondary }}
                   >
                     {stat.label}
@@ -532,16 +532,16 @@ export default function Home() {
 
         {overdueTasks.length > 0 && (
           <div>
-            <div className="flex items-center space-x-2 mb-3">
+            <div className="flex items-center space-x-2 mb-4">
               <div className="w-1 h-6 bg-red-500 rounded-full"></div>
               <h2
-                className="text-lg font-semibold"
+                className="text-lg md:text-xl font-semibold"
                 style={{ color: state.currentTheme.colors.text }}
               >
                 Tarefas Atrasadas
               </h2>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-4">
               {overdueTasks.map((task) => (
                 <TaskCard
                   key={task.id}
@@ -559,17 +559,17 @@ export default function Home() {
         )}
 
         <div>
-          <div className="flex items-center space-x-2 mb-3">
+          <div className="flex items-center space-x-2 mb-4">
             <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
             <h2
-              className="text-lg font-semibold"
+              className="text-lg md:text-xl font-semibold"
               style={{ color: state.currentTheme.colors.text }}
             >
               Tarefas de Hoje
             </h2>
           </div>
           {todayTasks.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {todayTasks.map((task) => (
                 <TaskCard
                   key={task.id}
@@ -604,16 +604,16 @@ export default function Home() {
 
         {upcomingTasks.length > 0 && (
           <div>
-            <div className="flex items-center space-x-2 mb-3">
+            <div className="flex items-center space-x-2 mb-4">
               <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
               <h2
-                className="text-lg font-semibold"
+                className="text-lg md:text-xl font-semibold"
                 style={{ color: state.currentTheme.colors.text }}
               >
                 Próximos 7 dias
               </h2>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-4">
               {upcomingTasks.slice(0, 5).map((task) => (
                 <TaskCard
                   key={task.id}
@@ -639,46 +639,51 @@ export default function Home() {
         )}
       </div>
 
-      <FloatingActionButton onClick={() => setIsTaskModalOpen(true)} />
+      <FloatingActionButton
+        onClick={() => setIsTaskModalOpen(true)}
+        hidden={
+          isTaskModalOpen ||
+          isAchievementModalOpen ||
+          showAIConfirmModal ||
+          isAIInputOpen
+        }
+      />
 
-      {FEATURES.AI_ENABLED && (
-        <button
-          onClick={() => setIsAIInputOpen(true)}
-          className="fixed bottom-32 right-4 z-50 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border-0 flex items-center justify-center"
-          style={{
-            border: `1px solid ${state.currentTheme.colors.primary}`,
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor =
-              state.currentTheme.colors.primary + "60";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-          }}
-          aria-label="Criar tarefa com IA"
-        >
-          <Sparkles
-            className="w-6 h-6 hover:text-white"
+      {FEATURES.AI_ENABLED &&
+        !isTaskModalOpen &&
+        !isAchievementModalOpen &&
+        !showAIConfirmModal &&
+        !isAIInputOpen && (
+          <button
+            onClick={() => setIsAIInputOpen(true)}
+            className="fixed bottom-32 right-4 z-50 w-14 h-14 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border-0 flex items-center justify-center"
             style={{
-              color: state.currentTheme.colors.primary,
-              transition: "color 0.2s ease-in-out",
+              border: `1px solid ${state.currentTheme.colors.primary}`,
             }}
-          />
-        </button>
-      )}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor =
+                state.currentTheme.colors.primary + "60";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
+            aria-label="Criar tarefa com IA"
+          >
+            <Sparkles
+              className="w-6 h-6 hover:text-white"
+              style={{
+                color: state.currentTheme.colors.primary,
+                transition: "color 0.2s ease-in-out",
+              }}
+            />
+          </button>
+        )}
 
       <TaskModal
         isOpen={isTaskModalOpen}
         onClose={() => setIsTaskModalOpen(false)}
         task={editingTask}
         onSave={handleSaveTask}
-      />
-
-      <FloatingActionButton
-        onClick={() => {
-          setEditingTask(undefined);
-          setIsTaskModalOpen(true);
-        }}
       />
 
       {isAIInputOpen && (
