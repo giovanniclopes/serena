@@ -57,7 +57,7 @@ export default function Tasks() {
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [sortBy, setSortBy] = useState<"priority" | "recent" | "dueDate">(
-    "priority"
+    "priority",
   );
 
   const [isAIInputOpen, setIsAIInputOpen] = useState(false);
@@ -65,7 +65,7 @@ export default function Tasks() {
   const [showAIConfirmModal, setShowAIConfirmModal] = useState(false);
   const [createdTaskData, setCreatedTaskData] = useState<Task | null>(null);
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(
-    null
+    null,
   );
   const [showExportModal, setShowExportModal] = useState(false);
   const [taskToExport, setTaskToExport] = useState<Task | null>(null);
@@ -138,7 +138,7 @@ export default function Tasks() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
                 const searchWords = searchName
                   .split(/\s+/)
@@ -155,7 +155,7 @@ export default function Tasks() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
 
                 console.log("📝 Palavras extraídas:", {
@@ -167,8 +167,8 @@ export default function Tasks() {
                   projectWords.some(
                     (projectWord) =>
                       projectWord.includes(searchWord) ||
-                      searchWord.includes(projectWord)
-                  )
+                      searchWord.includes(projectWord),
+                  ),
                 );
 
                 console.log("✅ Match encontrado:", match);
@@ -230,7 +230,7 @@ export default function Tasks() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
                 const searchWords = searchName
                   .split(/\s+/)
@@ -247,15 +247,15 @@ export default function Tasks() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
 
                 return searchWords.every((searchWord) =>
                   projectWords.some(
                     (projectWord) =>
                       projectWord.includes(searchWord) ||
-                      searchWord.includes(projectWord)
-                  )
+                      searchWord.includes(projectWord),
+                  ),
                 );
               })?.id || undefined
             : undefined,
@@ -352,10 +352,10 @@ export default function Tasks() {
 
         if (overdueDate) {
           const instanceId = `${task.id}_${overdueDate.getFullYear()}-${String(
-            overdueDate.getMonth() + 1
+            overdueDate.getMonth() + 1,
           ).padStart(2, "0")}-${String(overdueDate.getDate()).padStart(
             2,
-            "0"
+            "0",
           )}`;
 
           return {
@@ -371,7 +371,7 @@ export default function Tasks() {
         const nextDate = getNextRecurringDate(task, today);
         if (nextDate) {
           const instanceId = `${task.id}_${nextDate.getFullYear()}-${String(
-            nextDate.getMonth() + 1
+            nextDate.getMonth() + 1,
           ).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
           const completed = isRecurringTaskInstanceCompleted(task.id, nextDate);
 
@@ -426,8 +426,8 @@ export default function Tasks() {
           selectedPriorities.length > 0 ? selectedPriorities : undefined,
       },
       false,
-      sharedTaskIds
-    )
+      sharedTaskIds,
+    ),
   );
 
   const handleCompleteTask = (taskId: string) => {
@@ -441,7 +441,7 @@ export default function Tasks() {
   const handleRecurringTaskToggle = (
     taskId: string,
     date: Date,
-    isCompleted: boolean
+    isCompleted: boolean,
   ) => {
     markInstanceComplete(taskId, date, isCompleted);
 
@@ -534,7 +534,7 @@ export default function Tasks() {
   };
 
   const handleSaveTask = async (
-    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">,
   ): Promise<Task> => {
     if (editingTask) {
       return new Promise((resolve, reject) => {
@@ -553,7 +553,7 @@ export default function Tasks() {
             onError: (error) => {
               reject(error);
             },
-          }
+          },
         );
       });
     } else {
@@ -574,7 +574,7 @@ export default function Tasks() {
             onError: (error) => {
               reject(error);
             },
-          }
+          },
         );
       });
     }
@@ -625,10 +625,10 @@ export default function Tasks() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-6">
       <div className="flex items-center justify-between">
         <h1
-          className="text-2xl font-bold"
+          className="text-2xl md:text-3xl font-bold"
           style={{ color: state.currentTheme.colors.text }}
         >
           Tarefas
@@ -690,11 +690,11 @@ export default function Tasks() {
 
       {filteredTasks.length > 0 ? (
         <div
-          className={`space-y-2 ${
+          className={
             viewMode === "grid"
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
-              : ""
-          }`}
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-4"
+              : "space-y-4"
+          }
         >
           {filteredTasks.map((task) => (
             <div
@@ -734,19 +734,19 @@ export default function Tasks() {
             searchQuery
               ? "Nenhuma tarefa encontrada"
               : showCompleted
-              ? "Nenhuma tarefa concluída"
-              : selectedPriorities.length > 0
-              ? "Nenhuma tarefa com essas prioridades"
-              : "Nenhuma tarefa criada"
+                ? "Nenhuma tarefa concluída"
+                : selectedPriorities.length > 0
+                  ? "Nenhuma tarefa com essas prioridades"
+                  : "Nenhuma tarefa criada"
           }
           description={
             searchQuery
               ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
               : showCompleted
-              ? "Você ainda não concluiu nenhuma tarefa. Continue trabalhando!"
-              : selectedPriorities.length > 0
-              ? "Não há tarefas com as prioridades selecionadas. Tente ajustar os filtros."
-              : "Crie tarefas para organizar seu trabalho e acompanhar seu progresso. Comece criando sua primeira tarefa!"
+                ? "Você ainda não concluiu nenhuma tarefa. Continue trabalhando!"
+                : selectedPriorities.length > 0
+                  ? "Não há tarefas com as prioridades selecionadas. Tente ajustar os filtros."
+                  : "Crie tarefas para organizar seu trabalho e acompanhar seu progresso. Comece criando sua primeira tarefa!"
           }
           actionLabel={
             searchQuery || showCompleted || selectedPriorities.length > 0
@@ -923,7 +923,7 @@ export default function Tasks() {
       {FEATURES.AI_ENABLED && (
         <button
           onClick={() => setIsAIInputOpen(true)}
-          className="fixed bottom-32 right-4 z-50 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border-0 flex items-center justify-center"
+          className={`fixed bottom-32 right-4 z-50 w-14 h-14 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border-0 flex items-center justify-center ${isTaskModalOpen || showCompleteAllModal || showDeleteModal || showBulkDeleteModal || isAIInputOpen || showAIConfirmModal || showExportModal || showShareModal || showPromptModal ? "hidden" : ""}`}
           style={{
             border: `1px solid ${state.currentTheme.colors.primary}`,
           }}
@@ -1004,6 +1004,17 @@ export default function Tasks() {
           setEditingTask(undefined);
           setIsTaskModalOpen(true);
         }}
+        hidden={
+          isTaskModalOpen ||
+          showCompleteAllModal ||
+          showDeleteModal ||
+          showBulkDeleteModal ||
+          isAIInputOpen ||
+          showAIConfirmModal ||
+          showExportModal ||
+          showShareModal ||
+          showPromptModal
+        }
       />
 
       <ConfettiEffect

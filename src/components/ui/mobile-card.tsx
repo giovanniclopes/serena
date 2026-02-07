@@ -33,18 +33,21 @@ export function MobileCard({
     lg: isMobile ? "p-6" : "p-5",
   };
 
+  const borderRadius = isMobile ? "rounded-3xl" : "rounded-2xl";
+
   const minHeight = isMobile ? "min-h-[60px]" : "min-h-[48px]";
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl shadow-sm transition-all duration-300 border",
+        "relative overflow-hidden shadow-sm transition-all duration-300 border",
+        borderRadius,
         minHeight,
         paddingClasses[padding],
         hover && "hover:shadow-lg",
         onClick && "cursor-pointer active:scale-[0.98]",
         isMobile && "touch-manipulation",
-        className
+        className,
       )}
       style={{
         backgroundColor: state.currentTheme.colors.surface,

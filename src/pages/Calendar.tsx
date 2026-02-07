@@ -154,7 +154,7 @@ export default function Calendar() {
   const handleRecurringTaskToggle = (
     taskId: string,
     date: Date,
-    isCompleted: boolean
+    isCompleted: boolean,
   ) => {
     markInstanceComplete(taskId, date, isCompleted);
 
@@ -194,7 +194,7 @@ export default function Calendar() {
   };
 
   const handleSaveTask = async (
-    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">,
   ): Promise<Task> => {
     if (editingTask) {
       return new Promise((resolve, reject) => {
@@ -213,7 +213,7 @@ export default function Calendar() {
             onError: (error) => {
               reject(error);
             },
-          }
+          },
         );
       });
     } else {
@@ -231,7 +231,7 @@ export default function Calendar() {
             onError: (error) => {
               reject(error);
             },
-          }
+          },
         );
       });
     }
@@ -270,7 +270,7 @@ export default function Calendar() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
                 const searchWords = searchName
                   .split(/\s+/)
@@ -287,15 +287,15 @@ export default function Calendar() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
 
                 return searchWords.every((searchWord) =>
                   projectWords.some(
                     (projectWord) =>
                       projectWord.includes(searchWord) ||
-                      searchWord.includes(projectWord)
-                  )
+                      searchWord.includes(projectWord),
+                  ),
                 );
               })?.id || undefined
             : undefined,
@@ -352,7 +352,7 @@ export default function Calendar() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
                 const searchWords = searchName
                   .split(/\s+/)
@@ -369,15 +369,15 @@ export default function Calendar() {
                         "no",
                         "nas",
                         "nos",
-                      ].includes(word)
+                      ].includes(word),
                   );
 
                 return searchWords.every((searchWord) =>
                   projectWords.some(
                     (projectWord) =>
                       projectWord.includes(searchWord) ||
-                      searchWord.includes(projectWord)
-                  )
+                      searchWord.includes(projectWord),
+                  ),
                 );
               })?.id || undefined
             : undefined,
@@ -434,7 +434,8 @@ export default function Calendar() {
     if (!selectedDate) return [];
     const workspaceTasks = tasks.filter(
       (task) =>
-        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+        !state.activeWorkspaceId ||
+        task.workspaceId === state.activeWorkspaceId,
     );
     const dateTasks = getTasksForDate(workspaceTasks, selectedDate);
     const filteredTasks = filterTasks(
@@ -445,7 +446,7 @@ export default function Calendar() {
         workspaceId: state.activeWorkspaceId,
         isCompleted: showCompleted ? undefined : false,
       },
-      false
+      false,
     );
 
     if (sortByPriority) {
@@ -453,7 +454,7 @@ export default function Calendar() {
     } else {
       return filteredTasks.sort(
         (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
       );
     }
   };
@@ -461,7 +462,8 @@ export default function Calendar() {
   const getDayTasks = (date: Date) => {
     const filteredTasks = tasks.filter(
       (task) =>
-        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+        !state.activeWorkspaceId ||
+        task.workspaceId === state.activeWorkspaceId,
     );
     return getTasksForDate(filteredTasks, date);
   };
@@ -473,7 +475,8 @@ export default function Calendar() {
 
     const filteredTasks = tasks.filter(
       (task) =>
-        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+        !state.activeWorkspaceId ||
+        task.workspaceId === state.activeWorkspaceId,
     );
 
     return weekDays.map((day) => ({
@@ -485,7 +488,8 @@ export default function Calendar() {
   const getCurrentDayTasks = () => {
     const filteredTasks = tasks.filter(
       (task) =>
-        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+        !state.activeWorkspaceId ||
+        task.workspaceId === state.activeWorkspaceId,
     );
     return getTasksForDate(filteredTasks, currentDate);
   };
@@ -497,7 +501,8 @@ export default function Calendar() {
 
     const workspaceTasks = tasks.filter(
       (task) =>
-        !state.activeWorkspaceId || task.workspaceId === state.activeWorkspaceId
+        !state.activeWorkspaceId ||
+        task.workspaceId === state.activeWorkspaceId,
     );
 
     const todayTasks = getTasksForDate(workspaceTasks, today);
@@ -594,13 +599,13 @@ export default function Calendar() {
                   backgroundColor: isSelected
                     ? state.currentTheme.colors.primary + "30"
                     : isToday
-                    ? state.currentTheme.colors.primary + "10"
-                    : state.currentTheme.colors.surface,
+                      ? state.currentTheme.colors.primary + "10"
+                      : state.currentTheme.colors.surface,
                   borderColor: isSelected
                     ? state.currentTheme.colors.primary
                     : isToday
-                    ? state.currentTheme.colors.primary + "80"
-                    : state.currentTheme.colors.primary + "20",
+                      ? state.currentTheme.colors.primary + "80"
+                      : state.currentTheme.colors.primary + "20",
                 }}
               >
                 <div className="text-center mb-2">
@@ -622,8 +627,8 @@ export default function Calendar() {
                       color: isSelected
                         ? state.currentTheme.colors.primary
                         : isToday
-                        ? state.currentTheme.colors.primary
-                        : state.currentTheme.colors.text,
+                          ? state.currentTheme.colors.primary
+                          : state.currentTheme.colors.text,
                     }}
                   >
                     {format(dayData.date, "d")}
@@ -697,8 +702,8 @@ export default function Calendar() {
                               backgroundColor: task.isCompleted
                                 ? "#10b981"
                                 : task.projectId
-                                ? state.currentTheme.colors.primary
-                                : getPriorityColor(task.priority),
+                                  ? state.currentTheme.colors.primary
+                                  : getPriorityColor(task.priority),
                             }}
                           />
                           <span
@@ -934,26 +939,26 @@ export default function Calendar() {
                 background: isSelected
                   ? `linear-gradient(135deg, ${state.currentTheme.colors.primary}30, ${state.currentTheme.colors.primary}20)`
                   : isToday
-                  ? `linear-gradient(135deg, ${state.currentTheme.colors.primary}15, ${state.currentTheme.colors.primary}08)`
-                  : isWeekend
-                  ? `linear-gradient(135deg, ${state.currentTheme.colors.surface}, ${state.currentTheme.colors.border}20)`
-                  : state.currentTheme.colors.surface,
+                    ? `linear-gradient(135deg, ${state.currentTheme.colors.primary}15, ${state.currentTheme.colors.primary}08)`
+                    : isWeekend
+                      ? `linear-gradient(135deg, ${state.currentTheme.colors.surface}, ${state.currentTheme.colors.border}20)`
+                      : state.currentTheme.colors.surface,
                 color: isCurrentMonth
                   ? state.currentTheme.colors.text
                   : state.currentTheme.colors.textSecondary,
                 border: isSelected
                   ? `2px solid ${state.currentTheme.colors.primary}`
                   : isToday
-                  ? `2px solid ${state.currentTheme.colors.primary}80`
-                  : isWeekend
-                  ? `1px solid ${state.currentTheme.colors.border}40`
-                  : "2px solid transparent",
+                    ? `2px solid ${state.currentTheme.colors.primary}80`
+                    : isWeekend
+                      ? `1px solid ${state.currentTheme.colors.border}40`
+                      : "2px solid transparent",
                 transform: isSelected ? "scale(1.02)" : "scale(1)",
                 boxShadow: isSelected
                   ? `0 4px 12px ${state.currentTheme.colors.primary}30`
                   : isWeekend
-                  ? `0 1px 3px ${state.currentTheme.colors.border}20`
-                  : "none",
+                    ? `0 1px 3px ${state.currentTheme.colors.border}20`
+                    : "none",
                 position: "relative",
                 overflow: "hidden",
               }}
@@ -985,10 +990,10 @@ export default function Calendar() {
                   color: isSelected
                     ? state.currentTheme.colors.primary
                     : isToday
-                    ? state.currentTheme.colors.primary
-                    : isCurrentMonth
-                    ? state.currentTheme.colors.text
-                    : state.currentTheme.colors.textSecondary,
+                      ? state.currentTheme.colors.primary
+                      : isCurrentMonth
+                        ? state.currentTheme.colors.text
+                        : state.currentTheme.colors.textSecondary,
                 }}
               >
                 {format(day, "d")}
@@ -1006,7 +1011,7 @@ export default function Calendar() {
                             background: task.projectId
                               ? `linear-gradient(135deg, ${state.currentTheme.colors.primary}25, ${state.currentTheme.colors.primary}15)`
                               : `linear-gradient(135deg, ${getPriorityColor(
-                                  task.priority
+                                  task.priority,
                                 )}25, ${getPriorityColor(task.priority)}15)`,
                             boxShadow: `0 1px 3px ${
                               task.projectId
@@ -1054,7 +1059,7 @@ export default function Calendar() {
                             background: task.projectId
                               ? `linear-gradient(135deg, ${state.currentTheme.colors.primary}25, ${state.currentTheme.colors.primary}15)`
                               : `linear-gradient(135deg, ${getPriorityColor(
-                                  task.priority
+                                  task.priority,
                                 )}25, ${getPriorityColor(task.priority)}15)`,
                             color: task.projectId
                               ? state.currentTheme.colors.primary
@@ -1078,8 +1083,8 @@ export default function Calendar() {
                               backgroundColor: task.isCompleted
                                 ? "#10b981"
                                 : task.projectId
-                                ? state.currentTheme.colors.primary
-                                : getPriorityColor(task.priority),
+                                  ? state.currentTheme.colors.primary
+                                  : getPriorityColor(task.priority),
                               boxShadow: task.isCompleted
                                 ? "0 0 4px #10b981"
                                 : `0 0 4px ${
@@ -1332,16 +1337,16 @@ export default function Calendar() {
                     {mode === "month"
                       ? calendarDays.reduce(
                           (acc, day) => acc + getDayTasks(day).length,
-                          0
+                          0,
                         )
                       : mode === "week"
-                      ? calendarDays
-                          .slice(0, 7)
-                          .reduce(
-                            (acc, day) => acc + getDayTasks(day).length,
-                            0
-                          )
-                      : getDayTasks(currentDate).length}
+                        ? calendarDays
+                            .slice(0, 7)
+                            .reduce(
+                              (acc, day) => acc + getDayTasks(day).length,
+                              0,
+                            )
+                        : getDayTasks(currentDate).length}
                   </div>
                 )}
               </button>
@@ -1472,7 +1477,7 @@ export default function Calendar() {
       {FEATURES.AI_ENABLED && (
         <button
           onClick={() => setIsAIInputOpen(true)}
-          className={`fixed bottom-32 right-4 z-50 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border-0 flex items-center justify-center`}
+          className={`fixed bottom-32 right-4 z-50 w-14 h-14 rounded-full bg-white shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95 border-0 flex items-center justify-center ${isTaskModalOpen || showDeleteModal || isAIInputOpen || showAIConfirmModal ? "hidden" : ""}`}
           style={{
             border: `1px solid ${state.currentTheme.colors.primary}`,
           }}

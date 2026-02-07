@@ -36,7 +36,8 @@ export default function Projects() {
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [viewingProject, setViewingProject] = useState<Project | null>(null);
-  const [viewingGoalsProject, setViewingGoalsProject] = useState<Project | null>(null);
+  const [viewingGoalsProject, setViewingGoalsProject] =
+    useState<Project | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCompleted, setShowCompleted] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
@@ -66,7 +67,7 @@ export default function Projects() {
 
   const handleSaveProject = (
     projectData: Omit<Project, "id" | "createdAt" | "updatedAt">,
-    templateId?: string
+    templateId?: string,
   ) => {
     if (!activeWorkspaceId) return;
 
@@ -107,7 +108,7 @@ export default function Projects() {
 
   const filteredProjects = filterProjects(
     searchProjects(workspaceProjects, searchQuery),
-    showCompleted
+    showCompleted,
   );
 
   if (showSkeleton) {
@@ -175,20 +176,26 @@ export default function Projects() {
             searchQuery
               ? "Nenhum projeto encontrado"
               : showCompleted
-              ? "Nenhum projeto concluído"
-              : "Nenhum projeto criado"
+                ? "Nenhum projeto concluído"
+                : "Nenhum projeto criado"
           }
           description={
             searchQuery
               ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
               : showCompleted
-              ? "Você ainda não concluiu nenhum projeto. Continue trabalhando!"
-              : "Crie projetos para organizar suas tarefas e acompanhar seu progresso de forma mais eficiente."
+                ? "Você ainda não concluiu nenhum projeto. Continue trabalhando!"
+                : "Crie projetos para organizar suas tarefas e acompanhar seu progresso de forma mais eficiente."
           }
           actionLabel={
-            searchQuery ? undefined : showCompleted ? undefined : "Criar Primeiro Projeto"
+            searchQuery
+              ? undefined
+              : showCompleted
+                ? undefined
+                : "Criar Primeiro Projeto"
           }
-          onAction={searchQuery || showCompleted ? undefined : handleOpenCreateModal}
+          onAction={
+            searchQuery || showCompleted ? undefined : handleOpenCreateModal
+          }
         />
       )}
 
@@ -226,6 +233,9 @@ export default function Projects() {
           setEditingProject(null);
           setIsProjectModalOpen(true);
         }}
+        hidden={
+          isProjectModalOpen || isProjectTasksModalOpen || isGoalModalOpen
+        }
       />
 
       <ConfirmDialog

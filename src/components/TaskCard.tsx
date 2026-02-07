@@ -4,7 +4,6 @@ import {
   MoreVertical,
   Paperclip,
   RotateCcw,
-  Tag,
   Trash2,
 } from "lucide-react";
 import { useApp } from "../context/AppContext";
@@ -39,7 +38,7 @@ interface TaskCardProps {
   onRecurringToggle?: (
     taskId: string,
     date: Date,
-    isCompleted: boolean
+    isCompleted: boolean,
   ) => void;
   viewMode?: "list" | "grid";
 }
@@ -132,7 +131,7 @@ export default function TaskCard({
       className={`transition-all duration-200 ${
         task.isCompleted ? "opacity-60" : "hover:shadow-md"
       } ${isSelected ? "ring-2 ring-blue-500" : ""}`}
-      padding="md"
+      padding="lg"
       onDoubleClick={(e) => {
         if (
           (e.target as HTMLElement).closest("button") ||
@@ -146,333 +145,258 @@ export default function TaskCard({
         }
       }}
     >
-      <div
-        className="flex flex-col md:items-start md:flex-row"
-        style={{ gap: spacing.sm }}
-      >
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-col md:flex-row md:items-start mb-4 md:gap-3 md:justify-between">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
-              {isBulkDeleteMode ? (
-                <Checkbox
-                  checked={isSelected}
-                  onCheckedChange={handleSelectionChange}
-                  className="flex-shrink-0"
-                  style={{
-                    minWidth: touchTarget,
-                    minHeight: touchTarget,
-                  }}
-                />
-              ) : (
-                <Checkbox
-                  checked={task.isCompleted}
-                  onCheckedChange={handleToggleComplete}
-                  className="flex-shrink-0"
-                  style={{
-                    minWidth: touchTarget,
-                    minHeight: touchTarget,
-                  }}
-                />
-              )}
-              <ResponsiveText
-                variant="h3"
-                weight="medium"
-                className={`flex-1 mt-1 leading-tight ${
-                  task.isCompleted ? "line-through" : ""
-                }`}
-                style={{ color: state.currentTheme.colors.text }}
-              >
-                {task.title}
-              </ResponsiveText>
-            </div>
+      <div className="space-y-4">
+        {/* Header: Checkbox + Título */}
+        <div className="flex items-start gap-3">
+          {isBulkDeleteMode ? (
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={handleSelectionChange}
+              className="flex-shrink-0 mt-0.5"
+              style={{
+                minWidth: touchTarget,
+                minHeight: touchTarget,
+              }}
+            />
+          ) : (
+            <Checkbox
+              checked={task.isCompleted}
+              onCheckedChange={handleToggleComplete}
+              className="flex-shrink-0 mt-0.5"
+              style={{
+                minWidth: touchTarget,
+                minHeight: touchTarget,
+              }}
+            />
+          )}
 
-            <div
-              className="flex items-center justify-end md:ml-0 ml-12 mt-2 md:mt-0"
-              style={{ gap: spacing.xs }}
+          <div className="flex-1 min-w-0">
+            <ResponsiveText
+              variant="h3"
+              weight="medium"
+              className={`leading-relaxed break-words ${
+                task.isCompleted ? "line-through" : ""
+              }`}
+              style={{ color: state.currentTheme.colors.text }}
             >
-              <div className="hidden md:block">
-                <Badge
-                  variant="outline"
-                  style={{
-                    backgroundColor: getPriorityColor(task.priority) + "20",
-                    color: getPriorityColor(task.priority),
-                    borderColor: getPriorityColor(task.priority),
-                    fontSize: isMobile ? "0.75rem" : "0.6875rem",
-                    padding: isMobile ? "0.25rem 0.5rem" : "0.125rem 0.375rem",
-                  }}
-                >
-                  {getPriorityLabel(task.priority)}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-0 pl-5">
-                {!isBulkDeleteMode && onEdit && (
-                  <MobileButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleEdit}
-                    style={{
-                      minWidth: touchTarget,
-                      minHeight: touchTarget,
-                      padding: 0,
-                    }}
-                    aria-label="Editar tarefa"
-                  >
-                    <Edit className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
-                  </MobileButton>
-                )}
-                {!isBulkDeleteMode &&
-                  (onExport || onShare || onAddToGoogleCalendar) && (
-                    <ActionsMenu
-                      task={task}
-                      onExport={handleExport}
-                      onShare={handleShare}
-                      onGeneratePrompt={
-                        onGeneratePrompt ? handleGeneratePrompt : undefined
-                      }
-                      onAddToGoogleCalendar={handleAddToGoogleCalendar}
-                    >
-                      <MobileButton
-                        variant="ghost"
-                        size="sm"
-                        style={{
-                          minWidth: touchTarget,
-                          minHeight: touchTarget,
-                          padding: 0,
-                        }}
-                        aria-label="Ações"
-                        aria-haspopup="menu"
-                      >
-                        <MoreVertical
-                          className={isMobile ? "w-4 h-4" : "w-5 h-5"}
-                        />
-                      </MobileButton>
-                    </ActionsMenu>
-                  )}
-                {!isBulkDeleteMode && onDelete && (
-                  <MobileButton
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDelete}
-                    style={{
-                      minWidth: touchTarget,
-                      minHeight: touchTarget,
-                      padding: 0,
-                      color: state.currentTheme.colors.error,
-                    }}
-                    aria-label="Excluir tarefa"
-                  >
-                    <Trash2 className={isMobile ? "w-4 h-4" : "w-5 h-5"} />
-                  </MobileButton>
-                )}
-              </div>
-            </div>
+              {task.title}
+            </ResponsiveText>
           </div>
+        </div>
 
-          {task.description && (
+        {/* Actions Row */}
+        <div className="flex items-center justify-between gap-2">
+          <Badge
+            variant="outline"
+            style={{
+              backgroundColor: getPriorityColor(task.priority) + "20",
+              color: getPriorityColor(task.priority),
+              borderColor: getPriorityColor(task.priority),
+              fontSize: isMobile ? "0.75rem" : "0.6875rem",
+              padding: isMobile ? "0.3rem 0.6rem" : "0.125rem 0.375rem",
+            }}
+          >
+            {getPriorityLabel(task.priority)}
+          </Badge>
+
+          <div className="flex items-center gap-1">
+            {!isBulkDeleteMode && onEdit && (
+              <MobileButton
+                variant="ghost"
+                size="sm"
+                onClick={handleEdit}
+                style={{
+                  minWidth: touchTarget,
+                  minHeight: touchTarget,
+                  padding: spacing.xs,
+                }}
+                aria-label="Editar tarefa"
+              >
+                <Edit className={isMobile ? "w-5 h-5" : "w-4 h-4"} />
+              </MobileButton>
+            )}
+            {!isBulkDeleteMode &&
+              (onExport || onShare || onAddToGoogleCalendar) && (
+                <ActionsMenu
+                  task={task}
+                  onExport={handleExport}
+                  onShare={handleShare}
+                  onGeneratePrompt={
+                    onGeneratePrompt ? handleGeneratePrompt : undefined
+                  }
+                  onAddToGoogleCalendar={handleAddToGoogleCalendar}
+                >
+                  <MobileButton
+                    variant="ghost"
+                    size="sm"
+                    style={{
+                      minWidth: touchTarget,
+                      minHeight: touchTarget,
+                      padding: spacing.xs,
+                    }}
+                    aria-label="Ações"
+                    aria-haspopup="menu"
+                  >
+                    <MoreVertical
+                      className={isMobile ? "w-5 h-5" : "w-4 h-4"}
+                    />
+                  </MobileButton>
+                </ActionsMenu>
+              )}
+            {!isBulkDeleteMode && onDelete && (
+              <MobileButton
+                variant="ghost"
+                size="sm"
+                onClick={handleDelete}
+                style={{
+                  minWidth: touchTarget,
+                  minHeight: touchTarget,
+                  padding: spacing.xs,
+                  color: state.currentTheme.colors.error,
+                }}
+                aria-label="Excluir tarefa"
+              >
+                <Trash2 className={isMobile ? "w-5 h-5" : "w-4 h-4"} />
+              </MobileButton>
+            )}
+          </div>
+        </div>
+
+        {/* Descrição */}
+        {task.description && (
+          <div
+            className="pt-2 border-t"
+            style={{ borderColor: state.currentTheme.colors.border + "40" }}
+          >
             <ResponsiveText
               variant="caption"
               color="secondary"
-              className="mt-1"
+              className="break-words leading-relaxed"
               style={{ color: state.currentTheme.colors.textSecondary }}
             >
               {task.description}
             </ResponsiveText>
+          </div>
+        )}
+
+        {/* Metadados */}
+        <div className="flex flex-wrap items-center gap-3">
+          {showProject && project && (
+            <div className="flex items-center gap-2">
+              <div
+                className="rounded-full"
+                style={{
+                  backgroundColor: project.color,
+                  width: isMobile ? "10px" : "8px",
+                  height: isMobile ? "10px" : "8px",
+                }}
+              />
+              <ResponsiveText
+                variant="caption"
+                color="secondary"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                {project.name}
+              </ResponsiveText>
+            </div>
           )}
 
-          <div
-            className="flex items-center flex-wrap"
-            style={{ gap: spacing.md, marginTop: spacing.sm }}
-          >
-            {showProject && project && (
-              <div className="flex items-center" style={{ gap: spacing.xs }}>
-                <div
-                  className="rounded-full"
-                  style={{
-                    backgroundColor: project.color,
-                    width: isMobile ? "8px" : "6px",
-                    height: isMobile ? "8px" : "6px",
-                  }}
+          {showDate && (task.dueDate || task.recurrence?.startDate) && (
+            <div className="flex items-center gap-2">
+              <Calendar
+                className={isMobile ? "w-4 h-4" : "w-3.5 h-3.5"}
+                style={{
+                  color: state.currentTheme.colors.textSecondary,
+                }}
+              />
+              <ResponsiveText
+                variant="caption"
+                color="secondary"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                {task.recurrence
+                  ? `Início: ${formatDate(
+                      task.recurrence.startDate
+                        ? new Date(
+                            task.recurrence.startDate as unknown as string,
+                          )
+                        : (task.dueDate as Date),
+                    )}`
+                  : formatDate(task.dueDate as Date)}
+              </ResponsiveText>
+            </div>
+          )}
+
+          {!task.isCompleted && !isBulkDeleteMode && (
+            <TaskTimer task={task} variant="compact" />
+          )}
+        </div>
+
+        {/* Tags */}
+        {taskTags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {taskTags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant="outline"
+                style={{
+                  backgroundColor: tag.color + "20",
+                  color: tag.color,
+                  borderColor: tag.color,
+                  fontSize: isMobile ? "0.75rem" : "0.6875rem",
+                  padding: isMobile ? "0.3rem 0.6rem" : "0.125rem 0.375rem",
+                }}
+              >
+                {tag.name}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Anexos e recorrência */}
+        {(task.attachments.length > 0 || task.recurrence) && (
+          <div className="flex items-center flex-wrap gap-3">
+            {task.attachments.length > 0 && (
+              <div className="flex items-center gap-2">
+                <Paperclip
+                  className={isMobile ? "w-4 h-4" : "w-3.5 h-3.5"}
+                  style={{ color: state.currentTheme.colors.textSecondary }}
                 />
                 <ResponsiveText
                   variant="caption"
                   color="secondary"
                   style={{ color: state.currentTheme.colors.textSecondary }}
                 >
-                  {project.name}
+                  {task.attachments.length} anexo
+                  {task.attachments.length !== 1 ? "s" : ""}
                 </ResponsiveText>
               </div>
             )}
 
-            <div className="block md:hidden">
-              <Badge
-                variant="outline"
-                style={{
-                  backgroundColor: getPriorityColor(task.priority) + "20",
-                  color: getPriorityColor(task.priority),
-                  borderColor: getPriorityColor(task.priority),
-                  fontSize: isMobile ? "0.75rem" : "0.6875rem",
-                  padding: isMobile ? "0.25rem 0.5rem" : "0.125rem 0.375rem",
-                }}
-              >
-                {getPriorityLabel(task.priority)}
-              </Badge>
-            </div>
-
-            {showDate && (task.dueDate || task.recurrence?.startDate) && (
-              <>
-                {task.recurrence ? (
-                  <div
-                    className="flex items-center"
-                    style={{ gap: spacing.sm }}
-                  >
-                    <div
-                      className="flex items-center"
-                      style={{ gap: spacing.xs }}
-                    >
-                      <Calendar
-                        className={isMobile ? "w-4 h-4" : "w-3 h-3"}
-                        style={{
-                          color: state.currentTheme.colors.textSecondary,
-                        }}
-                      />
-                      <ResponsiveText
-                        variant="caption"
-                        color="secondary"
-                        style={{
-                          color: state.currentTheme.colors.textSecondary,
-                        }}
-                      >
-                        {`Início: ${formatDate(
-                          task.recurrence.startDate
-                            ? new Date(
-                                task.recurrence.startDate as unknown as string
-                              )
-                            : (task.dueDate as Date)
-                        )}`}
-                      </ResponsiveText>
-                    </div>
-                    {task.recurrence.endDate && (
-                      <div
-                        className="flex items-center"
-                        style={{ gap: spacing.xs }}
-                      >
-                        <Calendar
-                          className={isMobile ? "w-4 h-4" : "w-3 h-3"}
-                          style={{
-                            color: state.currentTheme.colors.textSecondary,
-                          }}
-                        />
-                        <ResponsiveText
-                          variant="caption"
-                          color="secondary"
-                          style={{
-                            color: state.currentTheme.colors.textSecondary,
-                          }}
-                        >
-                          {`Fim: ${formatDate(
-                            new Date(
-                              task.recurrence.endDate as unknown as string
-                            )
-                          )}`}
-                        </ResponsiveText>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div
-                    className="flex items-center"
-                    style={{ gap: spacing.xs }}
-                  >
-                    <Calendar
-                      className={isMobile ? "w-4 h-4" : "w-3 h-3"}
-                      style={{ color: state.currentTheme.colors.textSecondary }}
-                    />
-                    <ResponsiveText
-                      variant="caption"
-                      color="secondary"
-                      style={{ color: state.currentTheme.colors.textSecondary }}
-                    >
-                      {formatDate(task.dueDate as Date)}
-                    </ResponsiveText>
-                  </div>
-                )}
-              </>
-            )}
-
-            {taskTags.length > 0 && (
-              <div className="flex items-center" style={{ gap: spacing.xs }}>
-                <Tag
-                  className={isMobile ? "w-4 h-4" : "w-3 h-3"}
+            {task.recurrence && (
+              <div className="flex items-center gap-2">
+                <RotateCcw
+                  className={isMobile ? "w-4 h-4" : "w-3.5 h-3.5"}
                   style={{ color: state.currentTheme.colors.textSecondary }}
                 />
-                <div className="flex flex-wrap" style={{ gap: spacing.xs }}>
-                  {taskTags.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="outline"
-                      style={{
-                        backgroundColor: tag.color + "20",
-                        color: tag.color,
-                        borderColor: tag.color,
-                        fontSize: isMobile ? "0.75rem" : "0.6875rem",
-                        padding: isMobile
-                          ? "0.25rem 0.5rem"
-                          : "0.125rem 0.375rem",
-                      }}
-                    >
-                      {tag.name}
-                    </Badge>
-                  ))}
-                </div>
+                <ResponsiveText
+                  variant="caption"
+                  color="secondary"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  Repetir
+                </ResponsiveText>
               </div>
             )}
-
-            {!task.isCompleted && !isBulkDeleteMode && (
-              <TaskTimer task={task} variant="compact" />
-            )}
           </div>
+        )}
 
-          {(task.attachments.length > 0 || task.recurrence) && (
-            <div
-              className="flex items-center flex-wrap"
-              style={{ gap: spacing.md, marginTop: spacing.sm }}
-            >
-              {task.attachments.length > 0 && (
-                <div className="flex items-center" style={{ gap: spacing.xs }}>
-                  <Paperclip
-                    className={isMobile ? "w-4 h-4" : "w-3 h-3"}
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  />
-                  <ResponsiveText
-                    variant="caption"
-                    color="secondary"
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  >
-                    {task.attachments.length} anexo
-                    {task.attachments.length !== 1 ? "s" : ""}
-                  </ResponsiveText>
-                </div>
-              )}
-
-              {task.recurrence && (
-                <div className="flex items-center" style={{ gap: spacing.xs }}>
-                  <RotateCcw
-                    className={isMobile ? "w-4 h-4" : "w-3 h-3"}
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  />
-                  <ResponsiveText
-                    variant="caption"
-                    color="secondary"
-                    style={{ color: state.currentTheme.colors.textSecondary }}
-                  >
-                    Repetir
-                  </ResponsiveText>
-                </div>
-              )}
-            </div>
-          )}
-
-          <div style={{ marginTop: spacing.sm }}>
+        {/* Subtarefas */}
+        {task.subtasks && task.subtasks.length > 0 && (
+          <div
+            className="pt-3 border-t"
+            style={{ borderColor: state.currentTheme.colors.border + "40" }}
+          >
             <SubtaskManager
               taskId={task.id}
               workspaceId={task.workspaceId}
@@ -482,7 +406,7 @@ export default function TaskCard({
               defaultExpanded={true}
             />
           </div>
-        </div>
+        )}
       </div>
     </MobileCard>
   );

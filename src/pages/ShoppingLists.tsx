@@ -31,7 +31,7 @@ export default function ShoppingLists() {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingList, setEditingList] = useState<ShoppingList | undefined>(
-    undefined
+    undefined,
   );
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [listToDelete, setListToDelete] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function ShoppingLists() {
 
   const filteredLists = filterShoppingLists(
     searchShoppingLists(shoppingLists || [], searchQuery),
-    showCompleted
+    showCompleted,
   ).filter((list) => {
     if (selectedCategory === "all") return true;
     if (selectedCategory === "completed") return list.isCompleted;
@@ -247,19 +247,19 @@ export default function ShoppingLists() {
             searchQuery
               ? "Nenhuma lista encontrada"
               : selectedCategory === "completed"
-              ? "Nenhuma lista concluída"
-              : selectedCategory !== "all"
-              ? "Nenhuma lista nesta categoria"
-              : "Nenhuma lista criada"
+                ? "Nenhuma lista concluída"
+                : selectedCategory !== "all"
+                  ? "Nenhuma lista nesta categoria"
+                  : "Nenhuma lista criada"
           }
           description={
             searchQuery
               ? "Tente ajustar sua busca ou filtros para encontrar o que procura."
               : selectedCategory === "completed"
-              ? "Você ainda não concluiu nenhuma lista. Continue organizando suas compras!"
-              : selectedCategory !== "all"
-              ? `Não há listas na categoria "${SHOPPING_CATEGORIES.find((c) => c.value === selectedCategory)?.label || selectedCategory}". Tente outra categoria ou crie uma nova lista.`
-              : "Crie listas de compras para organizar suas compras e nunca mais esquecer de comprar algo importante."
+                ? "Você ainda não concluiu nenhuma lista. Continue organizando suas compras!"
+                : selectedCategory !== "all"
+                  ? `Não há listas na categoria "${SHOPPING_CATEGORIES.find((c) => c.value === selectedCategory)?.label || selectedCategory}". Tente outra categoria ou crie uma nova lista.`
+                  : "Crie listas de compras para organizar suas compras e nunca mais esquecer de comprar algo importante."
           }
           actionLabel={
             searchQuery || selectedCategory === "completed"
@@ -297,7 +297,7 @@ export default function ShoppingLists() {
         isLoading={deleteListMutation.isPending}
       />
 
-      <FloatingActionButton onClick={handleCreateList} />
+      <FloatingActionButton onClick={handleCreateList} hidden={isModalOpen} />
     </div>
   );
 }
