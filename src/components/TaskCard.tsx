@@ -25,7 +25,7 @@ interface TaskCardProps {
   onComplete?: (taskId: string) => void;
   onUncomplete?: (taskId: string) => void;
   onEdit?: (task: Task) => void;
-  onDelete?: (taskId: string) => void;
+  onDelete?: (task: Task) => void;
   onExport?: (task: Task) => void;
   onShare?: (task: Task) => void;
   onGeneratePrompt?: (task: Task) => void;
@@ -92,7 +92,7 @@ export default function TaskCard({
 
   const handleDelete = () => {
     if (onDelete) {
-      onDelete(task.id);
+      onDelete(task);
     }
   };
 

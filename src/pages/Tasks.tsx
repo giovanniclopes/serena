@@ -42,6 +42,7 @@ import {
   isRecurringTaskInstanceExcluded,
   shouldTaskAppearOnDate,
 } from "../utils/recurrenceUtils";
+import { extractOriginalTaskId } from "../utils/taskUtils";
 
 export default function Tasks() {
   const { state } = useApp();
@@ -54,6 +55,8 @@ export default function Tasks() {
   const [showCompleteAllModal, setShowCompleteAllModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [taskToDeleteFull, setTaskToDeleteFull] = useState<Task | null>(null);
+  const [deleteMode, setDeleteMode] = useState<"instance" | "all">("instance");
   const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -484,8 +487,10 @@ export default function Tasks() {
     setIsTaskModalOpen(true);
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTaskToDelete(taskId);
+  const handleDeleteTask = (task: Task) => {
+    setTaskToDelete(task.id);
+    setTaskToDeleteFull(task);
+    setDeleteMode("instance");
     setShowDeleteModal(true);
   };
 
@@ -521,9 +526,16 @@ export default function Tasks() {
 
   const confirmDeleteTask = () => {
     if (taskToDelete) {
-      deleteTaskMutation.mutate(taskToDelete);
+      let idToDelete = taskToDelete;
+
+      if (deleteMode === "all" && taskToDeleteFull?.recurrence) {
+        idToDelete = extractOriginalTaskId(taskToDelete);
+      }
+
+      deleteTaskMutation.mutate(idToDelete);
       setShowDeleteModal(false);
       setTaskToDelete(null);
+      setTaskToDeleteFull(null);
     }
   };
 
@@ -859,18 +871,111 @@ export default function Tasks() {
             >
               Excluir tarefa
             </h3>
-            <p
-              className="text-sm mb-6"
-              style={{ color: state.currentTheme.colors.textSecondary }}
-            >
-              Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser
-              desfeita.
-            </p>
+
+            {taskToDeleteFull?.recurrence ? (
+              <>
+                <p
+                  className="text-sm mb-4"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  Esta é uma tarefa recorrente. O que você deseja fazer?
+                </p>
+                <div className="space-y-2 mb-6">
+                  <label
+                    className="flex items-center p-3 border rounded-lg cursor-pointer"
+                    style={{
+                      borderColor:
+                        deleteMode === "instance"
+                          ? state.currentTheme.colors.primary
+                          : state.currentTheme.colors.border,
+                      backgroundColor:
+                        deleteMode === "instance"
+                          ? `${state.currentTheme.colors.primary}10`
+                          : "transparent",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="delete-mode"
+                      value="instance"
+                      checked={deleteMode === "instance"}
+                      onChange={() => setDeleteMode("instance")}
+                      className="mr-3"
+                    />
+                    <div>
+                      <div
+                        style={{ color: state.currentTheme.colors.text }}
+                        className="font-medium text-sm"
+                      >
+                        Excluir apenas esta ocorrência
+                      </div>
+                      <div
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                        className="text-xs"
+                      >
+                        Remove apenas a instância deste dia
+                      </div>
+                    </div>
+                  </label>
+
+                  <label
+                    className="flex items-center p-3 border rounded-lg cursor-pointer"
+                    style={{
+                      borderColor:
+                        deleteMode === "all"
+                          ? state.currentTheme.colors.primary
+                          : state.currentTheme.colors.border,
+                      backgroundColor:
+                        deleteMode === "all"
+                          ? `${state.currentTheme.colors.primary}10`
+                          : "transparent",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="delete-mode"
+                      value="all"
+                      checked={deleteMode === "all"}
+                      onChange={() => setDeleteMode("all")}
+                      className="mr-3"
+                    />
+                    <div>
+                      <div
+                        style={{ color: state.currentTheme.colors.text }}
+                        className="font-medium text-sm"
+                      >
+                        Excluir todas as ocorrências
+                      </div>
+                      <div
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                        className="text-xs"
+                      >
+                        Remove a tarefa recorrente completamente
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </>
+            ) : (
+              <p
+                className="text-sm mb-6"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Tem certeza que deseja excluir esta tarefa? Esta ação não pode
+                ser desfeita.
+              </p>
+            )}
+
             <div className="flex space-x-3 justify-end">
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
                   setTaskToDelete(null);
+                  setTaskToDeleteFull(null);
                 }}
                 className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                 style={{

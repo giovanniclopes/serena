@@ -67,7 +67,6 @@ export async function excludeRecurringInstance(
 export async function removeRecurringExclusion(
   taskId: string,
   excludedDate: string, // YYYY-MM-DD
-  workspaceId: string,
 ): Promise<void> {
   const {
     data: { user },

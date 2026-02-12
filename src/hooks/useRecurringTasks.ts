@@ -158,12 +158,8 @@ export function useRecurringTasks() {
         setExclusions(filtered);
 
         try {
-          if (user && state.activeWorkspaceId) {
-            await removeRecurringExclusion(
-              taskId,
-              dateKey,
-              state.activeWorkspaceId,
-            );
+          if (user) {
+            await removeRecurringExclusion(taskId, dateKey);
           }
         } catch (err) {
           console.error(
