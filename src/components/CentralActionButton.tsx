@@ -112,9 +112,8 @@ export default function CentralActionButton({
                 <motion.button
                   key={button.id}
                   onClick={() => handleSubButtonClick(button.onClick)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-full shadow-lg border transition-all duration-200 hover:scale-105"
+                  className="flex items-center bg-white gap-2 px-3 py-2 rounded-full shadow-lg border transition-all duration-200 hover:scale-105"
                   style={{
-                    backgroundColor: button.color,
                     color: button.textColor,
                     borderColor: button.textColor + "40",
                   }}

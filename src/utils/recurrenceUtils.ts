@@ -1,7 +1,6 @@
 import {
   addDays,
   addMonths,
-  addWeeks,
   addYears,
   format,
   isAfter,
@@ -127,6 +126,8 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
             return shouldAppearMonthly(startBase, current, recurrence);
           case "yearly":
             return shouldAppearYearly(startBase, current, recurrence);
+          case "custom":
+            return shouldAppearCustom(startBase, current, recurrence);
           default:
             return false;
         }
@@ -144,6 +145,7 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
 
       switch (recurrence.type) {
         case "daily":
+        case "custom":
           current = addDays(current, 1);
           break;
         case "weekly":
@@ -174,6 +176,8 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
       return shouldAppearMonthly(startBase, target, recurrence);
     case "yearly":
       return shouldAppearYearly(startBase, target, recurrence);
+    case "custom":
+      return shouldAppearCustom(startBase, target, recurrence);
     default:
       return false;
   }
@@ -198,17 +202,31 @@ function shouldAppearWeekly(
   recurrence: Recurrence,
 ): boolean {
   const interval = recurrence.interval || 1;
-  const daysOfWeek = recurrence.daysOfWeek || [originalDate.getDay()];
+  const daysOfWeek =
+    recurrence.daysOfWeek && recurrence.daysOfWeek.length > 0
+      ? recurrence.daysOfWeek
+      : [originalDate.getDay()];
 
   if (!daysOfWeek.includes(targetDate.getDay())) {
     return false;
   }
 
-  const weeksDiff = Math.floor(
-    (targetDate.getTime() - originalDate.getTime()) / (1000 * 60 * 60 * 24 * 7),
+  let firstOccurrence = new Date(originalDate);
+  const targetDayOfWeek = targetDate.getDay();
+  const originalDayOfWeek = originalDate.getDay();
+
+  let daysToAdd = (targetDayOfWeek - originalDayOfWeek + 7) % 7;
+  if (daysToAdd > 0) {
+    firstOccurrence = addDays(firstOccurrence, daysToAdd);
+  }
+
+  const daysDiff = Math.floor(
+    (targetDate.getTime() - firstOccurrence.getTime()) / (1000 * 60 * 60 * 24),
   );
 
-  return weeksDiff >= 0 && weeksDiff % interval === 0;
+  const weeksDiff = Math.floor(daysDiff / 7);
+
+  return daysDiff >= 0 && daysDiff % 7 === 0 && weeksDiff % interval === 0;
 }
 
 function shouldAppearMonthly(
@@ -217,17 +235,35 @@ function shouldAppearMonthly(
   recurrence: Recurrence,
 ): boolean {
   const interval = recurrence.interval || 1;
-  const dayOfMonth = recurrence.dayOfMonth || originalDate.getDate();
+  const dayOfMonth =
+    recurrence.dayOfMonth && recurrence.dayOfMonth > 0
+      ? recurrence.dayOfMonth
+      : originalDate.getDate();
 
   if (targetDate.getDate() !== dayOfMonth) {
     return false;
   }
 
-  const monthsDiff =
-    (targetDate.getFullYear() - originalDate.getFullYear()) * 12 +
-    (targetDate.getMonth() - originalDate.getMonth());
+  let effectiveStartDate = originalDate;
+  if (originalDate.getDate() < dayOfMonth) {
+    effectiveStartDate = new Date(
+      originalDate.getFullYear(),
+      originalDate.getMonth(),
+      dayOfMonth,
+    );
+  } else {
+    effectiveStartDate = new Date(
+      originalDate.getFullYear(),
+      originalDate.getMonth() + 1,
+      dayOfMonth,
+    );
+  }
 
-  return monthsDiff >= 0 && monthsDiff % interval === 0;
+  const effectiveMonthsDiff =
+    (targetDate.getFullYear() - effectiveStartDate.getFullYear()) * 12 +
+    (targetDate.getMonth() - effectiveStartDate.getMonth());
+
+  return effectiveMonthsDiff >= 0 && effectiveMonthsDiff % interval === 0;
 }
 
 function shouldAppearYearly(
@@ -246,6 +282,19 @@ function shouldAppearYearly(
 
   const yearsDiff = targetDate.getFullYear() - originalDate.getFullYear();
   return yearsDiff >= 0 && yearsDiff % interval === 0;
+}
+
+function shouldAppearCustom(
+  originalDate: Date,
+  targetDate: Date,
+  recurrence: Recurrence,
+): boolean {
+  const interval = recurrence.interval || 1;
+  const daysDiff = Math.floor(
+    (targetDate.getTime() - originalDate.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  return daysDiff >= 0 && daysDiff % interval === 0;
 }
 
 export function getRecurringTaskInstancesForDate(
@@ -309,7 +358,10 @@ export function getNextRecurringDate(
     }
   }
 
-  let currentDate = isBefore(start, originalDate) ? originalDate : start;
+  let currentDate = isBefore(start, originalDate)
+    ? new Date(originalDate)
+    : new Date(start);
+
   const maxIterations = 1000;
   let iterations = 0;
   let occurrences = 0;
@@ -329,16 +381,47 @@ export function getNextRecurringDate(
 
     switch (recurrence.type) {
       case "daily":
-        currentDate = addDays(currentDate, 1);
+        currentDate = addDays(currentDate, recurrence.interval || 1);
         break;
-      case "weekly":
-        currentDate = addWeeks(currentDate, 1);
+      case "weekly": {
+        const daysOfWeek =
+          recurrence.daysOfWeek && recurrence.daysOfWeek.length > 0
+            ? recurrence.daysOfWeek
+            : [originalDate.getDay()];
+
+        let found = false;
+        for (let i = 1; i < 14; i++) {
+          const nextDate = addDays(currentDate, i);
+          if (daysOfWeek.includes(nextDate.getDay())) {
+            currentDate = nextDate;
+            found = true;
+            break;
+          }
+        }
+        if (!found) currentDate = addDays(currentDate, 7);
         break;
-      case "monthly":
-        currentDate = addMonths(currentDate, 1);
+      }
+      case "monthly": {
+        const dayOfMonth =
+          recurrence.dayOfMonth && recurrence.dayOfMonth > 0
+            ? recurrence.dayOfMonth
+            : originalDate.getDate();
+        currentDate = addMonths(currentDate, recurrence.interval || 1);
+        if (currentDate.getDate() !== dayOfMonth) {
+          currentDate = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth() + 1,
+            1,
+          );
+          currentDate = addDays(currentDate, -1);
+        }
         break;
+      }
       case "yearly":
-        currentDate = addYears(currentDate, 1);
+        currentDate = addYears(currentDate, recurrence.interval || 1);
+        break;
+      case "custom":
+        currentDate = addDays(currentDate, recurrence.interval || 1);
         break;
       default:
         return null;
@@ -407,6 +490,10 @@ export function getRecurrenceDescription(recurrence: Recurrence): string {
       break;
     case "yearly":
       description += interval === 1 ? "ano" : "anos";
+      break;
+    case "custom":
+      description += interval === 1 ? "dia" : "dias";
+      description += " (personalizado)";
       break;
   }
 

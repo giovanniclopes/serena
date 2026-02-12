@@ -62,7 +62,9 @@ export default function RecurrenceManager({
     endDate: recurrence?.endDate ? new Date(recurrence.endDate) : undefined,
     endCount: recurrence?.endCount || 1,
     excludeWeekends: recurrence?.excludeWeekends || false,
-    startDate: recurrence?.startDate ? new Date(recurrence.startDate) : undefined,
+    startDate: recurrence?.startDate
+      ? new Date(recurrence.startDate)
+      : undefined,
   });
 
   useEffect(() => {
@@ -76,7 +78,9 @@ export default function RecurrenceManager({
         endDate: recurrence.endDate ? new Date(recurrence.endDate) : undefined,
         endCount: recurrence.endCount || 1,
         excludeWeekends: recurrence.excludeWeekends || false,
-        startDate: recurrence.startDate ? new Date(recurrence.startDate) : undefined,
+        startDate: recurrence.startDate
+          ? new Date(recurrence.startDate)
+          : undefined,
       });
       setIsEnabled(true);
     } else {
@@ -105,7 +109,22 @@ export default function RecurrenceManager({
   };
 
   const handleChange = (field: keyof Recurrence, value: unknown) => {
-    const newFormData = { ...formData, [field]: value };
+    let newFormData = { ...formData, [field]: value };
+
+    if (
+      field === "type" &&
+      value === "weekly" &&
+      (!newFormData.daysOfWeek || newFormData.daysOfWeek.length === 0)
+    ) {
+      const today = new Date();
+      newFormData.daysOfWeek = [today.getDay()];
+    }
+
+    if (field === "type" && value === "monthly" && !newFormData.dayOfMonth) {
+      const today = new Date();
+      newFormData.dayOfMonth = today.getDate();
+    }
+
     setFormData(newFormData);
     onRecurrenceChange(newFormData);
   };
@@ -284,7 +303,7 @@ export default function RecurrenceManager({
                       const brazilDateTime = createBrazilDateTime(
                         new Date(year, month, day),
                         hours,
-                        minutes
+                        minutes,
                       );
                       handleChange("endDate", brazilDateTime);
                     } else {
@@ -298,7 +317,9 @@ export default function RecurrenceManager({
             )}
 
             <div>
-              <Label className="text-xs font-medium mb-2 block">Data de início</Label>
+              <Label className="text-xs font-medium mb-2 block">
+                Data de início
+              </Label>
               <DateTimeInput
                 value={(() => {
                   const d = formData.startDate;
@@ -324,7 +345,7 @@ export default function RecurrenceManager({
                     const brazilDateTime = createBrazilDateTime(
                       new Date(year, month, day),
                       hours,
-                      minutes
+                      minutes,
                     );
                     handleChange("startDate", brazilDateTime);
                   } else {
@@ -354,15 +375,15 @@ export default function RecurrenceManager({
             )}
 
             <div>
-              <Label className="text-xs font-medium mb-2 block">
-                Opções
-              </Label>
+              <Label className="text-xs font-medium mb-2 block">Opções</Label>
               <div className="flex items-center gap-2">
                 <input
                   id="exclude-weekends"
                   type="checkbox"
                   checked={!!formData.excludeWeekends}
-                  onChange={(e) => handleChange("excludeWeekends", e.target.checked)}
+                  onChange={(e) =>
+                    handleChange("excludeWeekends", e.target.checked)
+                  }
                 />
                 <label htmlFor="exclude-weekends" className="text-sm">
                   Ignorar finais de semana (não mostrar sábados e domingos)
