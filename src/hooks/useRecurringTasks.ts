@@ -6,23 +6,36 @@ import {
   listRecurringCompletions,
   setRecurringCompletion,
 } from "../services/apiRecurringCompletions";
+import {
+  excludeRecurringInstance,
+  listRecurringExclusions,
+  removeRecurringExclusion,
+} from "../services/apiRecurringExclusions";
 import type { RecurringTaskCompletion, Task } from "../types";
 import {
   getRecurringTaskCompletions,
+  getRecurringTaskExclusions,
   getRecurringTaskInstancesForDate,
   getRecurringTaskInstancesForDateRange,
   isRecurringTaskInstanceCompleted,
+  isRecurringTaskInstanceExcluded,
   markRecurringTaskInstanceComplete,
+  markRecurringTaskInstanceExcluded,
   saveRecurringTaskCompletions,
+  saveRecurringTaskExclusions,
 } from "../utils/recurrenceUtils";
 
 export function useRecurringTasks() {
   const [completions, setCompletions] = useState<RecurringTaskCompletion[]>([]);
+  const [exclusions, setExclusions] = useState<
+    Array<{ taskId: string; date: string }>
+  >([]);
   const { user } = useAuth();
   const { state } = useApp();
 
   useEffect(() => {
     setCompletions(getRecurringTaskCompletions());
+    setExclusions(getRecurringTaskExclusions());
   }, []);
 
   const markInstanceComplete = useCallback(
@@ -37,38 +50,38 @@ export function useRecurringTasks() {
             taskId,
             instanceDate,
             isCompleted,
-            state.activeWorkspaceId
+            state.activeWorkspaceId,
           );
         }
       } catch (err) {
         console.error(
           "Erro ao sincronizar conclusão recorrente no servidor:",
-          err
+          err,
         );
       }
     },
-    [user, state.activeWorkspaceId]
+    [user, state.activeWorkspaceId],
   );
 
   const isInstanceCompleted = useCallback(
     (taskId: string, date: Date): boolean => {
       return isRecurringTaskInstanceCompleted(taskId, date);
     },
-    []
+    [],
   );
 
   const getInstancesForDate = useCallback(
     (tasks: Task[], date: Date): Task[] => {
       return getRecurringTaskInstancesForDate(tasks, date);
     },
-    []
+    [],
   );
 
   const getInstancesForDateRange = useCallback(
     (tasks: Task[], startDate: Date, endDate: Date) => {
       return getRecurringTaskInstancesForDateRange(tasks, startDate, endDate);
     },
-    []
+    [],
   );
 
   const syncCompletionsForRange = useCallback(
@@ -98,7 +111,7 @@ export function useRecurringTasks() {
         console.error("Erro ao sincronizar conclusões do servidor:", err);
       }
     },
-    [user]
+    [user],
   );
 
   const clearAllCompletions = useCallback(() => {
@@ -112,7 +125,106 @@ export function useRecurringTasks() {
       saveRecurringTaskCompletions(filtered);
       setCompletions(filtered);
     },
-    [completions]
+    [completions],
+  );
+
+  const excludeInstance = useCallback(
+    async (taskId: string, date: Date, isExcluded: boolean = true) => {
+      const dateKey = format(date, "yyyy-MM-dd");
+
+      if (isExcluded) {
+        markRecurringTaskInstanceExcluded(taskId, dateKey);
+        setExclusions(getRecurringTaskExclusions());
+
+        try {
+          if (user && state.activeWorkspaceId) {
+            await excludeRecurringInstance(
+              taskId,
+              dateKey,
+              state.activeWorkspaceId,
+            );
+          }
+        } catch (err) {
+          console.error(
+            "Erro ao sincronizar exclusão recorrente no servidor:",
+            err,
+          );
+        }
+      } else {
+        const filtered = exclusions.filter(
+          (e) => !(e.taskId === taskId && e.date === dateKey),
+        );
+        saveRecurringTaskExclusions(filtered);
+        setExclusions(filtered);
+
+        try {
+          if (user && state.activeWorkspaceId) {
+            await removeRecurringExclusion(
+              taskId,
+              dateKey,
+              state.activeWorkspaceId,
+            );
+          }
+        } catch (err) {
+          console.error(
+            "Erro ao sincronizar remoção de exclusão no servidor:",
+            err,
+          );
+        }
+      }
+    },
+    [user, state.activeWorkspaceId, exclusions],
+  );
+
+  const isInstanceExcluded = useCallback(
+    (taskId: string, date: Date): boolean => {
+      return isRecurringTaskInstanceExcluded(taskId, date);
+    },
+    [],
+  );
+
+  const syncExclusionsForRange = useCallback(
+    async (taskIds: string[], startDate: Date, endDate: Date) => {
+      try {
+        if (!user) return;
+        const start = format(startDate, "yyyy-MM-dd");
+        const end = format(endDate, "yyyy-MM-dd");
+        const serverRows = await listRecurringExclusions(taskIds, start, end);
+
+        const local = getRecurringTaskExclusions();
+        const serverMapped: Array<{ taskId: string; date: string }> =
+          serverRows.map((r) => ({
+            taskId: r.task_id,
+            date: r.excluded_date,
+          }));
+
+        const key = (e: { taskId: string; date: string }) =>
+          `${e.taskId}|${e.date}`;
+        const mergedMap = new Map<string, { taskId: string; date: string }>();
+        for (const e of local) mergedMap.set(key(e), e);
+        for (const e of serverMapped) mergedMap.set(key(e), e);
+        const merged = Array.from(mergedMap.values());
+        saveRecurringTaskExclusions(merged);
+        setExclusions(merged);
+      } catch (err) {
+        console.error("Erro ao sincronizar exclusões do servidor:", err);
+      }
+    },
+    [user],
+  );
+
+  const clearAllExclusions = useCallback(() => {
+    saveRecurringTaskExclusions([]);
+    setExclusions([]);
+  }, []);
+
+  const clearTaskExclusions = useCallback(
+    (taskId: string) => {
+      const filtered = exclusions.filter((e) => e.taskId !== taskId);
+      saveRecurringTaskExclusions(filtered);
+      setExclusions(filtered);
+    },
+    [exclusions],
   );
 
   return {
@@ -124,5 +236,11 @@ export function useRecurringTasks() {
     syncCompletionsForRange,
     clearAllCompletions,
     clearTaskCompletions,
+    exclusions,
+    excludeInstance,
+    isInstanceExcluded,
+    syncExclusionsForRange,
+    clearAllExclusions,
+    clearTaskExclusions,
   };
 }

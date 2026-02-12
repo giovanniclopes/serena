@@ -1,6 +1,12 @@
 import { supabase } from "../lib/supabaseClient";
 import type { Task, TimeEntry } from "../types";
-import { sanitizeTaskIdForAPI } from "../utils/taskUtils";
+import { markRecurringTaskInstanceExcluded } from "../utils/recurrenceUtils";
+import {
+  extractOriginalTaskId,
+  isRecurringInstance,
+  sanitizeTaskIdForAPI,
+} from "../utils/taskUtils";
+import { excludeRecurringInstance } from "./apiRecurringExclusions";
 
 const formatDateForSupabase = (date: Date | undefined): string | undefined => {
   if (!date) return undefined;
@@ -14,7 +20,7 @@ export async function getTasks(): Promise<Task[]> {
       `
       *,
       subtasks:subtasks!task_id(*)
-    `
+    `,
     )
     .order("priority", { ascending: true })
     .order("created_at", { ascending: false });
@@ -94,7 +100,7 @@ export async function getTasks(): Promise<Task[]> {
 }
 
 export async function createTask(
-  task: Omit<Task, "id" | "createdAt" | "updatedAt">
+  task: Omit<Task, "id" | "createdAt" | "updatedAt">,
 ): Promise<Task> {
   const {
     data: { user },
@@ -242,6 +248,39 @@ export async function updateTask(task: Task): Promise<Task> {
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
+  if (isRecurringInstance(taskId)) {
+    const originalTaskId = extractOriginalTaskId(taskId);
+    const datePart = taskId.substring(originalTaskId.length + 1);
+
+    const { data: taskData, error: fetchError } = await supabase
+      .from("tasks")
+      .select("workspace_id")
+      .eq("id", originalTaskId)
+      .single();
+
+    if (fetchError || !taskData) {
+      console.error("Erro ao buscar tarefa original:", fetchError);
+      throw new Error("Falha ao buscar tarefa original");
+    }
+
+    markRecurringTaskInstanceExcluded(originalTaskId, datePart);
+
+    try {
+      await excludeRecurringInstance(
+        originalTaskId,
+        datePart,
+        taskData.workspace_id,
+      );
+    } catch (err) {
+      console.error(
+        "Aviso: Exclusão registrada localmente mas falhou ao sincronizar com servidor:",
+        err,
+      );
+      throw err;
+    }
+    return;
+  }
+
   const { error } = await supabase
     .from("tasks")
     .delete()
@@ -363,7 +402,7 @@ export async function completeAllTasks(taskIds: string[]): Promise<void> {
     })
     .in(
       "id",
-      taskIds.map((id) => sanitizeTaskIdForAPI(id))
+      taskIds.map((id) => sanitizeTaskIdForAPI(id)),
     );
 
   if (error) {
@@ -424,7 +463,7 @@ export async function startTaskTimer(taskId: string): Promise<Task> {
 
 export async function stopTaskTimer(
   taskId: string,
-  timeEntry: TimeEntry
+  timeEntry: TimeEntry,
 ): Promise<Task> {
   const { data: currentTask } = await supabase
     .from("tasks")

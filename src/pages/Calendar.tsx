@@ -68,7 +68,12 @@ export default function Calendar() {
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
-  const { markInstanceComplete, syncCompletionsForRange } = useRecurringTasks();
+  const {
+    markInstanceComplete,
+    syncCompletionsForRange,
+    syncExclusionsForRange,
+    exclusions,
+  } = useRecurringTasks();
   const { projects } = useProjects();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
@@ -85,6 +90,7 @@ export default function Calendar() {
   const [showAIConfirmModal, setShowAIConfirmModal] = useState(false);
   const [createdTaskData, setCreatedTaskData] = useState<Task | null>(null);
   const parseTaskMutation = useParseTaskInput({ availableProjects: projects });
+  const [, setForceUpdate] = useState(0);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -96,15 +102,21 @@ export default function Calendar() {
   });
 
   useEffect(() => {
+    setForceUpdate((prev) => prev + 1);
+  }, [exclusions?.length]);
+
+  useEffect(() => {
     const taskIds = (tasks || []).map((t) => t.id);
     if (taskIds.length > 0) {
       syncCompletionsForRange(taskIds, calendarStart, calendarEnd);
+      syncExclusionsForRange(taskIds, calendarStart, calendarEnd);
     }
   }, [
     tasks,
     calendarStart.getTime(),
     calendarEnd.getTime(),
     syncCompletionsForRange,
+    syncExclusionsForRange,
   ]);
 
   const handlePrevMonth = () => {

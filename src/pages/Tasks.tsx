@@ -1,4 +1,4 @@
-import { startOfDay, subDays } from "date-fns";
+import { addDays, startOfDay, subDays } from "date-fns";
 import { List, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -39,6 +39,7 @@ import { filterTasks, searchTasks } from "../utils";
 import {
   getNextRecurringDate,
   isRecurringTaskInstanceCompleted,
+  isRecurringTaskInstanceExcluded,
   shouldTaskAppearOnDate,
 } from "../utils/recurrenceUtils";
 
@@ -342,6 +343,9 @@ export default function Tasks() {
         for (let i = 0; i <= searchWindowDays; i++) {
           const date = subDays(today, i);
           if (shouldTaskAppearOnDate(task, date)) {
+            if (isRecurringTaskInstanceExcluded(task.id, date)) {
+              continue;
+            }
             const completed = isRecurringTaskInstanceCompleted(task.id, date);
             if (!completed) {
               overdueDate = date;
@@ -370,14 +374,29 @@ export default function Tasks() {
 
         const nextDate = getNextRecurringDate(task, today);
         if (nextDate) {
-          const instanceId = `${task.id}_${nextDate.getFullYear()}-${String(
+          if (isRecurringTaskInstanceExcluded(task.id, nextDate)) {
+            let currentDate: Date | null = nextDate;
+            for (let i = 0; i < 365; i++) {
+              const candidateDate = addDays(nextDate, i);
+              if (
+                shouldTaskAppearOnDate(task, candidateDate) &&
+                !isRecurringTaskInstanceExcluded(task.id, candidateDate)
+              ) {
+                currentDate = candidateDate;
+                break;
+              }
+            }
+            if (!currentDate) return null;
+          }
+
+          const instanceId = `${nextDate.getFullYear()}-${String(
             nextDate.getMonth() + 1,
           ).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
           const completed = isRecurringTaskInstanceCompleted(task.id, nextDate);
 
           return {
             ...task,
-            id: instanceId,
+            id: `${task.id}_${instanceId}`,
             dueDate: nextDate,
             isCompleted: completed || false,
             completedAt: completed ? new Date() : undefined,
