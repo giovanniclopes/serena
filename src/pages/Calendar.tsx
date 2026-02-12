@@ -103,7 +103,7 @@ export default function Calendar() {
 
   useEffect(() => {
     setForceUpdate((prev) => prev + 1);
-  }, [exclusions?.length]);
+  }, [exclusions]);
 
   useEffect(() => {
     const taskIds = (tasks || []).map((t) => t.id);

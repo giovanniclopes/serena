@@ -374,6 +374,7 @@ export default function Tasks() {
 
         const nextDate = getNextRecurringDate(task, today);
         if (nextDate) {
+          let displayDate = nextDate;
           if (isRecurringTaskInstanceExcluded(task.id, nextDate)) {
             let currentDate: Date | null = nextDate;
             for (let i = 0; i < 365; i++) {
@@ -387,17 +388,24 @@ export default function Tasks() {
               }
             }
             if (!currentDate) return null;
+            displayDate = currentDate;
           }
 
-          const instanceId = `${nextDate.getFullYear()}-${String(
-            nextDate.getMonth() + 1,
-          ).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
-          const completed = isRecurringTaskInstanceCompleted(task.id, nextDate);
+          const instanceId = `${displayDate.getFullYear()}-${String(
+            displayDate.getMonth() + 1,
+          ).padStart(
+            2,
+            "0",
+          )}-${String(displayDate.getDate()).padStart(2, "0")}`;
+          const completed = isRecurringTaskInstanceCompleted(
+            task.id,
+            displayDate,
+          );
 
           return {
             ...task,
             id: `${task.id}_${instanceId}`,
-            dueDate: nextDate,
+            dueDate: displayDate,
             isCompleted: completed || false,
             completedAt: completed ? new Date() : undefined,
             subtasks: task.subtasks || [],

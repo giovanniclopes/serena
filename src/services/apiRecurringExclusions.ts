@@ -48,12 +48,15 @@ export async function excludeRecurringInstance(
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  const { error } = await supabase.from("task_recurring_exclusions").insert({
-    task_id: taskId,
-    user_id: user.id,
-    workspace_id: workspaceId,
-    excluded_date: excludedDate,
-  });
+  const { error } = await supabase.from("task_recurring_exclusions").upsert(
+    {
+      task_id: taskId,
+      user_id: user.id,
+      workspace_id: workspaceId,
+      excluded_date: excludedDate,
+    },
+    { onConflict: "user_id,task_id,workspace_id,excluded_date" },
+  );
 
   if (error) {
     console.error("Erro ao registrar exclusão recorrente:", error);
@@ -76,7 +79,6 @@ export async function removeRecurringExclusion(
     .delete()
     .eq("task_id", taskId)
     .eq("user_id", user.id)
-    .eq("workspace_id", workspaceId)
     .eq("excluded_date", excludedDate);
 
   if (error) {

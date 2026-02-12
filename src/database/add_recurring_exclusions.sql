@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS public.task_recurring_exclusions (
   -- Data da instância excluída (YYYY-MM-DD)
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  -- Garante que uma instância só pode ser excluída uma vez
-  CONSTRAINT task_recurring_exclusion_unique UNIQUE (user_id, task_id, excluded_date)
+  -- Garante que uma instância só pode ser excluída uma vez por workspace
+  CONSTRAINT task_recurring_exclusion_unique UNIQUE (user_id, task_id, workspace_id, excluded_date)
 );
 
 COMMENT ON TABLE public.task_recurring_exclusions IS 'Armazena instâncias de tarefas recorrentes que foram deletadas individualmente';

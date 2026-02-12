@@ -276,7 +276,6 @@ export async function deleteTask(taskId: string): Promise<void> {
         "Aviso: Exclusão registrada localmente mas falhou ao sincronizar com servidor:",
         err,
       );
-      throw err;
     }
     return;
   }
