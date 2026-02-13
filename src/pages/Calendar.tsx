@@ -56,6 +56,7 @@ import {
   getTasksForDate,
   sortTasksByPriority,
 } from "../utils";
+import { extractOriginalTaskId } from "../utils/taskUtils";
 
 type ViewMode = "month" | "week" | "day";
 
@@ -68,7 +69,12 @@ export default function Calendar() {
   const createTaskMutation = useCreateTask();
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
-  const { markInstanceComplete, syncCompletionsForRange } = useRecurringTasks();
+  const {
+    markInstanceComplete,
+    syncCompletionsForRange,
+    syncExclusionsForRange,
+    exclusions,
+  } = useRecurringTasks();
   const { projects } = useProjects();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("month");
@@ -79,12 +85,15 @@ export default function Calendar() {
   const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [taskToDeleteFull, setTaskToDeleteFull] = useState<Task | null>(null);
+  const [deleteMode, setDeleteMode] = useState<"instance" | "all">("instance");
   const isMobile = useMediaQuery("(max-width: 768px)");
   const [isAIInputOpen, setIsAIInputOpen] = useState(false);
   const [aiInputValue, setAiInputValue] = useState("");
   const [showAIConfirmModal, setShowAIConfirmModal] = useState(false);
   const [createdTaskData, setCreatedTaskData] = useState<Task | null>(null);
   const parseTaskMutation = useParseTaskInput({ availableProjects: projects });
+  const [, setForceUpdate] = useState(0);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -96,15 +105,21 @@ export default function Calendar() {
   });
 
   useEffect(() => {
+    setForceUpdate((prev) => prev + 1);
+  }, [exclusions]);
+
+  useEffect(() => {
     const taskIds = (tasks || []).map((t) => t.id);
     if (taskIds.length > 0) {
       syncCompletionsForRange(taskIds, calendarStart, calendarEnd);
+      syncExclusionsForRange(taskIds, calendarStart, calendarEnd);
     }
   }, [
     tasks,
     calendarStart.getTime(),
     calendarEnd.getTime(),
     syncCompletionsForRange,
+    syncExclusionsForRange,
   ]);
 
   const handlePrevMonth = () => {
@@ -180,16 +195,24 @@ export default function Calendar() {
     setIsTaskModalOpen(true);
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTaskToDelete(taskId);
+  const handleDeleteTask = (task: Task) => {
+    setTaskToDeleteFull(task);
+    setTaskToDelete(task.id);
+    setDeleteMode("instance");
     setShowDeleteModal(true);
   };
 
   const confirmDeleteTask = () => {
-    if (taskToDelete) {
-      deleteTaskMutation.mutate(taskToDelete);
+    if (taskToDelete && taskToDeleteFull) {
+      let idToDelete = taskToDelete;
+      if (deleteMode === "all" && taskToDeleteFull.recurrence) {
+        idToDelete = extractOriginalTaskId(taskToDelete);
+      }
+      deleteTaskMutation.mutate(idToDelete);
       setShowDeleteModal(false);
       setTaskToDelete(null);
+      setTaskToDeleteFull(null);
+      setDeleteMode("instance");
     }
   };
 
@@ -1535,18 +1558,70 @@ export default function Calendar() {
             >
               Excluir tarefa
             </h3>
-            <p
-              className="text-sm mb-6"
-              style={{ color: state.currentTheme.colors.textSecondary }}
-            >
-              Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser
-              desfeita.
-            </p>
+
+            {taskToDeleteFull && taskToDeleteFull.recurrence ? (
+              <>
+                <p
+                  className="text-sm mb-4"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  Esta é uma tarefa recorrente. Como deseja proceder?
+                </p>
+                <div
+                  className="space-y-3 mb-6 p-3 rounded-lg"
+                  style={{
+                    backgroundColor: state.currentTheme.colors.background,
+                  }}
+                >
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="deleteMode"
+                      value="instance"
+                      checked={deleteMode === "instance"}
+                      onChange={(e) =>
+                        setDeleteMode(e.target.value as "instance" | "all")
+                      }
+                      className="mr-3"
+                    />
+                    <span style={{ color: state.currentTheme.colors.text }}>
+                      Deletar apenas esta ocorrência
+                    </span>
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="radio"
+                      name="deleteMode"
+                      value="all"
+                      checked={deleteMode === "all"}
+                      onChange={(e) =>
+                        setDeleteMode(e.target.value as "instance" | "all")
+                      }
+                      className="mr-3"
+                    />
+                    <span style={{ color: state.currentTheme.colors.text }}>
+                      Deletar todas as ocorrências
+                    </span>
+                  </label>
+                </div>
+              </>
+            ) : (
+              <p
+                className="text-sm mb-6"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Tem certeza que deseja excluir esta tarefa? Esta ação não pode
+                ser desfeita.
+              </p>
+            )}
+
             <div className="flex space-x-3 justify-end">
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
                   setTaskToDelete(null);
+                  setTaskToDeleteFull(null);
+                  setDeleteMode("instance");
                 }}
                 className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                 style={{

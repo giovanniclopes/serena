@@ -1,4 +1,4 @@
-import { startOfDay, subDays } from "date-fns";
+import { addDays, startOfDay, subDays } from "date-fns";
 import { List, Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -39,8 +39,10 @@ import { filterTasks, searchTasks } from "../utils";
 import {
   getNextRecurringDate,
   isRecurringTaskInstanceCompleted,
+  isRecurringTaskInstanceExcluded,
   shouldTaskAppearOnDate,
 } from "../utils/recurrenceUtils";
+import { extractOriginalTaskId } from "../utils/taskUtils";
 
 export default function Tasks() {
   const { state } = useApp();
@@ -53,6 +55,8 @@ export default function Tasks() {
   const [showCompleteAllModal, setShowCompleteAllModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
+  const [taskToDeleteFull, setTaskToDeleteFull] = useState<Task | null>(null);
+  const [deleteMode, setDeleteMode] = useState<"instance" | "all">("instance");
   const [isBulkDeleteMode, setIsBulkDeleteMode] = useState(false);
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
@@ -342,6 +346,9 @@ export default function Tasks() {
         for (let i = 0; i <= searchWindowDays; i++) {
           const date = subDays(today, i);
           if (shouldTaskAppearOnDate(task, date)) {
+            if (isRecurringTaskInstanceExcluded(task.id, date)) {
+              continue;
+            }
             const completed = isRecurringTaskInstanceCompleted(task.id, date);
             if (!completed) {
               overdueDate = date;
@@ -370,15 +377,38 @@ export default function Tasks() {
 
         const nextDate = getNextRecurringDate(task, today);
         if (nextDate) {
-          const instanceId = `${task.id}_${nextDate.getFullYear()}-${String(
-            nextDate.getMonth() + 1,
-          ).padStart(2, "0")}-${String(nextDate.getDate()).padStart(2, "0")}`;
-          const completed = isRecurringTaskInstanceCompleted(task.id, nextDate);
+          let displayDate = nextDate;
+          if (isRecurringTaskInstanceExcluded(task.id, nextDate)) {
+            let currentDate: Date | null = nextDate;
+            for (let i = 0; i < 365; i++) {
+              const candidateDate = addDays(nextDate, i);
+              if (
+                shouldTaskAppearOnDate(task, candidateDate) &&
+                !isRecurringTaskInstanceExcluded(task.id, candidateDate)
+              ) {
+                currentDate = candidateDate;
+                break;
+              }
+            }
+            if (!currentDate) return null;
+            displayDate = currentDate;
+          }
+
+          const instanceId = `${displayDate.getFullYear()}-${String(
+            displayDate.getMonth() + 1,
+          ).padStart(
+            2,
+            "0",
+          )}-${String(displayDate.getDate()).padStart(2, "0")}`;
+          const completed = isRecurringTaskInstanceCompleted(
+            task.id,
+            displayDate,
+          );
 
           return {
             ...task,
-            id: instanceId,
-            dueDate: nextDate,
+            id: `${task.id}_${instanceId}`,
+            dueDate: displayDate,
             isCompleted: completed || false,
             completedAt: completed ? new Date() : undefined,
             subtasks: task.subtasks || [],
@@ -457,8 +487,10 @@ export default function Tasks() {
     setIsTaskModalOpen(true);
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTaskToDelete(taskId);
+  const handleDeleteTask = (task: Task) => {
+    setTaskToDelete(task.id);
+    setTaskToDeleteFull(task);
+    setDeleteMode("instance");
     setShowDeleteModal(true);
   };
 
@@ -494,9 +526,16 @@ export default function Tasks() {
 
   const confirmDeleteTask = () => {
     if (taskToDelete) {
-      deleteTaskMutation.mutate(taskToDelete);
+      let idToDelete = taskToDelete;
+
+      if (deleteMode === "all" && taskToDeleteFull?.recurrence) {
+        idToDelete = extractOriginalTaskId(taskToDelete);
+      }
+
+      deleteTaskMutation.mutate(idToDelete);
       setShowDeleteModal(false);
       setTaskToDelete(null);
+      setTaskToDeleteFull(null);
     }
   };
 
@@ -832,18 +871,111 @@ export default function Tasks() {
             >
               Excluir tarefa
             </h3>
-            <p
-              className="text-sm mb-6"
-              style={{ color: state.currentTheme.colors.textSecondary }}
-            >
-              Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser
-              desfeita.
-            </p>
+
+            {taskToDeleteFull?.recurrence ? (
+              <>
+                <p
+                  className="text-sm mb-4"
+                  style={{ color: state.currentTheme.colors.textSecondary }}
+                >
+                  Esta é uma tarefa recorrente. O que você deseja fazer?
+                </p>
+                <div className="space-y-2 mb-6">
+                  <label
+                    className="flex items-center p-3 border rounded-lg cursor-pointer"
+                    style={{
+                      borderColor:
+                        deleteMode === "instance"
+                          ? state.currentTheme.colors.primary
+                          : state.currentTheme.colors.border,
+                      backgroundColor:
+                        deleteMode === "instance"
+                          ? `${state.currentTheme.colors.primary}10`
+                          : "transparent",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="delete-mode"
+                      value="instance"
+                      checked={deleteMode === "instance"}
+                      onChange={() => setDeleteMode("instance")}
+                      className="mr-3"
+                    />
+                    <div>
+                      <div
+                        style={{ color: state.currentTheme.colors.text }}
+                        className="font-medium text-sm"
+                      >
+                        Excluir apenas esta ocorrência
+                      </div>
+                      <div
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                        className="text-xs"
+                      >
+                        Remove apenas a instância deste dia
+                      </div>
+                    </div>
+                  </label>
+
+                  <label
+                    className="flex items-center p-3 border rounded-lg cursor-pointer"
+                    style={{
+                      borderColor:
+                        deleteMode === "all"
+                          ? state.currentTheme.colors.primary
+                          : state.currentTheme.colors.border,
+                      backgroundColor:
+                        deleteMode === "all"
+                          ? `${state.currentTheme.colors.primary}10`
+                          : "transparent",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="delete-mode"
+                      value="all"
+                      checked={deleteMode === "all"}
+                      onChange={() => setDeleteMode("all")}
+                      className="mr-3"
+                    />
+                    <div>
+                      <div
+                        style={{ color: state.currentTheme.colors.text }}
+                        className="font-medium text-sm"
+                      >
+                        Excluir todas as ocorrências
+                      </div>
+                      <div
+                        style={{
+                          color: state.currentTheme.colors.textSecondary,
+                        }}
+                        className="text-xs"
+                      >
+                        Remove a tarefa recorrente completamente
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </>
+            ) : (
+              <p
+                className="text-sm mb-6"
+                style={{ color: state.currentTheme.colors.textSecondary }}
+              >
+                Tem certeza que deseja excluir esta tarefa? Esta ação não pode
+                ser desfeita.
+              </p>
+            )}
+
             <div className="flex space-x-3 justify-end">
               <button
                 onClick={() => {
                   setShowDeleteModal(false);
                   setTaskToDelete(null);
+                  setTaskToDeleteFull(null);
                 }}
                 className="px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                 style={{

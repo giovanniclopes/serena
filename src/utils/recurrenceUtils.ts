@@ -1,7 +1,6 @@
 import {
   addDays,
   addMonths,
-  addWeeks,
   addYears,
   format,
   isAfter,
@@ -22,7 +21,7 @@ export function getRecurringTaskCompletions(): RecurringTaskCompletion[] {
 }
 
 export function saveRecurringTaskCompletions(
-  completions: RecurringTaskCompletion[]
+  completions: RecurringTaskCompletion[],
 ): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(completions));
@@ -34,13 +33,13 @@ export function saveRecurringTaskCompletions(
 export function markRecurringTaskInstanceComplete(
   taskId: string,
   date: Date,
-  isCompleted: boolean = true
+  isCompleted: boolean = true,
 ): void {
   const completions = getRecurringTaskCompletions();
   const dateKey = format(date, "yyyy-MM-dd");
 
   const existingIndex = completions.findIndex(
-    (c) => c.taskId === taskId && c.date === dateKey
+    (c) => c.taskId === taskId && c.date === dateKey,
   );
 
   if (isCompleted) {
@@ -67,13 +66,13 @@ export function markRecurringTaskInstanceComplete(
 
 export function isRecurringTaskInstanceCompleted(
   taskId: string,
-  date: Date
+  date: Date,
 ): boolean {
   const completions = getRecurringTaskCompletions();
   const dateKey = format(date, "yyyy-MM-dd");
 
   return completions.some(
-    (c) => c.taskId === taskId && c.date === dateKey && c.isCompleted
+    (c) => c.taskId === taskId && c.date === dateKey && c.isCompleted,
   );
 }
 
@@ -106,7 +105,11 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
     }
   }
 
-  if (recurrence.endType === "count" && recurrence.endCount && recurrence.endCount > 0) {
+  if (
+    recurrence.endType === "count" &&
+    recurrence.endCount &&
+    recurrence.endCount > 0
+  ) {
     let occurrences = 0;
     let current = startBase;
     const safetyLimit = 10000;
@@ -123,6 +126,8 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
             return shouldAppearMonthly(startBase, current, recurrence);
           case "yearly":
             return shouldAppearYearly(startBase, current, recurrence);
+          case "custom":
+            return shouldAppearCustom(startBase, current, recurrence);
           default:
             return false;
         }
@@ -140,6 +145,7 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
 
       switch (recurrence.type) {
         case "daily":
+        case "custom":
           current = addDays(current, 1);
           break;
         case "weekly":
@@ -170,6 +176,8 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
       return shouldAppearMonthly(startBase, target, recurrence);
     case "yearly":
       return shouldAppearYearly(startBase, target, recurrence);
+    case "custom":
+      return shouldAppearCustom(startBase, target, recurrence);
     default:
       return false;
   }
@@ -178,11 +186,11 @@ export function shouldTaskAppearOnDate(task: Task, targetDate: Date): boolean {
 function shouldAppearDaily(
   originalDate: Date,
   targetDate: Date,
-  recurrence: Recurrence
+  recurrence: Recurrence,
 ): boolean {
   const interval = recurrence.interval || 1;
   const daysDiff = Math.floor(
-    (targetDate.getTime() - originalDate.getTime()) / (1000 * 60 * 60 * 24)
+    (targetDate.getTime() - originalDate.getTime()) / (1000 * 60 * 60 * 24),
   );
 
   return daysDiff >= 0 && daysDiff % interval === 0;
@@ -191,45 +199,77 @@ function shouldAppearDaily(
 function shouldAppearWeekly(
   originalDate: Date,
   targetDate: Date,
-  recurrence: Recurrence
+  recurrence: Recurrence,
 ): boolean {
   const interval = recurrence.interval || 1;
-  const daysOfWeek = recurrence.daysOfWeek || [originalDate.getDay()];
+  const daysOfWeek =
+    recurrence.daysOfWeek && recurrence.daysOfWeek.length > 0
+      ? recurrence.daysOfWeek
+      : [originalDate.getDay()];
 
   if (!daysOfWeek.includes(targetDate.getDay())) {
     return false;
   }
 
-  const weeksDiff = Math.floor(
-    (targetDate.getTime() - originalDate.getTime()) / (1000 * 60 * 60 * 24 * 7)
+  let firstOccurrence = new Date(originalDate);
+  const targetDayOfWeek = targetDate.getDay();
+  const originalDayOfWeek = originalDate.getDay();
+
+  let daysToAdd = (targetDayOfWeek - originalDayOfWeek + 7) % 7;
+  if (daysToAdd > 0) {
+    firstOccurrence = addDays(firstOccurrence, daysToAdd);
+  }
+
+  const daysDiff = Math.floor(
+    (targetDate.getTime() - firstOccurrence.getTime()) / (1000 * 60 * 60 * 24),
   );
 
-  return weeksDiff >= 0 && weeksDiff % interval === 0;
+  const weeksDiff = Math.floor(daysDiff / 7);
+
+  return daysDiff >= 0 && daysDiff % 7 === 0 && weeksDiff % interval === 0;
 }
 
 function shouldAppearMonthly(
   originalDate: Date,
   targetDate: Date,
-  recurrence: Recurrence
+  recurrence: Recurrence,
 ): boolean {
   const interval = recurrence.interval || 1;
-  const dayOfMonth = recurrence.dayOfMonth || originalDate.getDate();
+  const dayOfMonth =
+    recurrence.dayOfMonth && recurrence.dayOfMonth > 0
+      ? recurrence.dayOfMonth
+      : originalDate.getDate();
 
   if (targetDate.getDate() !== dayOfMonth) {
     return false;
   }
 
-  const monthsDiff =
-    (targetDate.getFullYear() - originalDate.getFullYear()) * 12 +
-    (targetDate.getMonth() - originalDate.getMonth());
+  let effectiveStartDate = originalDate;
+  if (originalDate.getDate() < dayOfMonth) {
+    effectiveStartDate = new Date(
+      originalDate.getFullYear(),
+      originalDate.getMonth(),
+      dayOfMonth,
+    );
+  } else {
+    effectiveStartDate = new Date(
+      originalDate.getFullYear(),
+      originalDate.getMonth() + 1,
+      dayOfMonth,
+    );
+  }
 
-  return monthsDiff >= 0 && monthsDiff % interval === 0;
+  const effectiveMonthsDiff =
+    (targetDate.getFullYear() - effectiveStartDate.getFullYear()) * 12 +
+    (targetDate.getMonth() - effectiveStartDate.getMonth());
+
+  return effectiveMonthsDiff >= 0 && effectiveMonthsDiff % interval === 0;
 }
 
 function shouldAppearYearly(
   originalDate: Date,
   targetDate: Date,
-  recurrence: Recurrence
+  recurrence: Recurrence,
 ): boolean {
   const interval = recurrence.interval || 1;
 
@@ -244,18 +284,35 @@ function shouldAppearYearly(
   return yearsDiff >= 0 && yearsDiff % interval === 0;
 }
 
+function shouldAppearCustom(
+  originalDate: Date,
+  targetDate: Date,
+  recurrence: Recurrence,
+): boolean {
+  const interval = recurrence.interval || 1;
+  const daysDiff = Math.floor(
+    (targetDate.getTime() - originalDate.getTime()) / (1000 * 60 * 60 * 24),
+  );
+
+  return daysDiff >= 0 && daysDiff % interval === 0;
+}
+
 export function getRecurringTaskInstancesForDate(
   tasks: Task[],
-  targetDate: Date
+  targetDate: Date,
 ): Task[] {
   const recurringTasks = tasks.filter((task) => task.recurrence);
   const instances: Task[] = [];
 
   for (const task of recurringTasks) {
     if (shouldTaskAppearOnDate(task, targetDate)) {
+      if (isRecurringTaskInstanceExcluded(task.id, targetDate)) {
+        continue;
+      }
+
       const instanceCompleted = isRecurringTaskInstanceCompleted(
         task.id,
-        targetDate
+        targetDate,
       );
 
       const isCompleted = instanceCompleted || task.isCompleted;
@@ -282,7 +339,7 @@ export function getRecurringTaskInstancesForDate(
 
 export function getNextRecurringDate(
   task: Task,
-  fromDate: Date = new Date()
+  fromDate: Date = new Date(),
 ): Date | null {
   if (!task.recurrence || !task.dueDate) {
     return null;
@@ -301,7 +358,10 @@ export function getNextRecurringDate(
     }
   }
 
-  let currentDate = isBefore(start, originalDate) ? originalDate : start;
+  let currentDate = isBefore(start, originalDate)
+    ? new Date(originalDate)
+    : new Date(start);
+
   const maxIterations = 1000;
   let iterations = 0;
   let occurrences = 0;
@@ -309,7 +369,11 @@ export function getNextRecurringDate(
   while (iterations < maxIterations) {
     if (shouldTaskAppearOnDate(task, currentDate)) {
       occurrences++;
-      if (recurrence.endType === "count" && recurrence.endCount && occurrences > recurrence.endCount) {
+      if (
+        recurrence.endType === "count" &&
+        recurrence.endCount &&
+        occurrences > recurrence.endCount
+      ) {
         return null;
       }
       return currentDate;
@@ -317,16 +381,47 @@ export function getNextRecurringDate(
 
     switch (recurrence.type) {
       case "daily":
-        currentDate = addDays(currentDate, 1);
+        currentDate = addDays(currentDate, recurrence.interval || 1);
         break;
-      case "weekly":
-        currentDate = addWeeks(currentDate, 1);
+      case "weekly": {
+        const daysOfWeek =
+          recurrence.daysOfWeek && recurrence.daysOfWeek.length > 0
+            ? recurrence.daysOfWeek
+            : [originalDate.getDay()];
+
+        let found = false;
+        for (let i = 1; i < 14; i++) {
+          const nextDate = addDays(currentDate, i);
+          if (daysOfWeek.includes(nextDate.getDay())) {
+            currentDate = nextDate;
+            found = true;
+            break;
+          }
+        }
+        if (!found) currentDate = addDays(currentDate, 7);
         break;
-      case "monthly":
-        currentDate = addMonths(currentDate, 1);
+      }
+      case "monthly": {
+        const dayOfMonth =
+          recurrence.dayOfMonth && recurrence.dayOfMonth > 0
+            ? recurrence.dayOfMonth
+            : originalDate.getDate();
+        currentDate = addMonths(currentDate, recurrence.interval || 1);
+        if (currentDate.getDate() !== dayOfMonth) {
+          currentDate = new Date(
+            currentDate.getFullYear(),
+            currentDate.getMonth() + 1,
+            1,
+          );
+          currentDate = addDays(currentDate, -1);
+        }
         break;
+      }
       case "yearly":
-        currentDate = addYears(currentDate, 1);
+        currentDate = addYears(currentDate, recurrence.interval || 1);
+        break;
+      case "custom":
+        currentDate = addDays(currentDate, recurrence.interval || 1);
         break;
       default:
         return null;
@@ -348,7 +443,7 @@ export function getNextRecurringDate(
 export function getRecurringTaskInstancesForDateRange(
   tasks: Task[],
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): { [date: string]: Task[] } {
   const result: { [date: string]: Task[] } = {};
   const current = startOfDay(startDate);
@@ -396,6 +491,10 @@ export function getRecurrenceDescription(recurrence: Recurrence): string {
     case "yearly":
       description += interval === 1 ? "ano" : "anos";
       break;
+    case "custom":
+      description += interval === 1 ? "dia" : "dias";
+      description += " (personalizado)";
+      break;
   }
 
   if (endType === "date" && endDate) {
@@ -409,4 +508,62 @@ export function getRecurrenceDescription(recurrence: Recurrence): string {
   }
 
   return description;
+}
+
+// =====================================================================
+// Funções para gerenciar exclusões de instâncias recorrentes
+// =====================================================================
+
+const EXCLUSIONS_STORAGE_KEY = "recurring_task_exclusions";
+
+export function getRecurringTaskExclusions(): Array<{
+  taskId: string;
+  date: string;
+}> {
+  try {
+    const stored = localStorage.getItem(EXCLUSIONS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveRecurringTaskExclusions(
+  exclusions: Array<{ taskId: string; date: string }>,
+): void {
+  try {
+    localStorage.setItem(EXCLUSIONS_STORAGE_KEY, JSON.stringify(exclusions));
+  } catch (error) {
+    console.error("Erro ao salvar exclusões de tasks recorrentes:", error);
+  }
+}
+
+export function markRecurringTaskInstanceExcluded(
+  taskId: string,
+  dateKey: string, // YYYY-MM-DD
+): void {
+  const exclusions = getRecurringTaskExclusions();
+
+  const existingIndex = exclusions.findIndex(
+    (e) => e.taskId === taskId && e.date === dateKey,
+  );
+
+  if (existingIndex < 0) {
+    exclusions.push({
+      taskId,
+      date: dateKey,
+    });
+  }
+
+  saveRecurringTaskExclusions(exclusions);
+}
+
+export function isRecurringTaskInstanceExcluded(
+  taskId: string,
+  date: Date,
+): boolean {
+  const exclusions = getRecurringTaskExclusions();
+  const dateKey = format(date, "yyyy-MM-dd");
+
+  return exclusions.some((e) => e.taskId === taskId && e.date === dateKey);
 }
